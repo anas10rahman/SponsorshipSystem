@@ -17,3 +17,15 @@ python3 -m http.server 5173
 Lalu buka `http://localhost:5173`.
 
 Data demo disimpan di `localStorage` browser dengan key `sponsorhub-state-v1`.
+
+## Deploy Vercel
+
+Project ini bisa dideploy sebagai static site di Vercel.
+
+```sh
+vercel --prod
+```
+
+## Database
+
+Skema Postgres tersedia di `database/schema.sql`. Untuk deployment production, gunakan Neon Postgres dari Vercel Marketplace lalu isi environment variable `DATABASE_URL`.

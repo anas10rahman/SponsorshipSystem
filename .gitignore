@@ -1,0 +1,6 @@
+.vercel
+.env
+.env.*
+stitch.zip
+node_modules
+.DS_Store
