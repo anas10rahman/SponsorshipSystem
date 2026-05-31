@@ -18,6 +18,18 @@ Lalu buka `http://localhost:5173`.
 
 Data demo disimpan di `localStorage` browser dengan key `sponsorhub-state-v1`.
 
+## Akun Demo
+
+Semua akun memakai password dummy:
+
+```text
+Akundemo12345
+```
+
+- Admin: `Admin`
+- Organisasi: `organisasi`
+- Pendana: `pendana`
+
 ## Deploy Vercel
 
 Project ini bisa dideploy sebagai static site di Vercel.

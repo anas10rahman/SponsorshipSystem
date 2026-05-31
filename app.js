@@ -1,9 +1,10 @@
 const STORAGE_KEY = "sponsorhub-state-v1";
+const DEMO_PASSWORD = "Akundemo12345";
 
 const users = [
-  { id: "u-org", nama: "Rani Prameswari", email: "organisasi@sponsorhub.test", role: "Organisasi" },
-  { id: "u-funder", nama: "Budi Santoso", email: "pendana@sponsorhub.test", role: "Pendana" },
-  { id: "u-admin", nama: "Maya Admin", email: "admin@sponsorhub.test", role: "Admin" },
+  { id: "u-org", nama: "Rani Prameswari", username: "organisasi", email: "organisasi@sponsorhub.test", role: "Organisasi", password: DEMO_PASSWORD },
+  { id: "u-funder", nama: "Budi Santoso", username: "pendana", email: "pendana@sponsorhub.test", role: "Pendana", password: DEMO_PASSWORD },
+  { id: "u-admin", nama: "Maya Admin", username: "Admin", email: "admin@sponsorhub.test", role: "Admin", password: DEMO_PASSWORD },
 ];
 
 const statusClass = {
@@ -155,7 +156,7 @@ function historyItem(aksi, aktor, catatan, waktu) {
 function defaultState() {
   return {
     activeUserId: null,
-    loginRole: "Organisasi",
+    loginError: "",
     page: "Dashboard",
     selectedRequestId: null,
     search: "",
@@ -238,28 +239,18 @@ function renderLogin() {
         <div class="login-card">
           <div class="brand"><span class="brand-mark">S</span><span>SponsorHub</span></div>
           <h1>Login Sponsorship</h1>
-          <p class="meta-label">Pilih role untuk masuk ke demo workflow.</p>
-          <div class="role-picker" aria-label="Pilih role">
-            ${users
-              .map(
-                (user) => `
-                  <button class="${state.loginRole === user.role ? "active" : ""}" onclick="setState({ loginRole: '${user.role}' })">
-                    ${user.role}
-                  </button>
-                `,
-              )
-              .join("")}
-          </div>
+          <p class="meta-label">Masuk memakai akun demo yang sudah disiapkan.</p>
           <div class="field">
-            <label>Email</label>
-            <input value="${users.find((user) => user.role === state.loginRole).email}" readonly />
+            <label>Username</label>
+            <input id="loginUsername" placeholder="Admin / organisasi / pendana" autofocus />
           </div>
           <div class="field">
             <label>Password</label>
-            <input value="password" type="password" readonly />
+            <input id="loginPassword" onkeydown="if(event.key === 'Enter') login()" type="password" placeholder="Masukkan password" />
           </div>
+          ${state.loginError ? `<div class="notice">${escapeHtml(state.loginError)}</div>` : ""}
           <button class="primary" style="width: 100%" onclick="login()">Masuk</button>
-          <p class="meta-label" style="text-align: center; margin-bottom: 0;">Demo memakai data lokal browser.</p>
+          <p class="meta-label" style="text-align: center; margin-bottom: 0;">Admin / organisasi / pendana - Akundemo12345</p>
         </div>
       </section>
     </main>
@@ -267,8 +258,19 @@ function renderLogin() {
 }
 
 function login() {
-  const user = users.find((item) => item.role === state.loginRole);
-  setState({ activeUserId: user.id, page: "Dashboard", selectedRequestId: null });
+  const username = document.querySelector("#loginUsername")?.value.trim() || "";
+  const password = document.querySelector("#loginPassword")?.value || "";
+  const user = users.find((item) => item.username === username && item.password === password);
+  if (!user) {
+    setState({ loginError: "Username atau password tidak sesuai." });
+    return;
+  }
+  setState({
+    activeUserId: user.id,
+    loginError: "",
+    page: "Dashboard",
+    selectedRequestId: null,
+  });
 }
 
 function logout() {
