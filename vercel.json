@@ -1,12 +1,10 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
