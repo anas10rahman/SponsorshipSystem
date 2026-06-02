@@ -19,6 +19,7 @@ import OrgProposalEditor from "./pages/org/ProposalEditor";
 import OrgCariPendana from "./pages/org/CariPendana";
 import OrgPengajuanList from "./pages/org/PengajuanList";
 import BuatPengajuan from "./pages/org/BuatPengajuan";
+import OrgTopUp from "./pages/org/TopUp";
 import OrgTransaksi from "./pages/org/Transaksi";
 import OrgPengaturan from "./pages/org/Pengaturan";
 import FunderJelajahi from "./pages/funder/Jelajahi";
@@ -75,6 +76,7 @@ export default function App() {
           <Route path="/org/pengajuan" element={<OrgPengajuanList />} />
           <Route path="/org/pengajuan/baru" element={<BuatPengajuan />} />
           <Route path="/org/pengajuan/:id/edit" element={<BuatPengajuan />} />
+          <Route path="/org/topup" element={<OrgTopUp />} />
           <Route path="/org/transaksi" element={<OrgTransaksi />} />
           <Route path="/org/pengaturan" element={<OrgPengaturan />} />
         </Route>

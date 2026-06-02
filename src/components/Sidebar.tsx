@@ -14,6 +14,7 @@ import {
   LogOut,
   Send,
   Inbox,
+  Wallet,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { BrandMark } from "./BrandMark";
@@ -36,6 +37,7 @@ const NAV: Record<Role, Item[]> = {
     { to: "/org/proposal", label: "Proposal saya", icon: <FolderKanban size={18} /> },
     { to: "/org/cari", label: "Cari pendana", icon: <Search size={18} /> },
     { to: "/org/pengajuan", label: "Pengajuan saya", icon: <Send size={18} /> },
+    { to: "/org/topup", label: "Top-up saldo", icon: <Wallet size={18} /> },
     { to: "/org/transaksi", label: "Transaksi", icon: <ReceiptText size={18} /> },
     { to: "/org/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],

@@ -39,6 +39,18 @@ export function formatDate(value: string | Date | null | undefined): string {
   return dateFmt.format(d);
 }
 
+/** Tanggal dari <input type="date"> (YYYY-MM-DD) → "20 Desember 2026".
+ *  Diparse sebagai waktu lokal agar tidak bergeser akibat timezone. */
+export function formatEventDate(value: string | null | undefined): string {
+  if (!value) return "—";
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (m) {
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return dateFmt.format(d);
+  }
+  return value; // fallback untuk data lama berupa teks bebas
+}
+
 export function formatDateTime(value: string | Date | null | undefined): string {
   if (!value) return "—";
   const d = typeof value === "string" ? new Date(value) : value;

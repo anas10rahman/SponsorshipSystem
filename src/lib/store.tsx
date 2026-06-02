@@ -22,8 +22,9 @@ import type {
   User,
 } from "./types";
 import { makeTransactionId, nowIso } from "./format";
+import { SUBMISSION_FEE } from "./pengajuan";
 
-const STORAGE_KEY = "sponsorhub-state-v4";
+const STORAGE_KEY = "sponsorhub-state-v5";
 
 function loadInitial(): AppState {
   if (typeof localStorage === "undefined") return createSeedState();
@@ -57,6 +58,7 @@ type Action =
   | { type: "tx/setStatus"; id: string; status: TransactionStatus; actorId: string; note?: string }
   | { type: "pengajuan/upsert"; pengajuan: Pengajuan }
   | { type: "pengajuan/approve"; id: string }
+  | { type: "org/addBalance"; orgId: string; delta: number }
   | { type: "notification/add"; notification: Notification }
   | { type: "notification/markRead"; id: string }
   | { type: "audit/add"; log: AuditLog };
@@ -167,6 +169,16 @@ function reducer(state: AppState, action: Action): AppState {
           : state.funders;
       return { ...state, funders: updatedFunders };
     }
+
+    case "org/addBalance":
+      return {
+        ...state,
+        organizations: state.organizations.map((o) =>
+          o.id === action.orgId
+            ? { ...o, balance: Math.max(0, o.balance + action.delta) }
+            : o,
+        ),
+      };
 
     case "notification/add":
       return { ...state, notifications: [action.notification, ...state.notifications] };
@@ -401,8 +413,15 @@ export function useActions() {
         }
       },
 
+      topUpOrg(amount: number) {
+        if (!currentUser?.orgId || amount <= 0) return;
+        dispatch({ type: "org/addBalance", orgId: currentUser.orgId, delta: amount });
+      },
+
       submitPengajuan(p: Pengajuan) {
         if (!currentUser) return;
+        // Biaya pengajuan hanya ditarik saat pertama kali dikirim (dari draf).
+        const isFirstSubmit = p.status === "draf";
         const updated: Pengajuan = {
           ...p,
           status: "diajukan",
@@ -413,12 +432,17 @@ export function useActions() {
             {
               action: p.status === "perlu_revisi" ? "Diajukan ulang" : "Diajukan ke pendana",
               actor: "Organisasi",
-              note: "Pengajuan dikirim ke pendana untuk ditinjau.",
+              note: isFirstSubmit
+                ? `Pengajuan dikirim ke pendana. Biaya pengajuan ${SUBMISSION_FEE.toLocaleString("id-ID")} dipotong dari saldo.`
+                : "Pengajuan dikirim ke pendana untuk ditinjau.",
               at: nowIso(),
             },
           ],
         };
         dispatch({ type: "pengajuan/upsert", pengajuan: updated });
+        if (isFirstSubmit) {
+          dispatch({ type: "org/addBalance", orgId: p.orgId, delta: -SUBMISSION_FEE });
+        }
         dispatch({
           type: "audit/add",
           log: {

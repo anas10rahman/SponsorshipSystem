@@ -87,6 +87,7 @@ create table organizations (
   verified        boolean not null default false,
   legal_docs      text[] not null default '{}',    -- nama berkas / URL
   payout_account  text not null,                   -- contoh "BCA 0123456789"
+  balance         numeric(16, 2) not null default 0 check (balance >= 0), -- saldo biaya pengajuan
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );

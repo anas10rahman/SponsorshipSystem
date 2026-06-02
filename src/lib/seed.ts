@@ -53,6 +53,7 @@ export function createSeedState(): AppState {
         verified: true,
         legalDocs: ["akta-yayasan.pdf", "skt-kemenkumham.pdf"],
         payoutAccount: "BCA 0123456789",
+        balance: 100_000,
       },
     ],
 

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Modal } from "./Modal";
 import { StatusBadge } from "./StatusBadge";
 import { useStore } from "@/lib/store";
-import { formatDateTime, formatRupiah } from "@/lib/format";
+import { formatDateTime, formatEventDate, formatRupiah } from "@/lib/format";
 import { pengajuanBadge } from "@/lib/pengajuan";
 import type { Pengajuan } from "@/lib/types";
 
@@ -54,7 +54,7 @@ export function PengajuanDetail({ pengajuan, onClose, actions }: Props) {
         <Field label="Organisasi">{org?.name ?? "—"}</Field>
         <Field label="Pendana tujuan">{funder?.name ?? "—"}</Field>
         <Field label="Lokasi">{pengajuan.eventLocation || "—"}</Field>
-        <Field label="Tanggal">{pengajuan.eventDate || "—"}</Field>
+        <Field label="Tanggal">{formatEventDate(pengajuan.eventDate)}</Field>
         <Field label="Total anggaran">{formatRupiah(pengajuan.eventBudget)}</Field>
         <Field label="Jenis">
           {pengajuan.type === "in_cash" ? "In-Cash (uang)" : "In-Kind (barang)"}

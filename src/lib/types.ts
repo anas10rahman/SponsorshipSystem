@@ -23,6 +23,7 @@ export type Organization = {
   verified: boolean;
   legalDocs: string[];
   payoutAccount: string;
+  balance: number; // saldo untuk biaya pengajuan
 };
 
 export type FunderType = "Korporasi" | "Individu" | "Filantropi" | "Perbankan";

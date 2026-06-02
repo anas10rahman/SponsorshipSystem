@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
 import { useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
-import { formatRupiah, makePengajuanId, nowIso } from "@/lib/format";
+import { formatEventDate, formatRupiah, makePengajuanId, nowIso } from "@/lib/format";
+import { SUBMISSION_FEE } from "@/lib/pengajuan";
 import type { InKindItem, Pengajuan, SponsorshipType } from "@/lib/types";
 import {
   ArrowLeft,
@@ -15,6 +16,9 @@ import {
   Plus,
   Trash2,
   Check,
+  UploadCloud,
+  FileText,
+  X,
 } from "lucide-react";
 
 const STEPS = ["Informasi umum", "Detail sponsorship", "Dokumen", "Review"] as const;
@@ -68,6 +72,12 @@ export default function BuatPengajuan() {
   });
 
   const funder = state.funders.find((f) => f.id === form.funderId);
+  const org = state.organizations.find((o) => o.id === orgId);
+  const balance = org?.balance ?? 0;
+  const isFirstSubmit = form.status === "draf";
+  const feeDue = isFirstSubmit ? SUBMISSION_FEE : 0;
+  const balanceOk = balance >= feeDue;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!funder) {
     return (
@@ -99,6 +109,34 @@ export default function BuatPengajuan() {
   const removeItem = (i: number) =>
     set({ inKindItems: items.filter((_, idx) => idx !== i) });
 
+  // ---- File upload (PDF only) ----
+  const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const isPdf =
+      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      toast.failed("Hanya berkas PDF yang diperbolehkan.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    set({ proposalDocUrl: file.name });
+    toast.success(`Berkas "${file.name}" dipilih.`);
+  };
+
+  const clearFile = () => {
+    set({ proposalDocUrl: "" });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // In-cash: nominal yang diajukan = total anggaran event.
+  const normalize = (f: Pengajuan): Pengajuan => ({
+    ...f,
+    requestedAmount: f.type === "in_cash" ? f.eventBudget : undefined,
+    benefits: [],
+    updatedAt: nowIso(),
+  });
+
   // ---- Validation per step ----
   const stepValid = (s: number): boolean => {
     if (s === 0) {
@@ -110,14 +148,14 @@ export default function BuatPengajuan() {
       );
     }
     if (s === 1) {
-      if (form.type === "in_cash") return (form.requestedAmount ?? 0) > 0;
+      if (form.type === "in_cash") return form.eventBudget > 0;
       return items.some((it) => it.name.trim() !== "" && it.qty > 0);
     }
     return true;
   };
 
   const persistDraft = () => {
-    savePengajuan({ ...form, status: form.status === "draf" ? "draf" : form.status, updatedAt: nowIso() });
+    savePengajuan(normalize({ ...form, status: form.status === "draf" ? "draf" : form.status }));
     toast.success("Pengajuan disimpan sebagai draf.");
     navigate("/org/pengajuan");
   };
@@ -127,7 +165,14 @@ export default function BuatPengajuan() {
       toast.failed("Masih ada kolom wajib yang kosong.");
       return;
     }
-    submitPengajuan({ ...form, updatedAt: nowIso() });
+    if (feeDue > 0 && !balanceOk) {
+      toast.failed(
+        `Saldo tidak cukup untuk biaya pengajuan ${formatRupiah(SUBMISSION_FEE)}. Silakan top-up dulu.`,
+      );
+      navigate("/org/topup");
+      return;
+    }
+    submitPengajuan(normalize(form));
     toast.success(`Pengajuan "${form.eventName}" dikirim ke ${funder.name}.`);
     navigate("/org/pengajuan");
   };
@@ -230,9 +275,9 @@ export default function BuatPengajuan() {
                 <div className="sh-field">
                   <label className="sh-field__label">Tanggal event</label>
                   <input
+                    type="date"
                     value={form.eventDate}
                     onChange={(e) => set({ eventDate: e.target.value })}
-                    placeholder="Misal: 20 Desember 2026"
                   />
                 </div>
                 <div className="sh-field sh-field--wide">
@@ -279,20 +324,14 @@ export default function BuatPengajuan() {
               </div>
 
               {form.type === "in_cash" ? (
-                <div className="sh-form-grid">
-                  <div className="sh-field">
+                <div>
+                  <div className="sh-field" style={{ maxWidth: 360 }}>
                     <label className="sh-field__label">Total anggaran event (Rp)</label>
                     <input type="number" value={form.eventBudget || ""} disabled />
-                  </div>
-                  <div className="sh-field">
-                    <label className="sh-field__label">Nominal diajukan ke pendana (Rp)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={form.requestedAmount || ""}
-                      onChange={(e) => set({ requestedAmount: Number(e.target.value) })}
-                      placeholder="Misal: 80000000"
-                    />
+                    <span className="sh-field__hint">
+                      Nominal yang diajukan ke pendana mengikuti total anggaran event.
+                      Ubah di langkah 1 bila perlu.
+                    </span>
                   </div>
                 </div>
               ) : (
@@ -363,23 +402,6 @@ export default function BuatPengajuan() {
                   </button>
                 </div>
               )}
-
-              <div className="sh-field" style={{ marginTop: 20 }}>
-                <label className="sh-field__label">Benefit untuk pendana</label>
-                <textarea
-                  rows={4}
-                  value={(form.benefits ?? []).join("\n")}
-                  onChange={(e) =>
-                    set({
-                      benefits: e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  placeholder={"Satu benefit per baris\nLogo di banner acara\nBooth pameran"}
-                />
-              </div>
             </div>
           )}
 
@@ -387,19 +409,55 @@ export default function BuatPengajuan() {
           {step === 2 && (
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <h3 className="sh-form-section__title">3. Dokumen pendukung</h3>
-              <div className="sh-file-drop" style={{ marginBottom: 16 }}>
-                <span>Seret berkas proposal (PDF) ke sini, atau klik untuk unggah.</span>
-                <span className="sh-muted" style={{ fontSize: 12 }}>
-                  Untuk demo, isi nama berkas saja.
-                </span>
-                <input
-                  className="sh-input"
-                  style={{ maxWidth: 360 }}
-                  value={form.proposalDocUrl ?? ""}
-                  onChange={(e) => set({ proposalDocUrl: e.target.value })}
-                  placeholder="proposal-acara.pdf"
-                />
-              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/pdf,.pdf"
+                style={{ display: "none" }}
+                onChange={onPickFile}
+              />
+              {form.proposalDocUrl ? (
+                <div
+                  className="sh-row sh-row--between"
+                  style={{
+                    marginBottom: 16,
+                    padding: "14px 16px",
+                    border: "1px solid var(--line)",
+                    borderRadius: "var(--radius-md)",
+                    background: "var(--canvas-soft)",
+                  }}
+                >
+                  <div className="sh-row" style={{ gap: 10 }}>
+                    <FileText size={20} style={{ color: "var(--status-failed)" }} />
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{form.proposalDocUrl}</div>
+                      <div className="sh-muted" style={{ fontSize: 12 }}>
+                        Berkas PDF proposal
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    className="sh-btn sh-btn--ghost sh-btn--icon"
+                    onClick={clearFile}
+                    title="Hapus berkas"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="sh-file-drop"
+                  style={{ marginBottom: 16, width: "100%", cursor: "pointer" }}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
+                  <span>Klik untuk unggah berkas proposal.</span>
+                  <span className="sh-muted" style={{ fontSize: 12 }}>
+                    Hanya format PDF yang diperbolehkan.
+                  </span>
+                </button>
+              )}
               <div className="sh-field">
                 <label className="sh-field__label">Catatan tambahan (opsional)</label>
                 <textarea
@@ -420,22 +478,17 @@ export default function BuatPengajuan() {
                 <ReviewRow label="Pendana tujuan" value={`${funder.name} · ${funder.type}`} />
                 <ReviewRow label="Nama event" value={form.eventName || "—"} />
                 <ReviewRow label="Lokasi" value={form.eventLocation || "—"} />
-                <ReviewRow label="Tanggal" value={form.eventDate || "—"} />
+                <ReviewRow label="Tanggal" value={formatEventDate(form.eventDate)} />
                 <ReviewRow label="Deskripsi" value={form.description || "—"} />
                 <ReviewRow
-                  label="Total anggaran"
+                  label={form.type === "in_cash" ? "Total anggaran / nominal diajukan" : "Total anggaran"}
                   value={formatRupiah(form.eventBudget)}
                 />
                 <ReviewRow
                   label="Jenis"
                   value={form.type === "in_cash" ? "In-Cash (uang)" : "In-Kind (barang)"}
                 />
-                {form.type === "in_cash" ? (
-                  <ReviewRow
-                    label="Nominal diajukan"
-                    value={formatRupiah(form.requestedAmount ?? 0)}
-                  />
-                ) : (
+                {form.type === "in_kind" && (
                   <div>
                     <div className="sh-meta-label">Barang yang diminta</div>
                     <ul style={{ margin: "6px 0 0 18px" }}>
@@ -449,20 +502,29 @@ export default function BuatPengajuan() {
                     </ul>
                   </div>
                 )}
-                {form.benefits.length > 0 && (
-                  <div>
-                    <div className="sh-meta-label">Benefit untuk pendana</div>
-                    <ul style={{ margin: "6px 0 0 18px" }}>
-                      {form.benefits.map((b, i) => (
-                        <li key={i}>{b}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
                 <ReviewRow label="Dokumen" value={form.proposalDocUrl || "—"} />
               </div>
 
-              <div className="sh-notice sh-notice--info" style={{ marginTop: 16 }}>
+              {feeDue > 0 &&
+                (balanceOk ? (
+                  <div className="sh-notice" style={{ marginTop: 16 }}>
+                    Saldo Anda akan terpotong <strong>{formatRupiah(SUBMISSION_FEE)}</strong>{" "}
+                    sebagai biaya pengajuan proposal. Saldo saat ini:{" "}
+                    <strong>{formatRupiah(balance)}</strong>.
+                  </div>
+                ) : (
+                  <div className="sh-notice sh-notice--failed" style={{ marginTop: 16 }}>
+                    Saldo tidak cukup untuk biaya pengajuan{" "}
+                    <strong>{formatRupiah(SUBMISSION_FEE)}</strong> (saldo Anda:{" "}
+                    {formatRupiah(balance)}).{" "}
+                    <Link to="/org/topup" style={{ fontWeight: 700 }}>
+                      Top-up saldo dulu
+                    </Link>
+                    .
+                  </div>
+                ))}
+
+              <div className="sh-notice sh-notice--info" style={{ marginTop: 12 }}>
                 Setelah dikirim, pengajuan masuk ke pendana untuk ditinjau. Pendana dapat
                 menyetujui, menolak, atau meminta revisi.
               </div>
@@ -488,7 +550,12 @@ export default function BuatPengajuan() {
                 <ArrowRight size={16} />
               </button>
             ) : (
-              <button className="sh-btn sh-btn--primary" onClick={finalSubmit}>
+              <button
+                className="sh-btn sh-btn--primary"
+                onClick={finalSubmit}
+                disabled={feeDue > 0 && !balanceOk}
+                style={feeDue > 0 && !balanceOk ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
+              >
                 <Send size={16} />
                 Kirim pengajuan
               </button>

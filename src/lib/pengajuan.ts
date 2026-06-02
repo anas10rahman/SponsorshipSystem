@@ -1,5 +1,8 @@
 import type { PengajuanStatus } from "./types";
 
+/** Biaya yang dipotong dari saldo organisasi saat mengirim pengajuan baru. */
+export const SUBMISSION_FEE = 50_000;
+
 type BadgeVariant = "success" | "pending" | "failed" | "info" | "neutral";
 
 const MAP: Record<PengajuanStatus, { label: string; variant: BadgeVariant }> = {
