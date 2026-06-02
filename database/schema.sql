@@ -1,127 +1,340 @@
+-- ============================================================
+-- SponsorHub — Postgres schema (model PRD §6)
+-- Bahasa: SQL. Komentar: Bahasa Indonesia.
+-- Saat dipakai di Neon / Postgres, jalankan file ini sekali.
+-- ============================================================
+
 create extension if not exists pgcrypto;
 
-create type user_role as enum ('organisasi', 'pendana', 'admin');
+-- =========== Enums (state machine sesuai PRD §6 & §7) ===========
+
+create type user_role as enum ('admin', 'org', 'funder');
+
+create type funder_type as enum ('Korporasi', 'Individu', 'Filantropi', 'Perbankan');
+
+create type proposal_status as enum ('draf', 'aktif', 'tercapai', 'arsip');
+
+-- State machine transaksi sukses: menunggu → diproses → disalurkan
+-- Jalur tolak                  : menunggu → ditolak
+create type transaction_status as enum ('menunggu', 'diproses', 'disalurkan', 'ditolak');
+
 create type sponsorship_type as enum ('in_cash', 'in_kind');
-create type request_status as enum (
-  'draft',
-  'review_admin',
-  'perlu_revisi',
-  'ditolak',
-  'terbuka',
-  'ditinjau_pendana',
-  'disetujui_pendana',
-  'menunggu_transfer',
-  'transfer_terverifikasi',
-  'selesai'
-);
-create type decision_type as enum ('submit', 'approve', 'reject', 'request_revision', 'resubmit', 'set_terms', 'submit_transfer', 'verify_transfer');
-create type transfer_status as enum ('belum_transfer', 'menunggu_verifikasi', 'terverifikasi', 'perlu_perbaikan');
 
+-- Pengajuan terarah (org → pendana spesifik).
+-- Lifecycle: draf → diajukan → (perlu_revisi → diajukan)* → disetujui | ditolak.
+-- Persetujuan pendana bersifat FINAL (admin hanya memantau).
+create type pengajuan_status as enum (
+  'draf', 'diajukan', 'perlu_revisi', 'disetujui', 'ditolak'
+);
+
+create type audit_action as enum (
+  'transaksi.dibuat',
+  'transaksi.diproses',
+  'transaksi.disalurkan',
+  'transaksi.ditolak',
+  'proposal.dibuat',
+  'proposal.diedit',
+  'proposal.dipublikasi',
+  'proposal.diarsip',
+  'ajuan.dikirim',
+  'akun.diverifikasi',
+  'pengajuan.dibuat',
+  'pengajuan.diajukan',
+  'pengajuan.disetujui',
+  'pengajuan.ditolak',
+  'pengajuan.revisi'
+);
+
+create type audit_entity as enum ('transaksi', 'proposal', 'organisasi', 'pendana', 'ajuan', 'pengajuan');
+
+create type notification_type as enum (
+  'transaksi.menunggu',
+  'transaksi.disalurkan',
+  'transaksi.ditolak',
+  'proposal.tercapai',
+  'ajuan.diterima',
+  'pengajuan.diajukan',
+  'pengajuan.disetujui',
+  'pengajuan.ditolak',
+  'pengajuan.revisi'
+);
+
+-- ============================================================
+-- USERS
+-- ============================================================
 create table users (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  email text not null unique,
-  role user_role not null,
-  password_hash text,
+  id         uuid primary key default gen_random_uuid(),
+  name       text not null,
+  email      text not null unique,
+  username   text not null unique,
+  password_hash text not null,                     -- bcrypt/argon2 di backend
+  role       user_role not null,
+  org_id     uuid,                                 -- ditautkan ke organizations
+  funder_id  uuid,                                 -- ditautkan ke funders
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
+-- ============================================================
+-- ORGANIZATIONS
+-- ============================================================
 create table organizations (
-  id uuid primary key default gen_random_uuid(),
-  owner_user_id uuid not null references users(id) on delete cascade,
-  name text not null,
-  phone text,
-  address text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  id              uuid primary key default gen_random_uuid(),
+  name            text not null,
+  category        text not null,
+  city            text not null,
+  logo_initials   text not null,                   -- contoh "YS"
+  verified        boolean not null default false,
+  legal_docs      text[] not null default '{}',    -- nama berkas / URL
+  payout_account  text not null,                   -- contoh "BCA 0123456789"
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
 );
 
-create table funder_profiles (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references users(id) on delete cascade,
-  company_name text not null,
-  preferred_categories text[] not null default '{}',
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+alter table users
+  add constraint users_org_fk
+  foreign key (org_id) references organizations(id) on delete set null;
+
+-- ============================================================
+-- FUNDERS (pendana)
+-- ============================================================
+create table funders (
+  id                uuid primary key default gen_random_uuid(),
+  name              text not null,
+  type              funder_type not null,
+  focus             text[] not null default '{}',  -- kategori fokus pendanaan
+  budget_total      numeric(16, 2) not null check (budget_total >= 0),
+  budget_remaining  numeric(16, 2) not null check (budget_remaining >= 0),
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now(),
+  constraint funders_budget_consistency check (budget_remaining <= budget_total)
 );
 
-create table sponsorship_requests (
-  id uuid primary key default gen_random_uuid(),
-  organization_id uuid not null references organizations(id) on delete cascade,
-  title text not null,
-  event_date text not null,
-  location text not null,
-  category text not null,
-  description text not null,
-  sponsorship_type sponsorship_type not null default 'in_cash',
-  total_budget numeric(14, 2) not null check (total_budget >= 0),
-  requested_amount numeric(14, 2) not null check (requested_amount >= 0),
-  proposed_revenue_share numeric(5, 2) not null default 0 check (proposed_revenue_share >= 0 and proposed_revenue_share <= 100),
-  sponsor_benefits text[] not null default '{}',
-  proposal_url text,
-  status request_status not null default 'draft',
-  selected_funder_id uuid references users(id) on delete set null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+alter table users
+  add constraint users_funder_fk
+  foreign key (funder_id) references funders(id) on delete set null;
+
+-- ============================================================
+-- PROPOSALS
+-- ============================================================
+create table proposals (
+  id                uuid primary key default gen_random_uuid(),
+  org_id            uuid not null references organizations(id) on delete cascade,
+  title             text not null,
+  category          text not null,
+  city              text not null,
+  description       text not null,
+  benefits          text[] not null default '{}',
+  target            numeric(16, 2) not null check (target > 0),
+  raised            numeric(16, 2) not null default 0 check (raised >= 0),
+  status            proposal_status not null default 'draf',
+  proposal_doc_url  text,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now(),
+  -- PRD §7: raised tidak boleh melebihi target
+  constraint proposals_raised_lte_target check (raised <= target)
 );
 
-create table review_history (
-  id uuid primary key default gen_random_uuid(),
-  request_id uuid not null references sponsorship_requests(id) on delete cascade,
-  actor_user_id uuid references users(id) on delete set null,
-  decision decision_type not null,
-  from_status request_status,
-  to_status request_status not null,
-  note text,
-  created_at timestamptz not null default now()
+-- Many-to-many: proposal supporters (pendana yang mendukung)
+create table proposal_supporters (
+  proposal_id uuid not null references proposals(id) on delete cascade,
+  funder_id   uuid not null references funders(id) on delete cascade,
+  joined_at   timestamptz not null default now(),
+  primary key (proposal_id, funder_id)
 );
 
-create table funding_commitments (
-  id uuid primary key default gen_random_uuid(),
-  request_id uuid not null references sponsorship_requests(id) on delete cascade,
-  funder_user_id uuid not null references users(id) on delete cascade,
-  committed_amount numeric(14, 2) not null check (committed_amount >= 0),
-  revenue_share numeric(5, 2) not null default 0 check (revenue_share >= 0 and revenue_share <= 100),
-  status request_status not null default 'disetujui_pendana',
-  admin_note text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (request_id, funder_user_id)
+-- ============================================================
+-- TRANSACTIONS
+-- ID format: TRX-YYYY-MMDD-XXXX (per PRD §6)
+-- Disimpan sebagai text supaya cocok dengan format readable.
+-- ============================================================
+create table transactions (
+  id               text primary key,
+  proposal_id      uuid not null references proposals(id) on delete restrict,
+  org_id           uuid not null references organizations(id) on delete restrict,
+  funder_id        uuid not null references funders(id) on delete restrict,
+  amount           numeric(16, 2) not null check (amount > 0),
+  status           transaction_status not null default 'menunggu',
+  note             text,
+  created_at       timestamptz not null default now(),
+  verified_by      uuid references users(id) on delete set null,
+  verified_at      timestamptz,
+  -- PRD §7: hanya Admin yang mengubah ke disalurkan/ditolak
+  -- Konsistensi: status `disalurkan` wajib punya verified_by + verified_at
+  constraint transactions_disalurkan_verified
+    check (status <> 'disalurkan' or (verified_by is not null and verified_at is not null))
 );
 
-create table transfer_records (
-  id uuid primary key default gen_random_uuid(),
-  request_id uuid not null references sponsorship_requests(id) on delete cascade,
-  funder_user_id uuid not null references users(id) on delete cascade,
-  amount numeric(14, 2) not null check (amount >= 0),
-  reference_number text,
-  proof_url text,
-  status transfer_status not null default 'belum_transfer',
-  verified_by_user_id uuid references users(id) on delete set null,
-  verified_at timestamptz,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+-- ============================================================
+-- PENGAJUAN (terarah: Organisasi → Pendana spesifik)
+-- Berisi informasi event + jenis sponsorship (in_cash / in_kind).
+-- Barang in-kind disimpan di tabel anak pengajuan_items.
+-- ============================================================
+create table pengajuan (
+  id                text primary key,            -- PGJ-YYYY-MMDD-XXXX
+  org_id            uuid not null references organizations(id) on delete cascade,
+  funder_id         uuid not null references funders(id) on delete cascade,
+  -- Informasi event
+  event_name        text not null,
+  event_location    text not null,
+  event_date        text,
+  description       text not null,
+  event_budget      numeric(16, 2) not null default 0 check (event_budget >= 0),
+  -- Detail sponsorship
+  type              sponsorship_type not null default 'in_cash',
+  requested_amount  numeric(16, 2) check (requested_amount is null or requested_amount >= 0),
+  benefits          text[] not null default '{}',
+  -- Dokumen
+  proposal_doc_url  text,
+  extra_note        text,
+  -- Lifecycle
+  status            pengajuan_status not null default 'draf',
+  revision_note     text,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now(),
+  -- in_cash wajib punya requested_amount > 0 saat sudah diajukan
+  constraint pengajuan_incash_amount
+    check (
+      status = 'draf'
+      or type <> 'in_cash'
+      or (requested_amount is not null and requested_amount > 0)
+    )
 );
 
-create index sponsorship_requests_status_idx on sponsorship_requests(status);
-create index sponsorship_requests_category_idx on sponsorship_requests(category);
-create index sponsorship_requests_organization_idx on sponsorship_requests(organization_id);
-create index review_history_request_idx on review_history(request_id, created_at desc);
-create index funding_commitments_funder_idx on funding_commitments(funder_user_id);
-create index transfer_records_request_idx on transfer_records(request_id);
+-- Barang in-kind (anak dari pengajuan)
+create table pengajuan_items (
+  id            uuid primary key default gen_random_uuid(),
+  pengajuan_id  text not null references pengajuan(id) on delete cascade,
+  name          text not null,
+  qty           integer not null check (qty > 0),
+  unit          text not null
+);
 
+-- Riwayat status pengajuan (timeline)
+create table pengajuan_history (
+  id            uuid primary key default gen_random_uuid(),
+  pengajuan_id  text not null references pengajuan(id) on delete cascade,
+  action        text not null,
+  actor         text not null,                    -- "Organisasi" | "Pendana" | "Admin"
+  note          text,
+  created_at    timestamptz not null default now()
+);
+
+-- ============================================================
+-- AUDIT LOGS (PRD §7: setiap perubahan status transaksi menulis log)
+-- ============================================================
+create table audit_logs (
+  id          uuid primary key default gen_random_uuid(),
+  actor_id    uuid references users(id) on delete set null,
+  action      audit_action not null,
+  entity      audit_entity not null,
+  entity_id   text not null,                       -- text supaya bisa nampung TRX-... id
+  meta        jsonb not null default '{}'::jsonb,
+  created_at  timestamptz not null default now()
+);
+
+-- ============================================================
+-- NOTIFICATIONS
+-- ============================================================
+create table notifications (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references users(id) on delete cascade,
+  type        notification_type not null,
+  message     text not null,
+  link        text,
+  read        boolean not null default false,
+  created_at  timestamptz not null default now()
+);
+
+-- ============================================================
+-- INDEX
+-- ============================================================
+create index proposals_status_idx          on proposals(status);
+create index proposals_category_idx        on proposals(category);
+create index proposals_org_idx             on proposals(org_id);
+create index transactions_status_idx       on transactions(status);
+create index transactions_org_idx          on transactions(org_id);
+create index transactions_funder_idx       on transactions(funder_id);
+create index transactions_proposal_idx     on transactions(proposal_id);
+create index transactions_created_idx      on transactions(created_at desc);
+create index pengajuan_funder_idx          on pengajuan(funder_id);
+create index pengajuan_org_idx             on pengajuan(org_id);
+create index pengajuan_status_idx          on pengajuan(status);
+create index pengajuan_items_parent_idx    on pengajuan_items(pengajuan_id);
+create index pengajuan_history_parent_idx  on pengajuan_history(pengajuan_id, created_at desc);
+create index audit_logs_entity_idx         on audit_logs(entity, entity_id);
+create index audit_logs_actor_idx          on audit_logs(actor_id);
+create index notifications_user_unread_idx on notifications(user_id, read);
+
+-- ============================================================
+-- TRIGGER: updated_at otomatis
+-- ============================================================
 create or replace function set_updated_at()
-returns trigger as $$
+returns trigger
+language plpgsql
+as $$
 begin
   new.updated_at = now();
   return new;
 end;
-$$ language plpgsql;
+$$;
 
-create trigger users_set_updated_at before update on users for each row execute function set_updated_at();
+create trigger users_set_updated_at         before update on users         for each row execute function set_updated_at();
 create trigger organizations_set_updated_at before update on organizations for each row execute function set_updated_at();
-create trigger funder_profiles_set_updated_at before update on funder_profiles for each row execute function set_updated_at();
-create trigger sponsorship_requests_set_updated_at before update on sponsorship_requests for each row execute function set_updated_at();
-create trigger funding_commitments_set_updated_at before update on funding_commitments for each row execute function set_updated_at();
-create trigger transfer_records_set_updated_at before update on transfer_records for each row execute function set_updated_at();
+create trigger funders_set_updated_at       before update on funders       for each row execute function set_updated_at();
+create trigger proposals_set_updated_at     before update on proposals     for each row execute function set_updated_at();
+create trigger pengajuan_set_updated_at     before update on pengajuan     for each row execute function set_updated_at();
+
+-- ============================================================
+-- TRIGGER: auto-tercapai
+-- PRD §7: saat raised >= target → status `tercapai`.
+-- ============================================================
+create or replace function proposals_auto_status()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.raised >= new.target and new.status = 'aktif' then
+    new.status := 'tercapai';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger proposals_status_check
+  before insert or update of raised, target, status on proposals
+  for each row execute function proposals_auto_status();
+
+-- ============================================================
+-- TRIGGER: setelah transaksi disalurkan, update raised proposal & sisa anggaran funder
+-- Catatan: di backend Express/Prisma, ini lebih ideal dilakukan di service layer
+-- untuk audit log eksplisit. Triger ini sebagai safety-net.
+-- ============================================================
+create or replace function transactions_apply_disbursement()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.status = 'disalurkan' and (old is null or old.status <> 'disalurkan') then
+    update proposals
+       set raised = raised + new.amount,
+           updated_at = now()
+     where id = new.proposal_id;
+    update funders
+       set budget_remaining = greatest(0, budget_remaining - new.amount),
+           updated_at = now()
+     where id = new.funder_id;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger transactions_after_status
+  after insert or update of status on transactions
+  for each row execute function transactions_apply_disbursement();
+
+-- ============================================================
+-- SEED DATA (opsional — sebanding dengan src/lib/seed.ts)
+-- Aktifkan dengan blok di bawah jika diperlukan saat bootstrap dev DB.
+-- ============================================================
+-- Diabaikan secara default. Untuk testing, jalankan migrations/seed.ts terpisah.

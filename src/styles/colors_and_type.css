@@ -1,0 +1,278 @@
+/* ============================================================
+   SponsorHub — Tokens (warna, tipografi, spacing, radii, shadow)
+   Sumber: PRD §10 + visual refs Stitch.
+   Impor pertama, satu-satunya tempat warna/ukuran didefinisikan.
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+:root {
+  /* === Brand: biru SponsorHub === */
+  --brand-50: #eef6fd;
+  --brand-100: #d9ecfb;
+  --brand-200: #b6d8f6;
+  --brand-300: #7fb8ec;
+  --brand-400: #4795de;
+  --brand-500: #1769bd; /* primary */
+  --brand-600: #0f5ca8;
+  --brand-700: #0a4a8a;
+  --brand-800: #0a3a6c;
+  --brand-900: #08294d;
+
+  /* === Navy: aksen Admin === */
+  --navy-50: #eef2f6;
+  --navy-100: #d5dde6;
+  --navy-300: #8da0b3;
+  --navy-500: #475a72;
+  --navy-700: #233954;
+  --navy-900: #0c1b2e;
+
+  /* === Hijau: aksen Pendana === */
+  --green-50: #e7f7ee;
+  --green-100: #c7ecd3;
+  --green-300: #6dc88c;
+  --green-500: #23a25d;
+  --green-600: #1a8b4d;
+  --green-700: #15703f;
+
+  /* === Status === */
+  --status-success: #1f9a55;
+  --status-success-soft: #dff7e8;
+  --status-pending: #d99a14;
+  --status-pending-soft: #fff2ce;
+  --status-failed: #c92f2f;
+  --status-failed-soft: #ffe1e1;
+  --status-info: #1769bd;
+  --status-info-soft: #dceffc;
+  --status-neutral: #5b6b7a;
+  --status-neutral-soft: #eef2f5;
+
+  /* === Aksen per peran (alias) === */
+  --role-admin: var(--navy-900);
+  --role-admin-soft: var(--navy-50);
+  --role-org: var(--brand-500);
+  --role-org-soft: var(--brand-50);
+  --role-funder: var(--green-500);
+  --role-funder-soft: var(--green-50);
+
+  /* === Permukaan & ink === */
+  --canvas: #ffffff;
+  --canvas-soft: #f7fafd;
+  --canvas-tint: #eff6fb;
+  --surface: #ffffff;
+  --surface-soft: #f7fbfd;
+  --ink-900: #091827;
+  --ink-700: #1f2f3f;
+  --ink-500: #4a5d6e;
+  --ink-300: #7d8e9d;
+  --ink-100: #c4cfd9;
+
+  /* === Garis & shadow === */
+  --line: #dde6ee;
+  --line-soft: #ecf1f6;
+  --line-strong: #aebfcc;
+  --ring: rgba(23, 105, 189, 0.35);
+
+  --shadow-1: 0 1px 2px rgba(8, 26, 48, 0.04);
+  --shadow-2: 0 4px 12px rgba(8, 26, 48, 0.06);
+  --shadow-3: 0 12px 28px rgba(8, 26, 48, 0.10);
+  --shadow-soft-navy: 0 12px 26px rgba(35, 66, 88, 0.13);
+
+  /* === Spacing scale (4px base) === */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 56px;
+  --space-10: 72px;
+
+  /* === Radii === */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* === Tipografi === */
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace;
+
+  /* Type scale */
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 17px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-display: 36px;
+
+  --leading-tight: 1.25;
+  --leading-snug: 1.4;
+  --leading-normal: 1.55;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  /* === Motion === */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 120ms;
+  --duration-base: 160ms;
+  --duration-slow: 220ms;
+
+  /* === Layout === */
+  --shell-sidebar-w: 248px;
+  --shell-topbar-h: 64px;
+  --content-max: 1280px;
+}
+
+/* ============================================================
+   Aksen per role — di-set di <body data-role="admin|org|funder">
+   ============================================================ */
+[data-role="admin"] {
+  --role-accent: var(--navy-900);
+  --role-accent-soft: var(--navy-50);
+  --role-accent-strong: var(--navy-700);
+  --role-on-accent: #ffffff;
+}
+[data-role="org"] {
+  --role-accent: var(--brand-500);
+  --role-accent-soft: var(--brand-50);
+  --role-accent-strong: var(--brand-700);
+  --role-on-accent: #ffffff;
+}
+[data-role="funder"] {
+  --role-accent: var(--green-500);
+  --role-accent-soft: var(--green-50);
+  --role-accent-strong: var(--green-700);
+  --role-on-accent: #ffffff;
+}
+
+/* ============================================================
+   Reset & base
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100vh;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink-900);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01";
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+  color: var(--ink-900);
+}
+
+h1 {
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+}
+h2 {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+}
+h3 {
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+}
+h4 {
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+
+p {
+  margin: 0;
+  color: var(--ink-700);
+  line-height: var(--leading-normal);
+}
+
+a {
+  color: var(--brand-600);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Tabular figures for tables / nominal */
+.num,
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Focus ring — accessibility */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Scrollbars halus */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}

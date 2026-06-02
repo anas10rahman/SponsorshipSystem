@@ -1,43 +1,90 @@
-# SponsorHub MVP
+# SponsorHub
 
-Static MVP aplikasi sponsorship berbasis role:
+Platform sponsorship & pendanaan dengan tiga peran (Admin, Organisasi, Pendana) dan pengawasan administratif penuh atas setiap transaksi. Spesifikasi: lihat [`PRDsponsor.md`](./PRDsponsor.md).
 
-- Organisasi membuat dan mengelola pengajuan.
-- Pendana melihat upcoming event dan menyetujui pendanaan.
-- Admin mereview pengajuan, mengatur bagi hasil, dan memverifikasi transfer.
+## Tech stack
 
-## Cara Menjalankan
+- **Frontend:** React 18 + Vite + TypeScript + React Router
+- **State:** Reducer + React Context, persistensi `localStorage`
+- **Ikon:** Lucide
+- **Font:** Plus Jakarta Sans + JetBrains Mono (dimuat via Google Fonts)
+- **Design system:** `src/styles/colors_and_type.css` (token) + `src/styles/kit.css` (komponen)
 
-Buka `index.html` langsung di browser, atau jalankan server lokal:
+> Rilis pertama belum memakai backend. Schema PostgreSQL tetap disimpan di `database/schema.sql` untuk Milestone 6 (Data layer).
 
-```sh
-python3 -m http.server 5173
+## Menjalankan lokal
+
+```bash
+npm install
+npm run dev
 ```
 
-Lalu buka `http://localhost:5173`.
+Buka `http://localhost:5173`.
 
-Data demo disimpan di `localStorage` browser dengan key `sponsorhub-state-v1`.
+## Build
 
-## Akun Demo
-
-Semua akun memakai password dummy:
-
-```text
-Akundemo12345
+```bash
+npm run build
+npm run preview
 ```
 
-- Admin: `Admin`
-- Organisasi: `organisasi`
-- Pendana: `pendana`
+## Akun demo
+
+Kata sandi: `Akundemo12345`
+
+| Peran      | Username      |
+| ---------- | ------------- |
+| Admin      | `Admin`       |
+| Organisasi | `organisasi`  |
+| Pendana    | `pendana`     |
+
+Data tersimpan di `localStorage` (key `sponsorhub-state-v2`). Hapus key tersebut untuk reset.
+
+## Struktur folder
+
+```
+src/
+  components/   # Sidebar, Topbar, StatCard, StatusBadge, …
+  lib/          # types, store, format, seed
+  pages/
+    admin/      # /admin/*
+    org/        # /org/*
+    funder/     # /funder/*
+    Login.tsx
+    Placeholder.tsx
+  styles/
+    colors_and_type.css
+    kit.css
+public/
+  logo-mark.svg
+database/
+  schema.sql    # untuk Milestone 6
+```
+
+## Dua alur sponsorship
+
+SponsorHub mendukung **dua jalur** sekaligus:
+
+1. **Katalog publik** — Organisasi publikasi proposal → Pendana jelajahi & salurkan dana → Admin verifikasi transaksi (`menunggu → disalurkan`).
+2. **Pengajuan terarah** — Organisasi pilih pendana spesifik di "Cari pendana" → isi form multi-step (informasi event → jenis sponsorship In-Cash/In-Kind → dokumen → review) → kirim ke inbox pendana → Pendana **setujui / tolak / minta revisi**. Persetujuan pendana bersifat **final**; Admin hanya memantau (`/admin/pengajuan`). Bisa disimpan sebagai draf dan dilanjutkan.
+
+## Milestone
+
+Lihat PRD §13. Per milestone selesai → verifikasi acceptance criteria (§11) sebelum lanjut.
+
+1. Setup ✅
+2. Auth + shell + RBAC ✅
+3. Admin ✅
+4. Organisasi ✅
+5. Pendana ✅
+6. Data layer (refactor schema, backend opsional) ✅
+7. Polish (notifikasi, ekspor, empty/loading states) ✅
+8. Pengajuan terarah (Org → Pendana, In-Cash/In-Kind, alur revisi) ✅
 
 ## Deploy Vercel
 
-Project ini bisa dideploy sebagai static site di Vercel.
-
-```sh
+```bash
 vercel --prod
 ```
 
-## Database
-
-Skema Postgres tersedia di `database/schema.sql`. Untuk deployment production, gunakan Neon Postgres dari Vercel Marketplace lalu isi environment variable `DATABASE_URL`.
+Vite project, build output di `dist/`. Konfigurasi rewrites untuk SPA ada di `vercel.json`.
