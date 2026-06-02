@@ -151,6 +151,10 @@ export default function BuatPengajuan() {
       if (form.type === "in_cash") return form.eventBudget > 0;
       return items.some((it) => it.name.trim() !== "" && it.qty > 0);
     }
+    if (s === 2) {
+      // Berkas proposal (PDF) wajib diunggah.
+      return (form.proposalDocUrl ?? "").trim() !== "";
+    }
     return true;
   };
 
@@ -163,6 +167,11 @@ export default function BuatPengajuan() {
   const finalSubmit = () => {
     if (!stepValid(0) || !stepValid(1)) {
       toast.failed("Masih ada kolom wajib yang kosong.");
+      return;
+    }
+    if (!stepValid(2)) {
+      toast.failed("Unggah berkas proposal (PDF) dulu — wajib diisi.");
+      setStep(2);
       return;
     }
     if (feeDue > 0 && !balanceOk) {
@@ -179,7 +188,11 @@ export default function BuatPengajuan() {
 
   const next = () => {
     if (!stepValid(step)) {
-      toast.failed("Lengkapi kolom wajib di langkah ini dulu.");
+      toast.failed(
+        step === 2
+          ? "Unggah berkas proposal (PDF) dulu — wajib diisi."
+          : "Lengkapi kolom wajib di langkah ini dulu.",
+      );
       return;
     }
     setStep((s) => Math.min(STEPS.length - 1, s + 1));
@@ -408,7 +421,13 @@ export default function BuatPengajuan() {
           {/* STEP 2 — Dokumen */}
           {step === 2 && (
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
-              <h3 className="sh-form-section__title">3. Dokumen pendukung</h3>
+              <h3 className="sh-form-section__title">
+                3. Dokumen pendukung
+                <span style={{ color: "var(--status-failed)", marginLeft: 4 }}>*</span>
+              </h3>
+              <div className="sh-field__label" style={{ marginBottom: 8 }}>
+                Berkas proposal (PDF) — wajib
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -454,7 +473,7 @@ export default function BuatPengajuan() {
                   <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
                   <span>Klik untuk unggah berkas proposal.</span>
                   <span className="sh-muted" style={{ fontSize: 12 }}>
-                    Hanya format PDF yang diperbolehkan.
+                    Wajib diisi · hanya format PDF yang diperbolehkan.
                   </span>
                 </button>
               )}
