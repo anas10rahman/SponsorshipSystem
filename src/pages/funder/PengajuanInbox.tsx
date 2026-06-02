@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
@@ -153,7 +154,13 @@ export default function FunderPengajuanInbox() {
                             {p.eventLocation}
                           </div>
                         </td>
-                        <td>{org?.name ?? "—"}</td>
+                        <td>
+                          {org ? (
+                            <Link to={`/funder/organisasi/${org.id}`}>{org.name}</Link>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
                         <td>{p.type === "in_cash" ? "In-Cash" : "In-Kind"}</td>
                         <td className="num">
                           {p.type === "in_cash"

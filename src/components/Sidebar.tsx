@@ -15,6 +15,7 @@ import {
   Send,
   Inbox,
   Wallet,
+  UserCircle,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { BrandMark } from "./BrandMark";
@@ -30,6 +31,7 @@ const NAV: Record<Role, Item[]> = {
     { to: "/admin/organisasi", label: "Organisasi", icon: <Building2 size={18} /> },
     { to: "/admin/pendana", label: "Pendana", icon: <Users size={18} /> },
     { to: "/admin/laporan", label: "Laporan", icon: <FileText size={18} /> },
+    { to: "/admin/profil", label: "Profil", icon: <UserCircle size={18} /> },
     { to: "/admin/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
   org: [
@@ -39,6 +41,7 @@ const NAV: Record<Role, Item[]> = {
     { to: "/org/pengajuan", label: "Pengajuan saya", icon: <Send size={18} /> },
     { to: "/org/topup", label: "Top-up saldo", icon: <Wallet size={18} /> },
     { to: "/org/transaksi", label: "Transaksi", icon: <ReceiptText size={18} /> },
+    { to: "/org/profil", label: "Profil saya", icon: <UserCircle size={18} /> },
     { to: "/org/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
   funder: [
@@ -46,6 +49,7 @@ const NAV: Record<Role, Item[]> = {
     { to: "/funder/pengajuan", label: "Pengajuan masuk", icon: <Inbox size={18} /> },
     { to: "/funder/portofolio", label: "Portofolio", icon: <Briefcase size={18} /> },
     { to: "/funder/transaksi", label: "Transaksi", icon: <ReceiptText size={18} /> },
+    { to: "/funder/profil", label: "Profil saya", icon: <UserCircle size={18} /> },
     { to: "/funder/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
 };

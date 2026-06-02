@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
@@ -51,7 +52,14 @@ export default function AdminPendana() {
                     const pct = percent(used, f.budgetTotal);
                     return (
                       <tr key={f.id}>
-                        <td style={{ fontWeight: 700 }}>{f.name}</td>
+                        <td>
+                          <Link
+                            to={`/admin/pendana/${f.id}`}
+                            style={{ fontWeight: 700, color: "inherit" }}
+                          >
+                            {f.name}
+                          </Link>
+                        </td>
                         <td>{f.type}</td>
                         <td>{f.focus.join(", ")}</td>
                         <td className="num">{formatRupiah(f.budgetTotal)}</td>

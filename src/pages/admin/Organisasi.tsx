@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
@@ -74,7 +75,12 @@ export default function AdminOrganisasi() {
                           <div className="sh-row" style={{ gap: 10 }}>
                             <span className="sh-org-logo">{org.logoInitials}</span>
                             <div>
-                              <div style={{ fontWeight: 700 }}>{org.name}</div>
+                              <Link
+                                to={`/admin/organisasi/${org.id}`}
+                                style={{ fontWeight: 700, color: "inherit" }}
+                              >
+                                {org.name}
+                              </Link>
                               <div className="sh-muted" style={{ fontSize: 12 }}>
                                 {org.payoutAccount}
                               </div>

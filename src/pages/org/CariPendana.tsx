@@ -70,13 +70,23 @@ export default function OrgCariPendana() {
                       <span className="num">{formatRupiah(f.budgetRemaining)}</span>
                     </div>
                   </div>
-                  <button
-                    className="sh-btn sh-btn--primary sh-btn--sm"
-                    onClick={() => navigate(`/org/pengajuan/baru?funder=${f.id}`)}
-                  >
-                    <Send size={14} />
-                    Ajukan proposal
-                  </button>
+                  <div className="sh-row" style={{ gap: 8 }}>
+                    <button
+                      className="sh-btn sh-btn--secondary sh-btn--sm"
+                      style={{ flex: 1 }}
+                      onClick={() => navigate(`/org/pendana/${f.id}`)}
+                    >
+                      Lihat profil
+                    </button>
+                    <button
+                      className="sh-btn sh-btn--primary sh-btn--sm"
+                      style={{ flex: 1 }}
+                      onClick={() => navigate(`/org/pengajuan/baru?funder=${f.id}`)}
+                    >
+                      <Send size={14} />
+                      Ajukan
+                    </button>
+                  </div>
                 </article>
               );
             })}

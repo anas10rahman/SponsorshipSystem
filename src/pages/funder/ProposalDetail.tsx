@@ -97,27 +97,37 @@ export default function FunderProposalDetail() {
           <div className="sh-detail-stack">
             <section className="sh-card">
               <div className="sh-card__body sh-stack">
-                <div className="sh-row" style={{ gap: 16 }}>
-                  <span className="sh-org-logo" style={{ width: 56, height: 56, fontSize: 18 }}>
-                    {org?.logoInitials ?? "—"}
-                  </span>
-                  <div>
-                    <h3 style={{ marginBottom: 4 }}>{org?.name}</h3>
-                    <div className="sh-muted">
-                      {org?.category} · {org?.city}
-                      {org?.verified && (
-                        <>
-                          {" "}
-                          ·{" "}
-                          <StatusBadge
-                            kind="custom"
-                            label="Terverifikasi"
-                            variant="success"
-                          />
-                        </>
-                      )}
+                <div className="sh-row sh-row--between" style={{ gap: 16 }}>
+                  <div className="sh-row" style={{ gap: 16 }}>
+                    <span className="sh-org-logo" style={{ width: 56, height: 56, fontSize: 18 }}>
+                      {org?.logoInitials ?? "—"}
+                    </span>
+                    <div>
+                      <h3 style={{ marginBottom: 4 }}>{org?.name}</h3>
+                      <div className="sh-muted">
+                        {org?.category} · {org?.city}
+                        {org?.verified && (
+                          <>
+                            {" "}
+                            ·{" "}
+                            <StatusBadge
+                              kind="custom"
+                              label="Terverifikasi"
+                              variant="success"
+                            />
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  {org && (
+                    <Link
+                      to={`/funder/organisasi/${org.id}`}
+                      className="sh-btn sh-btn--secondary sh-btn--sm"
+                    >
+                      Lihat profil
+                    </Link>
+                  )}
                 </div>
                 <div>
                   <div className="sh-meta-label">Deskripsi</div>
