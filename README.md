@@ -61,12 +61,23 @@ database/
   schema.sql    # untuk Milestone 6
 ```
 
-## Dua alur sponsorship
+## Alur sponsorship (Plan 2 — org-initiated only)
 
-SponsorHub mendukung **dua jalur** sekaligus:
+Hanya **organisasi** yang dapat menginisiasi pendanaan. Pendana tidak menawarkan/menyalurkan
+dana sendiri — mereka hanya meninjau pengajuan yang masuk.
 
-1. **Katalog publik** — Organisasi publikasi proposal → Pendana jelajahi & salurkan dana → Admin verifikasi transaksi (`menunggu → disalurkan`).
-2. **Pengajuan terarah** — Organisasi pilih pendana spesifik di "Cari pendana" → isi form multi-step (informasi event → jenis sponsorship In-Cash/In-Kind → dokumen → review) → kirim ke inbox pendana → Pendana **setujui / tolak / minta revisi**. Persetujuan pendana bersifat **final**; Admin hanya memantau (`/admin/pengajuan`). Bisa disimpan sebagai draf dan dilanjutkan.
+**Pengajuan terarah:** Organisasi pilih pendana spesifik di "Cari pendana" → isi form multi-step
+(informasi event → jenis sponsorship In-Cash/In-Kind → dokumen PDF wajib → review) → bayar biaya
+pengajuan Rp 50.000 → kirim ke inbox pendana → Pendana **setujui / tolak / minta revisi**.
+Persetujuan pendana bersifat **final**; Admin hanya memantau (`/admin/pengajuan`, laporan,
+direktori). Bisa disimpan sebagai draf dan dilanjutkan.
+
+**Kontak ber-gate:** organisasi & pendana saling melihat no.hp di profil, tapi nomor penuh baru
+terbuka **setelah ada pengajuan terkirim** di antara mereka (sebelumnya di-mask). Admin selalu
+melihat. Tujuannya menjaga koordinasi tetap di dalam sistem.
+
+> Catatan: model katalog publik (`Proposal`/`Transaction`) masih ada di data-layer sebagai kode
+> dorman bila suatu saat ingin mengaktifkan kembali alur pendana-menyalurkan-dana (Plan 1).
 
 ## Milestone
 

@@ -54,6 +54,7 @@ export function createSeedState(): AppState {
         legalDocs: ["akta-yayasan.pdf", "skt-kemenkumham.pdf"],
         payoutAccount: "BCA 0123456789",
         balance: 100_000,
+        phone: "0812-3456-7890",
       },
     ],
 
@@ -66,6 +67,7 @@ export function createSeedState(): AppState {
         focus: ["Teknologi", "Edukasi"],
         budgetTotal: 1_000_000_000,
         budgetRemaining: 1_000_000_000,
+        phone: "0815-1111-2222",
       },
       {
         id: "fund-2",
@@ -74,6 +76,7 @@ export function createSeedState(): AppState {
         focus: ["Pendidikan", "Kesehatan"],
         budgetTotal: 500_000_000,
         budgetRemaining: 500_000_000,
+        phone: "0816-3333-4444",
       },
       {
         id: "fund-3",
@@ -82,6 +85,7 @@ export function createSeedState(): AppState {
         focus: ["Olahraga", "Komunitas"],
         budgetTotal: 2_000_000_000,
         budgetRemaining: 2_000_000_000,
+        phone: "0817-5555-6666",
       },
     ],
 

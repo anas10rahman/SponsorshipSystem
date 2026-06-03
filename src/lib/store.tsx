@@ -24,7 +24,7 @@ import type {
 import { makeTransactionId, nowIso } from "./format";
 import { SUBMISSION_FEE } from "./pengajuan";
 
-const STORAGE_KEY = "sponsorhub-state-v5";
+const STORAGE_KEY = "sponsorhub-state-v6";
 
 function loadInitial(): AppState {
   if (typeof localStorage === "undefined") return createSeedState();
@@ -627,5 +627,5 @@ export function useActions() {
 export const rolePath: Record<Role, string> = {
   admin: "/admin/dashboard",
   org: "/org/dashboard",
-  funder: "/funder/jelajahi",
+  funder: "/funder/pengajuan",
 };

@@ -7,6 +7,8 @@ import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useStore } from "@/lib/store";
 import { formatRupiah, initials, percent } from "@/lib/format";
+import { hasPengajuanBetween } from "@/lib/pengajuan";
+import { ContactLine } from "@/components/ContactLine";
 import {
   ArrowLeft,
   Send,
@@ -29,26 +31,21 @@ export default function PendanaProfil() {
 
   const stats = useMemo(() => {
     if (!funder) return null;
-    const incoming = state.pengajuan.filter(
-      (p) => p.funderId === funder.id && p.status !== "draf",
+    const approved = state.pengajuan.filter(
+      (p) => p.funderId === funder.id && p.status === "disetujui",
     );
-    const approved = incoming.filter((p) => p.status === "disetujui");
-    const cashDisbursed = approved
+    const totalDisbursed = approved
       .filter((p) => p.type === "in_cash")
       .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
-    const txDisbursed = state.transactions
-      .filter((t) => t.funderId === funder.id && t.status === "disalurkan")
-      .reduce((s, t) => s + t.amount, 0);
-    const orgs = new Set([
-      ...approved.map((p) => p.orgId),
-      ...state.proposals.filter((p) => p.supporters.includes(funder.id)).map((p) => p.orgId),
-    ]);
-    return {
-      approved,
-      totalDisbursed: cashDisbursed + txDisbursed,
-      orgsFunded: orgs.size,
-    };
-  }, [funder, state.pengajuan, state.transactions, state.proposals]);
+    const orgs = new Set(approved.map((p) => p.orgId));
+    return { approved, totalDisbursed, orgsFunded: orgs.size };
+  }, [funder, state.pengajuan]);
+
+  // Kontak terbuka untuk: diri sendiri, admin, atau org yang sudah mengajukan ke pendana ini.
+  const canSeeContact =
+    isSelf ||
+    currentUser?.role === "admin" ||
+    (isOrgViewer && hasPengajuanBetween(state.pengajuan, currentUser?.orgId, funderId));
 
   if (!funder) {
     return (
@@ -108,6 +105,11 @@ export default function PendanaProfil() {
                     </span>
                   ))}
                 </div>
+                <ContactLine
+                  phone={funder.phone}
+                  canSee={canSeeContact}
+                  hint="Nomor tampil setelah Anda mengajukan ke pendana ini."
+                />
               </div>
               {isOrgViewer && (
                 <Link

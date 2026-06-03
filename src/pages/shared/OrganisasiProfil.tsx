@@ -1,15 +1,17 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
+import { ContactLine } from "@/components/ContactLine";
+import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
-import { formatRupiah, percent } from "@/lib/format";
+import { formatRupiah, formatDate } from "@/lib/format";
+import { hasPengajuanBetween, pengajuanBadge } from "@/lib/pengajuan";
 import {
   ArrowLeft,
-  FolderKanban,
   Wallet,
   Send,
   CheckCircle2,
@@ -21,6 +23,7 @@ export default function OrganisasiProfil() {
   const { id } = useParams();
   const { state, currentUser } = useStore();
   const navigate = useNavigate();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const orgId = id ?? currentUser?.orgId ?? "";
   const org = state.organizations.find((o) => o.id === orgId);
@@ -29,17 +32,23 @@ export default function OrganisasiProfil() {
   const canSeeSensitive = currentUser?.role === "admin" || isSelf;
   const isFunderViewer = currentUser?.role === "funder";
 
+  const canSeeContact =
+    canSeeSensitive ||
+    (isFunderViewer && hasPengajuanBetween(state.pengajuan, orgId, currentUser?.funderId));
+
   const data = useMemo(() => {
     if (!org) return null;
-    const proposals = state.proposals.filter((p) => p.orgId === org.id);
-    const publicProposals = proposals.filter(
-      (p) => p.status === "aktif" || p.status === "tercapai",
-    );
-    const totalRaised = proposals.reduce((s, p) => s + p.raised, 0);
-    const pengajuan = state.pengajuan.filter((p) => p.orgId === org.id);
-    const approved = pengajuan.filter((p) => p.status === "disetujui").length;
-    return { proposals, publicProposals, totalRaised, pengajuanCount: pengajuan.length, approved };
-  }, [org, state.proposals, state.pengajuan]);
+    const all = state.pengajuan.filter((p) => p.orgId === org.id && p.status !== "draf");
+    const approved = all.filter((p) => p.status === "disetujui");
+    const totalApproved = approved
+      .filter((p) => p.type === "in_cash")
+      .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+    // Daftar rinci: admin/self lihat semua; pendana hanya riwayat dengan dirinya.
+    const visible = isFunderViewer
+      ? all.filter((p) => p.funderId === currentUser?.funderId)
+      : all;
+    return { sent: all.length, approvedCount: approved.length, totalApproved, visible };
+  }, [org, state.pengajuan, isFunderViewer, currentUser?.funderId]);
 
   if (!org) {
     return (
@@ -61,6 +70,7 @@ export default function OrganisasiProfil() {
   }
 
   const title = isSelf ? "Profil saya" : "Profil organisasi";
+  const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
 
   return (
     <>
@@ -68,7 +78,7 @@ export default function OrganisasiProfil() {
       <div className="sh-shell__content">
         <PageHead
           title={title}
-          subtitle="Informasi organisasi dan rekam jejak proposal."
+          subtitle="Informasi organisasi dan rekam jejak pengajuan."
           actions={
             <div className="sh-row" style={{ gap: 8 }}>
               <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
@@ -111,6 +121,11 @@ export default function OrganisasiProfil() {
                     <MapPin size={14} /> {org.city}
                   </span>
                 </div>
+                <ContactLine
+                  phone={org.phone}
+                  canSee={canSeeContact}
+                  hint="Nomor tampil setelah organisasi mengajukan ke Anda."
+                />
               </div>
             </div>
           </div>
@@ -119,23 +134,18 @@ export default function OrganisasiProfil() {
         {/* Stats */}
         <div className="sh-stat-grid">
           <StatCard
-            label="Total terkumpul"
-            value={formatRupiah(data?.totalRaised ?? 0)}
+            label="Total disetujui (in-cash)"
+            value={formatRupiah(data?.totalApproved ?? 0)}
             icon={<Wallet size={20} />}
           />
           <StatCard
-            label="Proposal publik"
-            value={data?.publicProposals.length ?? 0}
-            icon={<FolderKanban size={20} />}
-          />
-          <StatCard
             label="Pengajuan dikirim"
-            value={data?.pengajuanCount ?? 0}
+            value={data?.sent ?? 0}
             icon={<Send size={20} />}
           />
           <StatCard
             label="Pengajuan disetujui"
-            value={data?.approved ?? 0}
+            value={data?.approvedCount ?? 0}
             icon={<CheckCircle2 size={20} />}
           />
         </div>
@@ -181,57 +191,71 @@ export default function OrganisasiProfil() {
           </section>
         )}
 
-        {/* Public proposals */}
+        {/* Riwayat pengajuan */}
         <section className="sh-card">
           <header className="sh-card__header">
-            <h2>Proposal publik</h2>
+            <h2>Riwayat pengajuan</h2>
+            {isFunderViewer && (
+              <span className="sh-muted" style={{ fontSize: 12 }}>
+                Hanya pengajuan ke Anda
+              </span>
+            )}
           </header>
-          {data && data.publicProposals.length > 0 ? (
-            <div style={{ padding: 16 }}>
-              <div className="sh-proposal-grid">
-                {data.publicProposals.map((p) => {
-                  const pct = percent(p.raised, p.target);
-                  const card = (
-                    <article className="sh-proposal" style={{ height: "100%" }}>
-                      <div className="sh-proposal__header">
-                        <div>
-                          <div className="sh-proposal__title">{p.title}</div>
-                          <div className="sh-proposal__org">
-                            {p.category} · {p.city}
-                          </div>
-                        </div>
-                        <StatusBadge kind="proposal" status={p.status} />
-                      </div>
-                      <div className="sh-progress">
-                        <div className="sh-progress__bar" style={{ width: `${pct}%` }} />
-                      </div>
-                      <div className="sh-progress__meta">
-                        <span>{formatRupiah(p.raised)}</span>
-                        <span>dari {formatRupiah(p.target)}</span>
-                      </div>
-                    </article>
-                  );
-                  return isFunderViewer ? (
-                    <Link
-                      key={p.id}
-                      to={`/funder/proposal/${p.id}`}
-                      style={{ textDecoration: "none", color: "inherit" }}
-                    >
-                      {card}
-                    </Link>
-                  ) : (
-                    <div key={p.id}>{card}</div>
-                  );
-                })}
-              </div>
+          {data && data.visible.length > 0 ? (
+            <div className="sh-table-wrap">
+              <table className="sh-table">
+                <thead>
+                  <tr>
+                    <th>Event</th>
+                    {!isFunderViewer && <th>Pendana</th>}
+                    <th>Jenis</th>
+                    <th>Nilai</th>
+                    <th>Status</th>
+                    <th>Tanggal</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.visible.map((p) => {
+                    const funder = state.funders.find((f) => f.id === p.funderId);
+                    const badge = pengajuanBadge(p.status);
+                    return (
+                      <tr key={p.id}>
+                        <td style={{ fontWeight: 600 }}>{p.eventName}</td>
+                        {!isFunderViewer && <td>{funder?.name ?? "—"}</td>}
+                        <td>{p.type === "in_cash" ? "In-Cash" : "In-Kind"}</td>
+                        <td className="num">
+                          {p.type === "in_cash"
+                            ? formatRupiah(p.requestedAmount ?? 0)
+                            : `${(p.inKindItems ?? []).length} barang`}
+                        </td>
+                        <td>
+                          <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
+                        </td>
+                        <td className="sh-muted">{formatDate(p.updatedAt)}</td>
+                        <td>
+                          <button
+                            className="sh-btn sh-btn--ghost sh-btn--sm"
+                            onClick={() => setSelectedId(p.id)}
+                          >
+                            Detail
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ) : (
             <div className="sh-card__body">
-              <p className="sh-muted">Belum ada proposal publik.</p>
+              <p className="sh-muted">Belum ada pengajuan.</p>
             </div>
           )}
         </section>
       </div>
+
+      <PengajuanDetail pengajuan={selected} onClose={() => setSelectedId(null)} />
     </>
   );
 }

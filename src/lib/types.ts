@@ -24,6 +24,7 @@ export type Organization = {
   legalDocs: string[];
   payoutAccount: string;
   balance: number; // saldo untuk biaya pengajuan
+  phone: string; // no.hp kontak (ber-gate ke lawan)
 };
 
 export type FunderType = "Korporasi" | "Individu" | "Filantropi" | "Perbankan";
@@ -35,6 +36,7 @@ export type Funder = {
   focus: string[];
   budgetTotal: number;
   budgetRemaining: number;
+  phone: string; // no.hp kontak (ber-gate ke lawan)
 };
 
 export type ProposalStatus = "draf" | "aktif" | "tercapai" | "arsip";

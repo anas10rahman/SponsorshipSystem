@@ -1,22 +1,34 @@
+import { useMemo, useState } from "react";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
+import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
 import { formatRupiah, formatDate } from "@/lib/format";
-import { Wallet, ClockAlert, ListChecks, Building2 } from "lucide-react";
+import { pengajuanBadge } from "@/lib/pengajuan";
+import { Wallet, Send, CheckCircle2, Building2 } from "lucide-react";
 
 export default function AdminDashboard() {
   const { state } = useStore();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const disalurkan = state.transactions
-    .filter((t) => t.status === "disalurkan")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const menunggu = state.transactions.filter((t) => t.status === "menunggu").length;
-  const totalTx = state.transactions.length;
-  const orgAktif = state.organizations.filter((o) => o.verified).length;
+  const stats = useMemo(() => {
+    const sent = state.pengajuan.filter((p) => p.status !== "draf");
+    const approved = sent.filter((p) => p.status === "disetujui");
+    const approvedCash = approved
+      .filter((p) => p.type === "in_cash")
+      .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+    return {
+      sent: sent.length,
+      approved: approved.length,
+      approvedCash,
+      orgAktif: state.organizations.filter((o) => o.verified).length,
+    };
+  }, [state.pengajuan, state.organizations]);
 
-  const recent = state.transactions.slice(0, 6);
+  const recent = state.pengajuan.filter((p) => p.status !== "draf").slice(0, 6);
+  const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
 
   return (
     <>
@@ -24,74 +36,89 @@ export default function AdminDashboard() {
       <div className="sh-shell__content">
         <PageHead
           title="Dashboard Admin"
-          subtitle="Pantau semua transaksi, verifikasi, dan organisasi aktif."
+          subtitle="Pantau semua pengajuan sponsorship dan aktivitas pendanaan lintas platform."
         />
 
         <div className="sh-stat-grid">
           <StatCard
-            label="Total disalurkan"
-            value={formatRupiah(disalurkan)}
+            label="Total disetujui (in-cash)"
+            value={formatRupiah(stats.approvedCash)}
             icon={<Wallet size={20} />}
           />
+          <StatCard label="Pengajuan dikirim" value={stats.sent} icon={<Send size={20} />} />
           <StatCard
-            label="Jumlah transaksi"
-            value={totalTx}
-            icon={<ListChecks size={20} />}
-          />
-          <StatCard
-            label="Menunggu verifikasi"
-            value={menunggu}
-            icon={<ClockAlert size={20} />}
+            label="Pengajuan disetujui"
+            value={stats.approved}
+            icon={<CheckCircle2 size={20} />}
           />
           <StatCard
             label="Organisasi aktif"
-            value={orgAktif}
+            value={stats.orgAktif}
             icon={<Building2 size={20} />}
           />
         </div>
 
         <section className="sh-card">
           <header className="sh-card__header">
-            <h2>Transaksi terbaru</h2>
+            <h2>Pengajuan terbaru</h2>
           </header>
           <div className="sh-table-wrap">
             <table className="sh-table">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Event</th>
                   <th>Organisasi</th>
                   <th>Pendana</th>
-                  <th>Nominal</th>
+                  <th>Nilai</th>
                   <th>Status</th>
                   <th>Tanggal</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
-                {recent.map((t) => {
-                  const org = state.organizations.find((o) => o.id === t.orgId);
-                  const f = state.funders.find((x) => x.id === t.funderId);
+                {recent.map((p) => {
+                  const org = state.organizations.find((o) => o.id === p.orgId);
+                  const funder = state.funders.find((f) => f.id === p.funderId);
+                  const badge = pengajuanBadge(p.status);
                   return (
-                    <tr key={t.id}>
-                      <td>
-                        <code style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
-                          {t.id}
-                        </code>
-                      </td>
+                    <tr key={p.id}>
+                      <td style={{ fontWeight: 600 }}>{p.eventName}</td>
                       <td>{org?.name ?? "—"}</td>
-                      <td>{f?.name ?? "—"}</td>
-                      <td className="num">{formatRupiah(t.amount)}</td>
-                      <td>
-                        <StatusBadge kind="tx" status={t.status} />
+                      <td>{funder?.name ?? "—"}</td>
+                      <td className="num">
+                        {p.type === "in_cash"
+                          ? formatRupiah(p.requestedAmount ?? 0)
+                          : `${(p.inKindItems ?? []).length} barang`}
                       </td>
-                      <td className="sh-muted">{formatDate(t.createdAt)}</td>
+                      <td>
+                        <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
+                      </td>
+                      <td className="sh-muted">{formatDate(p.updatedAt)}</td>
+                      <td>
+                        <button
+                          className="sh-btn sh-btn--ghost sh-btn--sm"
+                          onClick={() => setSelectedId(p.id)}
+                        >
+                          Detail
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
+                {recent.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="sh-muted" style={{ textAlign: "center", padding: 24 }}>
+                      Belum ada pengajuan.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </section>
       </div>
+
+      <PengajuanDetail pengajuan={selected} onClose={() => setSelectedId(null)} />
     </>
   );
 }

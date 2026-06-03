@@ -1,15 +1,11 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
-  ListChecks,
   Building2,
   Users,
   FileText,
   Settings,
-  FolderKanban,
   Search,
-  ReceiptText,
-  Compass,
   Briefcase,
   LogOut,
   Send,
@@ -26,7 +22,6 @@ type Item = { to: string; label: string; icon: React.ReactNode };
 const NAV: Record<Role, Item[]> = {
   admin: [
     { to: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
-    { to: "/admin/transaksi", label: "Transaksi", icon: <ListChecks size={18} /> },
     { to: "/admin/pengajuan", label: "Pengajuan", icon: <Send size={18} /> },
     { to: "/admin/organisasi", label: "Organisasi", icon: <Building2 size={18} /> },
     { to: "/admin/pendana", label: "Pendana", icon: <Users size={18} /> },
@@ -36,19 +31,15 @@ const NAV: Record<Role, Item[]> = {
   ],
   org: [
     { to: "/org/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
-    { to: "/org/proposal", label: "Proposal saya", icon: <FolderKanban size={18} /> },
     { to: "/org/cari", label: "Cari pendana", icon: <Search size={18} /> },
     { to: "/org/pengajuan", label: "Pengajuan saya", icon: <Send size={18} /> },
     { to: "/org/topup", label: "Top-up saldo", icon: <Wallet size={18} /> },
-    { to: "/org/transaksi", label: "Transaksi", icon: <ReceiptText size={18} /> },
     { to: "/org/profil", label: "Profil saya", icon: <UserCircle size={18} /> },
     { to: "/org/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
   funder: [
-    { to: "/funder/jelajahi", label: "Jelajahi", icon: <Compass size={18} /> },
     { to: "/funder/pengajuan", label: "Pengajuan masuk", icon: <Inbox size={18} /> },
     { to: "/funder/portofolio", label: "Portofolio", icon: <Briefcase size={18} /> },
-    { to: "/funder/transaksi", label: "Transaksi", icon: <ReceiptText size={18} /> },
     { to: "/funder/profil", label: "Profil saya", icon: <UserCircle size={18} /> },
     { to: "/funder/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],

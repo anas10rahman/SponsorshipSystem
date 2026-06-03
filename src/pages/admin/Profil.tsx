@@ -4,15 +4,16 @@ import { PageHead } from "@/components/PageHead";
 import { StatCard } from "@/components/StatCard";
 import { useStore } from "@/lib/store";
 import { formatRupiah, initials } from "@/lib/format";
-import { Building2, Users, ListChecks, Send } from "lucide-react";
+import { Building2, Users, Send, CheckCircle2 } from "lucide-react";
 
 export default function AdminProfil() {
   const { state, currentUser } = useStore();
   if (!currentUser) return null;
 
-  const disalurkan = state.transactions
-    .filter((t) => t.status === "disalurkan")
-    .reduce((s, t) => s + t.amount, 0);
+  const sent = state.pengajuan.filter((p) => p.status !== "draf");
+  const approvedCash = sent
+    .filter((p) => p.status === "disetujui" && p.type === "in_cash")
+    .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
 
   return (
     <>
@@ -42,8 +43,8 @@ export default function AdminProfil() {
         <div className="sh-stat-grid">
           <StatCard label="Organisasi" value={state.organizations.length} icon={<Building2 size={20} />} />
           <StatCard label="Pendana" value={state.funders.length} icon={<Users size={20} />} />
-          <StatCard label="Transaksi" value={state.transactions.length} icon={<ListChecks size={20} />} />
-          <StatCard label="Total disalurkan" value={formatRupiah(disalurkan)} icon={<Send size={20} />} />
+          <StatCard label="Pengajuan dikirim" value={sent.length} icon={<Send size={20} />} />
+          <StatCard label="Disetujui (in-cash)" value={formatRupiah(approvedCash)} icon={<CheckCircle2 size={20} />} />
         </div>
 
         <section className="sh-card">

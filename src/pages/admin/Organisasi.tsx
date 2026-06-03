@@ -60,15 +60,17 @@ export default function AdminOrganisasi() {
                     <th>Kategori</th>
                     <th>Kota</th>
                     <th>Status</th>
-                    <th>Proposal aktif</th>
-                    <th>Total terkumpul</th>
+                    <th>Pengajuan dikirim</th>
+                    <th>Total disetujui</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((org) => {
-                    const myProposals = state.proposals.filter((p) => p.orgId === org.id);
-                    const aktif = myProposals.filter((p) => p.status === "aktif").length;
-                    const raised = myProposals.reduce((s, p) => s + p.raised, 0);
+                    const myPengajuan = state.pengajuan.filter((p) => p.orgId === org.id);
+                    const sent = myPengajuan.filter((p) => p.status !== "draf").length;
+                    const approved = myPengajuan
+                      .filter((p) => p.status === "disetujui" && p.type === "in_cash")
+                      .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
                     return (
                       <tr key={org.id}>
                         <td>
@@ -96,8 +98,8 @@ export default function AdminOrganisasi() {
                             <StatusBadge kind="custom" label="Menunggu" variant="pending" />
                           )}
                         </td>
-                        <td>{aktif}</td>
-                        <td className="num">{formatRupiah(raised)}</td>
+                        <td>{sent}</td>
+                        <td className="num">{formatRupiah(approved)}</td>
                       </tr>
                     );
                   })}

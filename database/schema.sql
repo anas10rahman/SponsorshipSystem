@@ -88,6 +88,7 @@ create table organizations (
   legal_docs      text[] not null default '{}',    -- nama berkas / URL
   payout_account  text not null,                   -- contoh "BCA 0123456789"
   balance         numeric(16, 2) not null default 0 check (balance >= 0), -- saldo biaya pengajuan
+  phone           text not null default '',         -- no.hp kontak (ber-gate ke lawan)
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -106,6 +107,7 @@ create table funders (
   focus             text[] not null default '{}',  -- kategori fokus pendanaan
   budget_total      numeric(16, 2) not null check (budget_total >= 0),
   budget_remaining  numeric(16, 2) not null check (budget_remaining >= 0),
+  phone             text not null default '',       -- no.hp kontak (ber-gate ke lawan)
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now(),
   constraint funders_budget_consistency check (budget_remaining <= budget_total)
