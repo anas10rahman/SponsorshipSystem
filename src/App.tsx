@@ -66,6 +66,7 @@ export default function App() {
           <Route path="/org/dashboard" element={<OrgDashboard />} />
           <Route path="/org/cari" element={<OrgCariPendana />} />
           <Route path="/org/pendana/:id" element={<PendanaProfil />} />
+          <Route path="/org/profil" element={<OrganisasiProfil />} />
           <Route path="/org/pengajuan" element={<OrgPengajuanList />} />
           <Route path="/org/pengajuan/baru" element={<BuatPengajuan />} />
           <Route path="/org/pengajuan/:id/edit" element={<BuatPengajuan />} />
@@ -83,6 +84,7 @@ export default function App() {
         >
           <Route path="/funder/pengajuan" element={<FunderPengajuanInbox />} />
           <Route path="/funder/organisasi/:id" element={<OrganisasiProfil />} />
+          <Route path="/funder/profil" element={<PendanaProfil />} />
           <Route path="/funder/portofolio" element={<FunderPortofolio />} />
           <Route path="/funder/pengaturan" element={<FunderPengaturan />} />
         </Route>

@@ -32,7 +32,6 @@ const NAV: Record<Role, Item[]> = {
     { to: "/org/cari", label: "Cari pendana", icon: <Search size={18} /> },
     { to: "/org/pengajuan", label: "Pengajuan saya", icon: <Send size={18} /> },
     { to: "/org/topup", label: "Top-up saldo", icon: <Wallet size={18} /> },
-    { to: "/org/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
   funder: [
     { to: "/funder/pengajuan", label: "Pengajuan masuk", icon: <Inbox size={18} /> },

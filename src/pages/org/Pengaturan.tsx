@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { useStore, useActions } from "@/lib/store";
@@ -14,12 +15,14 @@ import {
   Twitter,
   Facebook,
   Globe,
+  ArrowLeft,
 } from "lucide-react";
 
 export default function OrgPengaturan() {
   const { state, currentUser } = useStore();
   const { updateOrgProfile } = useActions();
   const toast = useToast();
+  const navigate = useNavigate();
   const org = state.organizations.find((o) => o.id === currentUser?.orgId);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +72,7 @@ export default function OrgPengaturan() {
       logoInitials: initials(form.name),
     });
     toast.success("Profil organisasi tersimpan.");
+    navigate("/org/profil");
   };
 
   return (
@@ -76,13 +80,22 @@ export default function OrgPengaturan() {
       <Topbar title="Pengaturan organisasi" />
       <div className="sh-shell__content">
         <PageHead
-          title="Profil organisasi"
+          title="Edit profil organisasi"
           subtitle="Lengkapi profil organisasi dan penanggung jawab (PIC)."
           actions={
-            <button className="sh-btn sh-btn--primary" onClick={save}>
-              <Save size={16} />
-              Simpan profil
-            </button>
+            <div className="sh-row" style={{ gap: 8 }}>
+              <button
+                className="sh-btn sh-btn--secondary"
+                onClick={() => navigate("/org/profil")}
+              >
+                <ArrowLeft size={16} />
+                Kembali
+              </button>
+              <button className="sh-btn sh-btn--primary" onClick={save}>
+                <Save size={16} />
+                Simpan profil
+              </button>
+            </div>
           }
         />
 
