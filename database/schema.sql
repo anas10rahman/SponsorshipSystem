@@ -89,6 +89,18 @@ create table organizations (
   payout_account  text not null,                   -- contoh "BCA 0123456789"
   balance         numeric(16, 2) not null default 0 check (balance >= 0), -- saldo biaya pengajuan
   phone           text not null default '',         -- no.hp kontak (ber-gate ke lawan)
+  -- Profil publik
+  email           text not null default '',
+  description     text not null default '',
+  website         text,
+  instagram       text,
+  twitter         text,                              -- X
+  facebook        text,
+  -- Penanggung jawab (PIC)
+  pic_name        text not null default '',
+  pic_phone       text not null default '',
+  pic_position    text not null default '',
+  pic_id_doc_url  text not null default '',          -- KTP/KTM (PDF) — wajib di UI
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );

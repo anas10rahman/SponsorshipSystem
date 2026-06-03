@@ -9,7 +9,7 @@ import { ContactLine } from "@/components/ContactLine";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
 import { formatRupiah, formatDate } from "@/lib/format";
-import { hasPengajuanBetween, pengajuanBadge } from "@/lib/pengajuan";
+import { hasPengajuanBetween, maskPhone, pengajuanBadge } from "@/lib/pengajuan";
 import {
   ArrowLeft,
   Wallet,
@@ -17,6 +17,14 @@ import {
   CheckCircle2,
   MapPin,
   FileText,
+  Mail,
+  Globe,
+  Instagram,
+  Twitter,
+  Facebook,
+  Phone,
+  Lock,
+  IdCard,
 } from "lucide-react";
 
 export default function OrganisasiProfil() {
@@ -131,6 +139,102 @@ export default function OrganisasiProfil() {
           </div>
         </section>
 
+        {/* Tentang organisasi */}
+        <section className="sh-card" style={{ marginBottom: 20 }}>
+          <header className="sh-card__header">
+            <h3>Tentang organisasi</h3>
+          </header>
+          <div className="sh-card__body sh-stack">
+            {org.description ? (
+              <p>{org.description}</p>
+            ) : (
+              <p className="sh-muted">Belum ada deskripsi.</p>
+            )}
+
+            <div className="sh-row" style={{ gap: 32, flexWrap: "wrap" }}>
+              <div>
+                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                  <Mail size={13} /> Email
+                </div>
+                {canSeeContact ? (
+                  <a href={`mailto:${org.email}`} className="sh-meta-value">
+                    {org.email || "—"}
+                  </a>
+                ) : (
+                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
+                    <Lock size={13} /> Terbuka setelah pengajuan
+                  </div>
+                )}
+              </div>
+              {org.website && (
+                <div>
+                  <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                    <Globe size={13} /> Website
+                  </div>
+                  <div className="sh-meta-value">{org.website}</div>
+                </div>
+              )}
+            </div>
+
+            {(org.instagram || org.twitter || org.facebook) && (
+              <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
+                {org.instagram && (
+                  <span className="sh-chip" style={{ cursor: "default" }}>
+                    <Instagram size={14} /> {org.instagram}
+                  </span>
+                )}
+                {org.twitter && (
+                  <span className="sh-chip" style={{ cursor: "default" }}>
+                    <Twitter size={14} /> {org.twitter}
+                  </span>
+                )}
+                {org.facebook && (
+                  <span className="sh-chip" style={{ cursor: "default" }}>
+                    <Facebook size={14} /> {org.facebook}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Penanggung jawab (PIC) */}
+        <section className="sh-card" style={{ marginBottom: 20 }}>
+          <header className="sh-card__header">
+            <h3>Penanggung jawab (PIC)</h3>
+          </header>
+          <div className="sh-card__body">
+            <div className="sh-row" style={{ gap: 32, flexWrap: "wrap" }}>
+              <div>
+                <div className="sh-meta-label">Nama</div>
+                <div className="sh-meta-value">{org.pic.name || "—"}</div>
+              </div>
+              <div>
+                <div className="sh-meta-label">Jabatan</div>
+                <div className="sh-meta-value">{org.pic.position || "—"}</div>
+              </div>
+              <div>
+                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                  <Phone size={13} /> No.telp
+                </div>
+                {canSeeContact ? (
+                  <a
+                    href={`tel:${org.pic.phone.replace(/\D/g, "")}`}
+                    className="sh-meta-value"
+                    style={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    {org.pic.phone || "—"}
+                  </a>
+                ) : (
+                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
+                    <Lock size={13} /> {maskPhone(org.pic.phone)}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Stats */}
         <div className="sh-stat-grid">
           <StatCard
@@ -170,6 +274,20 @@ export default function OrganisasiProfil() {
                     <div className="sh-meta-label">Saldo</div>
                     <div className="sh-meta-value num">{formatRupiah(org.balance)}</div>
                   </div>
+                )}
+              </div>
+              <div>
+                <div className="sh-meta-label">KTP/KTM penanggung jawab</div>
+                {org.pic.idDocUrl ? (
+                  <span
+                    className="sh-btn sh-btn--ghost sh-btn--sm"
+                    style={{ cursor: "default", marginTop: 6 }}
+                  >
+                    <IdCard size={14} />
+                    {org.pic.idDocUrl}
+                  </span>
+                ) : (
+                  <p className="sh-muted">Belum diunggah.</p>
                 )}
               </div>
               <div>

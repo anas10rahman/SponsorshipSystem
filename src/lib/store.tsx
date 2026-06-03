@@ -14,6 +14,7 @@ import type {
   AppState,
   AuditLog,
   Notification,
+  Organization,
   Pengajuan,
   Proposal,
   Role,
@@ -24,7 +25,7 @@ import type {
 import { makeTransactionId, nowIso } from "./format";
 import { SUBMISSION_FEE } from "./pengajuan";
 
-const STORAGE_KEY = "sponsorhub-state-v6";
+const STORAGE_KEY = "sponsorhub-state-v7";
 
 function loadInitial(): AppState {
   if (typeof localStorage === "undefined") return createSeedState();
@@ -59,6 +60,7 @@ type Action =
   | { type: "pengajuan/upsert"; pengajuan: Pengajuan }
   | { type: "pengajuan/approve"; id: string }
   | { type: "org/addBalance"; orgId: string; delta: number }
+  | { type: "org/update"; orgId: string; patch: Partial<Organization> }
   | { type: "notification/add"; notification: Notification }
   | { type: "notification/markRead"; id: string }
   | { type: "audit/add"; log: AuditLog };
@@ -177,6 +179,14 @@ function reducer(state: AppState, action: Action): AppState {
           o.id === action.orgId
             ? { ...o, balance: Math.max(0, o.balance + action.delta) }
             : o,
+        ),
+      };
+
+    case "org/update":
+      return {
+        ...state,
+        organizations: state.organizations.map((o) =>
+          o.id === action.orgId ? { ...o, ...action.patch } : o,
         ),
       };
 
@@ -416,6 +426,22 @@ export function useActions() {
       topUpOrg(amount: number) {
         if (!currentUser?.orgId || amount <= 0) return;
         dispatch({ type: "org/addBalance", orgId: currentUser.orgId, delta: amount });
+      },
+
+      updateOrgProfile(patch: Partial<Organization>) {
+        if (!currentUser?.orgId) return;
+        dispatch({ type: "org/update", orgId: currentUser.orgId, patch });
+        dispatch({
+          type: "audit/add",
+          log: {
+            id: `log-${Date.now()}`,
+            actorId: currentUser.id,
+            action: "akun.diverifikasi",
+            entity: "organisasi",
+            entityId: currentUser.orgId,
+            createdAt: nowIso(),
+          },
+        });
       },
 
       submitPengajuan(p: Pengajuan) {

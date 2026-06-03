@@ -14,6 +14,14 @@ export type User = {
   createdAt: string;
 };
 
+/** Penanggung jawab (PIC) organisasi. */
+export type OrgPic = {
+  name: string;
+  phone: string; // no.telp aktif PIC
+  position: string; // jabatan di organisasi
+  idDocUrl: string; // KTP/KTM (PDF) — wajib
+};
+
 export type Organization = {
   id: string;
   name: string;
@@ -24,7 +32,16 @@ export type Organization = {
   legalDocs: string[];
   payoutAccount: string;
   balance: number; // saldo untuk biaya pengajuan
-  phone: string; // no.hp kontak (ber-gate ke lawan)
+  phone: string; // no.hp kontak (ber-gate ke lawan) — disinkronkan dari PIC
+  // Profil publik
+  email: string;
+  description: string;
+  website?: string;
+  instagram?: string;
+  twitter?: string; // X
+  facebook?: string;
+  // Penanggung jawab
+  pic: OrgPic;
 };
 
 export type FunderType = "Korporasi" | "Individu" | "Filantropi" | "Perbankan";

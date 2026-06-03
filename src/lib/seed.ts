@@ -55,6 +55,19 @@ export function createSeedState(): AppState {
         payoutAccount: "BCA 0123456789",
         balance: 100_000,
         phone: "0812-3456-7890",
+        email: "halo@yayasansenibudaya.org",
+        description:
+          "Yayasan nirlaba yang mewadahi seniman muda lewat festival, pameran, dan lokakarya seni budaya nusantara.",
+        website: "yayasansenibudaya.org",
+        instagram: "@senibudaya.id",
+        twitter: "@senibudaya",
+        facebook: "YayasanSeniBudaya",
+        pic: {
+          name: "Rani Prameswari",
+          phone: "0812-3456-7890",
+          position: "Direktur Program",
+          idDocUrl: "ktp-rani-prameswari.pdf",
+        },
       },
     ],
 
