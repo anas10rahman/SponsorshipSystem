@@ -12,7 +12,6 @@ import AdminPendana from "./pages/admin/Pendana";
 import AdminLaporan from "./pages/admin/Laporan";
 import AdminPengaturan from "./pages/admin/Pengaturan";
 import AdminPengajuan from "./pages/admin/Pengajuan";
-import AdminProfil from "./pages/admin/Profil";
 import PendanaProfil from "./pages/shared/PendanaProfil";
 import OrganisasiProfil from "./pages/shared/OrganisasiProfil";
 import OrgDashboard from "./pages/org/Dashboard";
@@ -50,7 +49,6 @@ export default function App() {
           <Route path="/admin/pengajuan" element={<AdminPengajuan />} />
           <Route path="/admin/organisasi/:id" element={<OrganisasiProfil />} />
           <Route path="/admin/pendana/:id" element={<PendanaProfil />} />
-          <Route path="/admin/profil" element={<AdminProfil />} />
           <Route path="/admin/organisasi" element={<AdminOrganisasi />} />
           <Route path="/admin/pendana" element={<AdminPendana />} />
           <Route path="/admin/laporan" element={<AdminLaporan />} />
@@ -68,7 +66,6 @@ export default function App() {
           <Route path="/org/dashboard" element={<OrgDashboard />} />
           <Route path="/org/cari" element={<OrgCariPendana />} />
           <Route path="/org/pendana/:id" element={<PendanaProfil />} />
-          <Route path="/org/profil" element={<OrganisasiProfil />} />
           <Route path="/org/pengajuan" element={<OrgPengajuanList />} />
           <Route path="/org/pengajuan/baru" element={<BuatPengajuan />} />
           <Route path="/org/pengajuan/:id/edit" element={<BuatPengajuan />} />
@@ -86,7 +83,6 @@ export default function App() {
         >
           <Route path="/funder/pengajuan" element={<FunderPengajuanInbox />} />
           <Route path="/funder/organisasi/:id" element={<OrganisasiProfil />} />
-          <Route path="/funder/profil" element={<PendanaProfil />} />
           <Route path="/funder/portofolio" element={<FunderPortofolio />} />
           <Route path="/funder/pengaturan" element={<FunderPengaturan />} />
         </Route>

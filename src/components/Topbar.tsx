@@ -1,7 +1,14 @@
 import { Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useStore } from "@/lib/store";
 import { initials } from "@/lib/format";
 import { NotificationsMenu } from "./NotificationsMenu";
+
+const SETTINGS_PATH: Record<string, string> = {
+  admin: "/admin/pengaturan",
+  org: "/org/pengaturan",
+  funder: "/funder/pengaturan",
+};
 
 type Props = {
   title: string;
@@ -10,6 +17,7 @@ type Props = {
 
 export function Topbar({ title, search }: Props) {
   const { currentUser } = useStore();
+  const navigate = useNavigate();
 
   return (
     <header className="sh-topbar">
@@ -32,13 +40,19 @@ export function Topbar({ title, search }: Props) {
         <NotificationsMenu />
 
         {currentUser && (
-          <div className="sh-user">
+          <button
+            type="button"
+            className="sh-user"
+            onClick={() => navigate(SETTINGS_PATH[currentUser.role])}
+            title="Buka pengaturan profil"
+            style={{ background: "transparent", cursor: "pointer" }}
+          >
             <span className="sh-avatar">{initials(currentUser.name)}</span>
             <div className="sh-user__meta">
               <span className="sh-user__name">{currentUser.name}</span>
               <span className="sh-user__role">{currentUser.email}</span>
             </div>
-          </div>
+          </button>
         )}
       </div>
     </header>

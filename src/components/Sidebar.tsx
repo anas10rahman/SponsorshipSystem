@@ -11,7 +11,6 @@ import {
   Send,
   Inbox,
   Wallet,
-  UserCircle,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { BrandMark } from "./BrandMark";
@@ -26,7 +25,6 @@ const NAV: Record<Role, Item[]> = {
     { to: "/admin/organisasi", label: "Organisasi", icon: <Building2 size={18} /> },
     { to: "/admin/pendana", label: "Pendana", icon: <Users size={18} /> },
     { to: "/admin/laporan", label: "Laporan", icon: <FileText size={18} /> },
-    { to: "/admin/profil", label: "Profil", icon: <UserCircle size={18} /> },
     { to: "/admin/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
   org: [
@@ -34,13 +32,11 @@ const NAV: Record<Role, Item[]> = {
     { to: "/org/cari", label: "Cari pendana", icon: <Search size={18} /> },
     { to: "/org/pengajuan", label: "Pengajuan saya", icon: <Send size={18} /> },
     { to: "/org/topup", label: "Top-up saldo", icon: <Wallet size={18} /> },
-    { to: "/org/profil", label: "Profil saya", icon: <UserCircle size={18} /> },
     { to: "/org/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
   funder: [
     { to: "/funder/pengajuan", label: "Pengajuan masuk", icon: <Inbox size={18} /> },
     { to: "/funder/portofolio", label: "Portofolio", icon: <Briefcase size={18} /> },
-    { to: "/funder/profil", label: "Profil saya", icon: <UserCircle size={18} /> },
     { to: "/funder/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
 };
@@ -81,37 +77,13 @@ export function Sidebar({ role }: { role: Role }) {
 
       {currentUser && (
         <div className="sh-sidebar__footer">
-          <span className="sh-avatar sh-avatar--sm">
-            {currentUser.name
-              .split(" ")
-              .map((w) => w[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase()}
-          </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontWeight: 700,
-                fontSize: 13,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {currentUser.name}
-            </div>
-            <div style={{ fontSize: 11, color: "var(--ink-500)" }}>
-              {ROLE_LABEL[role]}
-            </div>
-          </div>
           <button
-            className="sh-btn sh-btn--ghost sh-btn--icon"
-            title="Keluar"
-            aria-label="Keluar"
+            className="sh-btn sh-btn--secondary"
+            style={{ width: "100%" }}
             onClick={logout}
           >
             <LogOut size={16} />
+            Keluar
           </button>
         </div>
       )}
