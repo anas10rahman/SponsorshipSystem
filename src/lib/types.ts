@@ -17,8 +17,9 @@ export type User = {
 /** Penanggung jawab (PIC) organisasi. */
 export type OrgPic = {
   name: string;
-  phone: string; // no.telp aktif PIC
+  phone: string; // no.WA aktif PIC
   position: string; // jabatan di organisasi
+  email: string; // email PIC
   idDocUrl: string; // KTP/KTM (PDF) — wajib
 };
 
@@ -28,6 +29,7 @@ export type Organization = {
   category: string;
   city: string;
   logoInitials: string;
+  logoUrl?: string; // logo organisasi (data URL/base64) — opsional, fallback ke inisial
   verified: boolean;
   legalDocs: string[];
   payoutAccount: string;

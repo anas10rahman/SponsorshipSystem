@@ -16,6 +16,9 @@ import {
   Facebook,
   Globe,
   ArrowLeft,
+  ImagePlus,
+  CreditCard,
+  Mail,
 } from "lucide-react";
 
 export default function OrgPengaturan() {
@@ -25,6 +28,7 @@ export default function OrgPengaturan() {
   const navigate = useNavigate();
   const org = state.organizations.find((o) => o.id === currentUser?.orgId);
   const fileRef = useRef<HTMLInputElement>(null);
+  const logoRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<Organization | null>(org ?? null);
 
@@ -49,15 +53,38 @@ export default function OrgPengaturan() {
     toast.success(`Berkas "${file.name}" dipilih.`);
   };
 
+  const onPickLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.failed("Logo harus berupa gambar (PNG/JPG).");
+      if (logoRef.current) logoRef.current.value = "";
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.failed("Ukuran logo maksimal 2 MB.");
+      if (logoRef.current) logoRef.current.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      set({ logoUrl: String(reader.result) });
+      toast.success("Logo organisasi dipilih.");
+    };
+    reader.readAsDataURL(file);
+  };
+
   const save = () => {
     const required: Array<[boolean, string]> = [
       [form.name.trim() !== "", "Nama organisasi"],
       [form.category.trim() !== "", "Kategori organisasi"],
       [form.email.trim() !== "", "Email organisasi"],
+      [form.payoutAccount.trim() !== "", "Nomor rekening pencairan"],
       [form.description.trim() !== "", "Deskripsi organisasi"],
       [form.pic.name.trim() !== "", "Nama PIC"],
-      [form.pic.phone.trim() !== "", "No.telp PIC"],
+      [form.pic.phone.trim() !== "", "Nomor WA PIC"],
       [form.pic.position.trim() !== "", "Jabatan PIC"],
+      [form.pic.email.trim() !== "", "Email PIC"],
       [form.pic.idDocUrl.trim() !== "", "Upload KTP/KTM (PDF)"],
     ];
     const missing = required.find(([ok]) => !ok);
@@ -106,6 +133,63 @@ export default function OrgPengaturan() {
               <h3>Profil organisasi</h3>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
+              {/* Logo organisasi */}
+              <div style={{ marginBottom: 18 }}>
+                <label className="sh-field__label" style={{ display: "block", marginBottom: 8 }}>
+                  Logo organisasi
+                </label>
+                <input
+                  ref={logoRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={onPickLogo}
+                />
+                <div className="sh-row" style={{ gap: 14, alignItems: "center" }}>
+                  {form.logoUrl ? (
+                    <img
+                      src={form.logoUrl}
+                      alt="Logo"
+                      className="sh-org-logo"
+                      style={{ width: 64, height: 64, objectFit: "cover", padding: 0 }}
+                    />
+                  ) : (
+                    <span
+                      className="sh-org-logo"
+                      style={{ width: 64, height: 64, fontSize: 22 }}
+                    >
+                      {form.logoInitials}
+                    </span>
+                  )}
+                  <div className="sh-row" style={{ gap: 8 }}>
+                    <button
+                      type="button"
+                      className="sh-btn sh-btn--secondary sh-btn--sm"
+                      onClick={() => logoRef.current?.click()}
+                    >
+                      <ImagePlus size={14} />
+                      {form.logoUrl ? "Ganti logo" : "Unggah logo"}
+                    </button>
+                    {form.logoUrl && (
+                      <button
+                        type="button"
+                        className="sh-btn sh-btn--ghost sh-btn--sm"
+                        onClick={() => {
+                          set({ logoUrl: undefined });
+                          if (logoRef.current) logoRef.current.value = "";
+                        }}
+                      >
+                        <X size={14} />
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <span className="sh-field__hint">
+                  PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama.
+                </span>
+              </div>
+
               <div className="sh-form-grid">
                 <Field label="Nama organisasi" required>
                   <input
@@ -134,6 +218,18 @@ export default function OrgPengaturan() {
                     value={form.city}
                     onChange={(e) => set({ city: e.target.value })}
                     placeholder="Misal: Jakarta"
+                  />
+                </Field>
+                <Field
+                  label="Nomor rekening pencairan"
+                  required
+                  icon={<CreditCard size={14} />}
+                  hint="Rekening tujuan dana sponsorship (hanya admin & organisasi yang melihat)"
+                >
+                  <input
+                    value={form.payoutAccount}
+                    onChange={(e) => set({ payoutAccount: e.target.value })}
+                    placeholder="Misal: BCA 0123456789 a.n. Yayasan"
                   />
                 </Field>
                 <div className="sh-field sh-field--wide">
@@ -202,7 +298,7 @@ export default function OrgPengaturan() {
                     placeholder="Nama lengkap penanggung jawab"
                   />
                 </Field>
-                <Field label="No.telp aktif PIC" required>
+                <Field label="Nomor WA PIC" required>
                   <input
                     value={form.pic.phone}
                     onChange={(e) => setPic({ phone: e.target.value })}
@@ -214,6 +310,14 @@ export default function OrgPengaturan() {
                     value={form.pic.position}
                     onChange={(e) => setPic({ position: e.target.value })}
                     placeholder="Misal: Direktur Program"
+                  />
+                </Field>
+                <Field label="Email PIC" required icon={<Mail size={14} />}>
+                  <input
+                    type="email"
+                    value={form.pic.email}
+                    onChange={(e) => setPic({ email: e.target.value })}
+                    placeholder="nama@organisasi.org"
                   />
                 </Field>
               </div>

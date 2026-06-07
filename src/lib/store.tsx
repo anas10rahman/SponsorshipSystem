@@ -25,7 +25,7 @@ import type {
 import { makeTransactionId, nowIso } from "./format";
 import { SUBMISSION_FEE } from "./pengajuan";
 
-const STORAGE_KEY = "sponsorhub-state-v7";
+const STORAGE_KEY = "sponsorhub-state-v8";
 
 function loadInitial(): AppState {
   if (typeof localStorage === "undefined") return createSeedState();

@@ -106,12 +106,21 @@ export default function OrganisasiProfil() {
         <section className="sh-card" style={{ marginBottom: 20 }}>
           <div className="sh-card__body">
             <div className="sh-row" style={{ gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
-              <span
-                className="sh-org-logo"
-                style={{ width: 64, height: 64, fontSize: 22, flexShrink: 0 }}
-              >
-                {org.logoInitials}
-              </span>
+              {org.logoUrl ? (
+                <img
+                  src={org.logoUrl}
+                  alt={org.name}
+                  className="sh-org-logo"
+                  style={{ width: 64, height: 64, objectFit: "cover", padding: 0, flexShrink: 0 }}
+                />
+              ) : (
+                <span
+                  className="sh-org-logo"
+                  style={{ width: 64, height: 64, fontSize: 22, flexShrink: 0 }}
+                >
+                  {org.logoInitials}
+                </span>
+              )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="sh-row" style={{ gap: 10, flexWrap: "wrap" }}>
                   <h2>{org.name}</h2>
@@ -215,7 +224,7 @@ export default function OrganisasiProfil() {
               </div>
               <div>
                 <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                  <Phone size={13} /> No.telp
+                  <Phone size={13} /> Nomor WA
                 </div>
                 {canSeeContact ? (
                   <a
@@ -228,6 +237,20 @@ export default function OrganisasiProfil() {
                 ) : (
                   <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
                     <Lock size={13} /> {maskPhone(org.pic.phone)}
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                  <Mail size={13} /> Email
+                </div>
+                {canSeeContact ? (
+                  <a href={`mailto:${org.pic.email}`} className="sh-meta-value">
+                    {org.pic.email || "—"}
+                  </a>
+                ) : (
+                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
+                    <Lock size={13} /> Terbuka setelah pengajuan
                   </div>
                 )}
               </div>

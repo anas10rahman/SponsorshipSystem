@@ -66,6 +66,7 @@ export function createSeedState(): AppState {
           name: "Rani Prameswari",
           phone: "0812-3456-7890",
           position: "Direktur Program",
+          email: "rani@yayasansenibudaya.org",
           idDocUrl: "ktp-rani-prameswari.pdf",
         },
       },

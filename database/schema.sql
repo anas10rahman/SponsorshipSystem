@@ -84,6 +84,7 @@ create table organizations (
   category        text not null,
   city            text not null,
   logo_initials   text not null,                   -- contoh "YS"
+  logo_url        text,                             -- logo organisasi (URL/base64), opsional
   verified        boolean not null default false,
   legal_docs      text[] not null default '{}',    -- nama berkas / URL
   payout_account  text not null,                   -- contoh "BCA 0123456789"
@@ -98,8 +99,9 @@ create table organizations (
   facebook        text,
   -- Penanggung jawab (PIC)
   pic_name        text not null default '',
-  pic_phone       text not null default '',
+  pic_phone       text not null default '',          -- no.WA aktif PIC
   pic_position    text not null default '',
+  pic_email       text not null default '',
   pic_id_doc_url  text not null default '',          -- KTP/KTM (PDF) — wajib di UI
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
