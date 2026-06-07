@@ -7,7 +7,7 @@ import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useStore } from "@/lib/store";
 import { formatRupiah, initials, percent } from "@/lib/format";
-import { hasPengajuanBetween } from "@/lib/pengajuan";
+import { hasPengajuanBetween, maskPhone } from "@/lib/pengajuan";
 import { ContactLine } from "@/components/ContactLine";
 import {
   ArrowLeft,
@@ -16,6 +16,13 @@ import {
   CheckCircle2,
   Building2,
   HandCoins,
+  Mail,
+  Globe,
+  Instagram,
+  Twitter,
+  Facebook,
+  Phone,
+  Lock,
 } from "lucide-react";
 
 export default function PendanaProfil() {
@@ -78,10 +85,17 @@ export default function PendanaProfil() {
           title={title}
           subtitle="Informasi pendana dan rekam jejak pendanaan."
           actions={
-            <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
-              <ArrowLeft size={16} />
-              Kembali
-            </button>
+            <div className="sh-row" style={{ gap: 8 }}>
+              <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
+                <ArrowLeft size={16} />
+                Kembali
+              </button>
+              {isSelf && (
+                <Link to="/funder/pengaturan" className="sh-btn sh-btn--primary">
+                  Edit profil
+                </Link>
+              )}
+            </div>
           }
         />
 
@@ -89,12 +103,21 @@ export default function PendanaProfil() {
         <section className="sh-card" style={{ marginBottom: 20 }}>
           <div className="sh-card__body">
             <div className="sh-row" style={{ gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
-              <span
-                className="sh-org-logo"
-                style={{ width: 64, height: 64, fontSize: 22, flexShrink: 0 }}
-              >
-                {initials(funder.name)}
-              </span>
+              {funder.logoUrl ? (
+                <img
+                  src={funder.logoUrl}
+                  alt={funder.name}
+                  className="sh-org-logo"
+                  style={{ width: 64, height: 64, objectFit: "cover", padding: 0, flexShrink: 0 }}
+                />
+              ) : (
+                <span
+                  className="sh-org-logo"
+                  style={{ width: 64, height: 64, fontSize: 22, flexShrink: 0 }}
+                >
+                  {initials(funder.name)}
+                </span>
+              )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h2 style={{ marginBottom: 8 }}>{funder.name}</h2>
                 <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
@@ -120,6 +143,116 @@ export default function PendanaProfil() {
                   Ajukan proposal
                 </Link>
               )}
+            </div>
+          </div>
+        </section>
+
+        {/* Tentang pendana */}
+        <section className="sh-card" style={{ marginBottom: 20 }}>
+          <header className="sh-card__header">
+            <h3>Tentang pendana</h3>
+          </header>
+          <div className="sh-card__body sh-stack">
+            {funder.description ? (
+              <p>{funder.description}</p>
+            ) : (
+              <p className="sh-muted">Belum ada deskripsi.</p>
+            )}
+
+            <div className="sh-row" style={{ gap: 32, flexWrap: "wrap" }}>
+              <div>
+                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                  <Mail size={13} /> Email
+                </div>
+                {canSeeContact ? (
+                  <a href={`mailto:${funder.email}`} className="sh-meta-value">
+                    {funder.email || "—"}
+                  </a>
+                ) : (
+                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
+                    <Lock size={13} /> Terbuka setelah pengajuan
+                  </div>
+                )}
+              </div>
+              {funder.website && (
+                <div>
+                  <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                    <Globe size={13} /> Website
+                  </div>
+                  <div className="sh-meta-value">{funder.website}</div>
+                </div>
+              )}
+            </div>
+
+            {(funder.instagram || funder.twitter || funder.facebook) && (
+              <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
+                {funder.instagram && (
+                  <span className="sh-chip" style={{ cursor: "default" }}>
+                    <Instagram size={14} /> {funder.instagram}
+                  </span>
+                )}
+                {funder.twitter && (
+                  <span className="sh-chip" style={{ cursor: "default" }}>
+                    <Twitter size={14} /> {funder.twitter}
+                  </span>
+                )}
+                {funder.facebook && (
+                  <span className="sh-chip" style={{ cursor: "default" }}>
+                    <Facebook size={14} /> {funder.facebook}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Penanggung jawab (PIC) */}
+        <section className="sh-card" style={{ marginBottom: 20 }}>
+          <header className="sh-card__header">
+            <h3>Penanggung jawab (PIC)</h3>
+          </header>
+          <div className="sh-card__body">
+            <div className="sh-row" style={{ gap: 32, flexWrap: "wrap" }}>
+              <div>
+                <div className="sh-meta-label">Nama</div>
+                <div className="sh-meta-value">{funder.pic.name || "—"}</div>
+              </div>
+              <div>
+                <div className="sh-meta-label">Jabatan</div>
+                <div className="sh-meta-value">{funder.pic.position || "—"}</div>
+              </div>
+              <div>
+                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                  <Phone size={13} /> Nomor WA
+                </div>
+                {canSeeContact ? (
+                  <a
+                    href={`tel:${funder.pic.phone.replace(/\D/g, "")}`}
+                    className="sh-meta-value"
+                    style={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    {funder.pic.phone || "—"}
+                  </a>
+                ) : (
+                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
+                    <Lock size={13} /> {maskPhone(funder.pic.phone)}
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                  <Mail size={13} /> Email
+                </div>
+                {canSeeContact ? (
+                  <a href={`mailto:${funder.pic.email}`} className="sh-meta-value">
+                    {funder.pic.email || "—"}
+                  </a>
+                ) : (
+                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
+                    <Lock size={13} /> Terbuka setelah pengajuan
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>

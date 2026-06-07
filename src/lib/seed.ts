@@ -82,6 +82,19 @@ export function createSeedState(): AppState {
         budgetTotal: 1_000_000_000,
         budgetRemaining: 1_000_000_000,
         phone: "0815-1111-2222",
+        email: "csr@sinerginusantara.co.id",
+        description:
+          "Perusahaan teknologi yang menjalankan program CSR di bidang pendidikan digital dan inovasi anak muda.",
+        website: "sinerginusantara.co.id",
+        instagram: "@sinergi.nusantara",
+        twitter: "@sinerginusantara",
+        facebook: "SinergiNusantara",
+        pic: {
+          name: "Budi Santoso",
+          phone: "0815-1111-2222",
+          position: "Manajer CSR",
+          email: "budi@sinerginusantara.co.id",
+        },
       },
       {
         id: "fund-2",
@@ -91,6 +104,17 @@ export function createSeedState(): AppState {
         budgetTotal: 500_000_000,
         budgetRemaining: 500_000_000,
         phone: "0816-3333-4444",
+        email: "kontak@yayasancahaya.org",
+        description:
+          "Yayasan filantropi yang mendukung program pendidikan dan kesehatan masyarakat prasejahtera.",
+        website: "yayasancahaya.org",
+        instagram: "@yayasancahaya",
+        pic: {
+          name: "Sari Wijaya",
+          phone: "0816-3333-4444",
+          position: "Direktur Program",
+          email: "sari@yayasancahaya.org",
+        },
       },
       {
         id: "fund-3",
@@ -100,6 +124,19 @@ export function createSeedState(): AppState {
         budgetTotal: 2_000_000_000,
         budgetRemaining: 2_000_000_000,
         phone: "0817-5555-6666",
+        email: "sponsorship@bankdaya.co.id",
+        description:
+          "Bank nasional dengan program sponsorship untuk olahraga dan kegiatan komunitas di seluruh Indonesia.",
+        website: "bankdaya.co.id",
+        instagram: "@bankdaya",
+        twitter: "@bankdaya",
+        facebook: "BankDaya",
+        pic: {
+          name: "Andi Pratama",
+          phone: "0817-5555-6666",
+          position: "Head of Sponsorship",
+          email: "andi@bankdaya.co.id",
+        },
       },
     ],
 

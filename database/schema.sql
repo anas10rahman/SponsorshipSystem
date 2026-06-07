@@ -122,6 +122,19 @@ create table funders (
   budget_total      numeric(16, 2) not null check (budget_total >= 0),
   budget_remaining  numeric(16, 2) not null check (budget_remaining >= 0),
   phone             text not null default '',       -- no.hp kontak (ber-gate ke lawan)
+  -- Profil publik
+  email             text not null default '',
+  description       text not null default '',
+  website           text,
+  instagram         text,
+  twitter           text,                            -- X
+  facebook          text,
+  logo_url          text,                            -- logo pendana (URL/base64), opsional
+  -- Penanggung jawab (PIC)
+  pic_name          text not null default '',
+  pic_phone         text not null default '',        -- no.WA aktif PIC
+  pic_position      text not null default '',
+  pic_email         text not null default '',
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now(),
   constraint funders_budget_consistency check (budget_remaining <= budget_total)

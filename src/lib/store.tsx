@@ -13,6 +13,7 @@ import { createSeedState } from "./seed";
 import type {
   AppState,
   AuditLog,
+  Funder,
   Notification,
   Organization,
   Pengajuan,
@@ -25,7 +26,7 @@ import type {
 import { makeTransactionId, nowIso } from "./format";
 import { SUBMISSION_FEE } from "./pengajuan";
 
-const STORAGE_KEY = "sponsorhub-state-v8";
+const STORAGE_KEY = "sponsorhub-state-v9";
 
 function loadInitial(): AppState {
   if (typeof localStorage === "undefined") return createSeedState();
@@ -61,6 +62,7 @@ type Action =
   | { type: "pengajuan/approve"; id: string }
   | { type: "org/addBalance"; orgId: string; delta: number }
   | { type: "org/update"; orgId: string; patch: Partial<Organization> }
+  | { type: "funder/update"; funderId: string; patch: Partial<Funder> }
   | { type: "notification/add"; notification: Notification }
   | { type: "notification/markRead"; id: string }
   | { type: "audit/add"; log: AuditLog };
@@ -187,6 +189,14 @@ function reducer(state: AppState, action: Action): AppState {
         ...state,
         organizations: state.organizations.map((o) =>
           o.id === action.orgId ? { ...o, ...action.patch } : o,
+        ),
+      };
+
+    case "funder/update":
+      return {
+        ...state,
+        funders: state.funders.map((f) =>
+          f.id === action.funderId ? { ...f, ...action.patch } : f,
         ),
       };
 
@@ -439,6 +449,22 @@ export function useActions() {
             action: "akun.diverifikasi",
             entity: "organisasi",
             entityId: currentUser.orgId,
+            createdAt: nowIso(),
+          },
+        });
+      },
+
+      updateFunderProfile(patch: Partial<Funder>) {
+        if (!currentUser?.funderId) return;
+        dispatch({ type: "funder/update", funderId: currentUser.funderId, patch });
+        dispatch({
+          type: "audit/add",
+          log: {
+            id: `log-${Date.now()}`,
+            actorId: currentUser.id,
+            action: "akun.diverifikasi",
+            entity: "pendana",
+            entityId: currentUser.funderId,
             createdAt: nowIso(),
           },
         });

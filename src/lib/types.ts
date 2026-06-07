@@ -48,6 +48,14 @@ export type Organization = {
 
 export type FunderType = "Korporasi" | "Individu" | "Filantropi" | "Perbankan";
 
+/** Penanggung jawab (PIC) pendana. */
+export type FunderPic = {
+  name: string;
+  phone: string; // no.WA aktif PIC
+  position: string; // jabatan
+  email: string;
+};
+
 export type Funder = {
   id: string;
   name: string;
@@ -55,7 +63,17 @@ export type Funder = {
   focus: string[];
   budgetTotal: number;
   budgetRemaining: number;
-  phone: string; // no.hp kontak (ber-gate ke lawan)
+  phone: string; // no.hp kontak (ber-gate ke lawan) — disinkronkan dari PIC
+  // Profil publik
+  email: string;
+  description: string;
+  website?: string;
+  instagram?: string;
+  twitter?: string; // X
+  facebook?: string;
+  logoUrl?: string; // logo pendana (data URL/base64), opsional
+  // Penanggung jawab
+  pic: FunderPic;
 };
 
 export type ProposalStatus = "draf" | "aktif" | "tercapai" | "arsip";

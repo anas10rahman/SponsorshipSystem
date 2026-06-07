@@ -36,7 +36,6 @@ const NAV: Record<Role, Item[]> = {
   funder: [
     { to: "/funder/pengajuan", label: "Pengajuan masuk", icon: <Inbox size={18} /> },
     { to: "/funder/portofolio", label: "Portofolio", icon: <Briefcase size={18} /> },
-    { to: "/funder/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
 };
 
