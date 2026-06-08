@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
-import { PageHead } from "@/components/PageHead";
+import { Hero } from "@/components/Hero";
 import { Empty } from "@/components/Empty";
 import { StatCard } from "@/components/StatCard";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
@@ -31,10 +31,7 @@ export default function FunderPortofolio() {
     <>
       <Topbar title="Portofolio sponsor" />
       <div className="sh-shell__content">
-        <PageHead
-          title="Portofolio sponsor"
-          subtitle="Pengajuan yang sudah Anda setujui & ringkasan dukungan."
-        />
+        <Hero />
 
         <div className="sh-stat-grid">
           <StatCard

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Topbar } from "@/components/Topbar";
-import { PageHead } from "@/components/PageHead";
+import { Hero } from "@/components/Hero";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
@@ -34,10 +34,7 @@ export default function AdminDashboard() {
     <>
       <Topbar title="Dashboard Admin" />
       <div className="sh-shell__content">
-        <PageHead
-          title="Dashboard Admin"
-          subtitle="Pantau semua pengajuan sponsorship dan aktivitas pendanaan lintas platform."
-        />
+        <Hero />
 
         <div className="sh-stat-grid">
           <StatCard

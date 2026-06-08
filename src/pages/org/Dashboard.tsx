@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
-import { PageHead } from "@/components/PageHead";
+import { Hero } from "@/components/Hero";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
@@ -30,16 +30,7 @@ export default function OrgDashboard() {
     <>
       <Topbar title="Dashboard Organisasi" />
       <div className="sh-shell__content">
-        <PageHead
-          title="Dashboard Organisasi"
-          subtitle="Pantau pengajuan sponsorship Anda ke para pendana."
-          actions={
-            <Link to="/org/cari" className="sh-btn sh-btn--primary">
-              Buat pengajuan
-              <ArrowRight size={16} />
-            </Link>
-          }
-        />
+        <Hero />
 
         <div className="sh-stat-grid">
           <StatCard
@@ -62,9 +53,15 @@ export default function OrgDashboard() {
         <section className="sh-card">
           <header className="sh-card__header">
             <h2>Pengajuan terbaru</h2>
-            <Link to="/org/pengajuan" className="sh-btn sh-btn--ghost sh-btn--sm">
-              Lihat semua
-            </Link>
+            <div className="sh-row" style={{ gap: 8 }}>
+              <Link to="/org/pengajuan" className="sh-btn sh-btn--ghost sh-btn--sm">
+                Lihat semua
+              </Link>
+              <Link to="/org/cari" className="sh-btn sh-btn--primary sh-btn--sm">
+                Buat pengajuan
+                <ArrowRight size={14} />
+              </Link>
+            </div>
           </header>
           {recent.length === 0 ? (
             <div className="sh-card__body">

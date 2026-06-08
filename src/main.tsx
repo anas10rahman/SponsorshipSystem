@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./styles/colors_and_type.css";
 import "./styles/kit.css";
+import "./styles/theme-indigo.css";
 
 ReactDOM.createRoot(document.getElementById("app")!).render(
   <React.StrictMode>

@@ -1,0 +1,251 @@
+/* ============================================================
+   SponsorHub — "Indigo" theme (client tone)
+   Re-skin layer di atas kit.css. Sumber: design bundle
+   ui_kits/dashboard/theme-indigo.css. Dipetakan ke kelas .sh-*.
+   Deep navy sidebar · indigo active nav · indigo→violet hero ·
+   white KPI cards dengan accent bawah + value berwarna.
+   ============================================================ */
+
+:root {
+  --indigo-500: #4f46e5;
+  --indigo-600: #4338ca;
+  --violet-500: #7c3aed;
+  --c-green: #16a34a;
+  --c-blue: #2e90fa;
+  --c-orange: #f59e0b;
+  --c-ink: #0c1222;
+
+  /* Re-point brand tokens → indigo (semua komponen ikut) */
+  --brand-50: #ecebfd;
+  --brand-100: #ecebfd;
+  --brand-200: #c7c2fb;
+  --brand-300: #a5a0f5;
+  --brand-400: #6366f1;
+  --brand-500: #4f46e5;
+  --brand-600: #4338ca;
+  --brand-700: #3a32ad;
+  --brand-800: #312a90;
+  --brand-900: #221d63;
+
+  --canvas-soft: #f6f7fb;
+  --ring: rgba(79, 70, 229, 0.22);
+}
+
+/* Semua peran pakai aksen indigo (tema terpadu, bukan per-role) */
+[data-role="admin"],
+[data-role="org"],
+[data-role="funder"] {
+  --role-accent: var(--indigo-500);
+  --role-accent-soft: #ecebfd;
+  --role-accent-strong: var(--indigo-600);
+  --role-on-accent: #fff;
+}
+
+/* ---------- Sidebar: navy slab, indigo active ---------- */
+.sh-sidebar {
+  background: linear-gradient(184deg, #0e1530 0%, #0a0f22 100%);
+  border-right: 0;
+}
+.sh-sidebar__brand {
+  color: #fff;
+}
+.sh-sidebar__group-label {
+  color: #5b6480;
+}
+.sh-sidebar__link {
+  color: #aeb6cc;
+  border-radius: 11px;
+  font-weight: 500;
+}
+.sh-sidebar__link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.sh-sidebar__link.is-active {
+  background: var(--indigo-500);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.45);
+}
+.sh-sidebar__footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+.sh-sidebar__footer .sh-btn--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #e5e9f5;
+}
+.sh-sidebar__footer .sh-btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- Topbar: bersih, tanpa border ---------- */
+.sh-topbar {
+  background: transparent;
+  border-bottom: 0;
+}
+.sh-topbar__title {
+  font-weight: 800;
+  color: var(--c-ink);
+}
+
+/* ---------- Buttons ---------- */
+.sh-btn {
+  border-radius: 11px;
+}
+.sh-btn--primary {
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+}
+
+/* ---------- Cards ---------- */
+.sh-card {
+  border-radius: 16px;
+}
+
+/* ---------- Stat cards: white + colored bottom accent + value ---------- */
+.sh-stat {
+  border-radius: 16px;
+  border-bottom: 3px solid var(--line-strong);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 1) {
+  border-bottom-color: var(--indigo-500);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 1) .sh-stat__value {
+  color: var(--indigo-500);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 1) .sh-stat__icon {
+  background: #ecebfd;
+  color: var(--indigo-500);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 2) {
+  border-bottom-color: var(--c-green);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 2) .sh-stat__value {
+  color: var(--c-green);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 2) .sh-stat__icon {
+  background: #e7f6ec;
+  color: var(--c-green);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 3) {
+  border-bottom-color: var(--c-blue);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 3) .sh-stat__value {
+  color: var(--c-blue);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 3) .sh-stat__icon {
+  background: #e5f1fe;
+  color: var(--c-blue);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 4) {
+  border-bottom-color: var(--c-orange);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 4) .sh-stat__value {
+  color: var(--c-orange);
+}
+.sh-stat-grid > .sh-stat:nth-child(4n + 4) .sh-stat__icon {
+  background: #fef3da;
+  color: var(--c-orange);
+}
+
+/* ---------- Table hover ---------- */
+.sh-table tbody tr:hover {
+  background: #f5f4fe;
+}
+
+/* ============================================================
+   Hero: indigo→violet gradient + floating wallet card
+   ============================================================ */
+.sh-hero {
+  border-radius: 22px;
+  padding: 30px 34px;
+  margin-bottom: 24px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(108deg, #3a4de8 0%, #5340e6 48%, #7c3aed 100%);
+  box-shadow: 0 16px 34px rgba(79, 70, 229, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.sh-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(420px 300px at 92% 120%, rgba(255, 255, 255, 0.16), transparent 60%),
+    repeating-radial-gradient(circle at 118% 60%, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 26px);
+  pointer-events: none;
+}
+.sh-hero__text {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+.sh-hero__text h2 {
+  margin: 0 0 8px;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+.sh-hero__text p {
+  margin: 0;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 520px;
+  line-height: 1.55;
+  font-weight: 500;
+}
+.sh-hero__stat {
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 12px 28px rgba(12, 18, 34, 0.22);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.sh-hero__stat-val {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--c-ink);
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+.sh-hero__stat-lbl {
+  font-size: 12.5px;
+  color: var(--indigo-500);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.sh-hero__stat-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #ecebfd;
+  color: var(--indigo-500);
+  flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+  .sh-hero {
+    padding: 22px;
+  }
+  .sh-hero__text h2 {
+    font-size: 24px;
+  }
+  .sh-hero__stat {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
