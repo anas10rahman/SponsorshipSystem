@@ -120,12 +120,22 @@ export default function BuatPengajuan() {
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
-    set({ proposalDocUrl: file.name });
-    toast.success(`Berkas "${file.name}" dipilih.`);
+    if (file.size > 4 * 1024 * 1024) {
+      toast.failed("Ukuran PDF maksimal 4 MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    // Simpan nama + isi (data URL) agar pendana bisa preview.
+    const reader = new FileReader();
+    reader.onload = () => {
+      set({ proposalDocUrl: file.name, proposalDocData: String(reader.result) });
+      toast.success(`Berkas "${file.name}" dipilih.`);
+    };
+    reader.readAsDataURL(file);
   };
 
   const clearFile = () => {
-    set({ proposalDocUrl: "" });
+    set({ proposalDocUrl: "", proposalDocData: undefined });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 

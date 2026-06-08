@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Modal } from "./Modal";
 import { StatusBadge } from "./StatusBadge";
+import { PdfPreview } from "./PdfPreview";
 import { useStore } from "@/lib/store";
 import { formatDateTime, formatEventDate, formatRupiah } from "@/lib/format";
 import { pengajuanBadge } from "@/lib/pengajuan";
@@ -37,7 +38,7 @@ export function PengajuanDetail({ pengajuan, onClose, actions }: Props) {
 
       {pengajuan.status === "perlu_revisi" && pengajuan.revisionNote && (
         <div className="sh-notice">
-          <strong>Catatan revisi dari pendana:</strong> {pengajuan.revisionNote}
+          <strong>Feedback dari pendana:</strong> {pengajuan.revisionNote}
         </div>
       )}
 
@@ -90,8 +91,22 @@ export function PengajuanDetail({ pengajuan, onClose, actions }: Props) {
             </ul>
           </div>
         )}
-        {pengajuan.proposalDocUrl && (
-          <Field label="Dokumen">{pengajuan.proposalDocUrl}</Field>
+      </div>
+
+      {/* Dokumen proposal + preview */}
+      <div>
+        <h4 style={{ marginBottom: 12 }}>Dokumen proposal</h4>
+        {pengajuan.proposalDocData ? (
+          <PdfPreview
+            dataUrl={pengajuan.proposalDocData}
+            fileName={pengajuan.proposalDocUrl}
+          />
+        ) : pengajuan.proposalDocUrl ? (
+          <div className="sh-notice sh-notice--info">
+            {pengajuan.proposalDocUrl} — preview tidak tersedia untuk dokumen ini.
+          </div>
+        ) : (
+          <p className="sh-muted">Belum ada dokumen.</p>
         )}
       </div>
 

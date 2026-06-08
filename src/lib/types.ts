@@ -158,7 +158,8 @@ export type Pengajuan = {
   inKindItems?: InKindItem[]; // in_kind
   benefits: string[];
   // Dokumen
-  proposalDocUrl?: string;
+  proposalDocUrl?: string; // nama berkas
+  proposalDocData?: string; // isi berkas PDF (data URL) untuk preview
   extraNote?: string;
   // Lifecycle
   status: PengajuanStatus;

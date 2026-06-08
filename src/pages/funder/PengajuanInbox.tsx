@@ -16,7 +16,7 @@ import { CheckCircle2, XCircle, MessageSquareWarning, Eye } from "lucide-react";
 const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
   { value: "semua", label: "Semua" },
   { value: "diajukan", label: "Perlu ditinjau" },
-  { value: "perlu_revisi", label: "Diminta revisi" },
+  { value: "perlu_revisi", label: "Diberi feedback" },
   { value: "disetujui", label: "Disetujui" },
   { value: "ditolak", label: "Ditolak" },
 ];
@@ -71,7 +71,7 @@ export default function FunderPengajuanInbox() {
     const p = state.pengajuan.find((x) => x.id === actionModal.id);
     if (actionModal.kind === "revisi") {
       requestRevisionPengajuan(actionModal.id, note.trim());
-      toast.info(`Revisi diminta untuk "${p?.eventName ?? ""}".`);
+      toast.info(`Feedback dikirim untuk "${p?.eventName ?? ""}".`);
     } else {
       rejectPengajuan(actionModal.id, note.trim());
       toast.failed(`Pengajuan "${p?.eventName ?? ""}" ditolak.`);
@@ -89,7 +89,7 @@ export default function FunderPengajuanInbox() {
         </button>
         <button className="sh-btn sh-btn--warning" onClick={() => openAction("revisi", p.id)}>
           <MessageSquareWarning size={16} />
-          Minta revisi
+          Berikan feedback
         </button>
         <button className="sh-btn sh-btn--primary" onClick={() => doApprove(p)}>
           <CheckCircle2 size={16} />
@@ -199,7 +199,7 @@ export default function FunderPengajuanInbox() {
       <Modal
         open={!!actionModal}
         onClose={() => setActionModal(null)}
-        title={actionModal?.kind === "revisi" ? "Minta revisi" : "Tolak pengajuan"}
+        title={actionModal?.kind === "revisi" ? "Berikan feedback" : "Tolak pengajuan"}
         footer={
           <>
             <button className="sh-btn sh-btn--secondary" onClick={() => setActionModal(null)}>
@@ -209,7 +209,7 @@ export default function FunderPengajuanInbox() {
               className={`sh-btn ${actionModal?.kind === "revisi" ? "sh-btn--warning" : "sh-btn--danger"}`}
               onClick={confirmAction}
             >
-              {actionModal?.kind === "revisi" ? "Kirim permintaan revisi" : "Tolak pengajuan"}
+              {actionModal?.kind === "revisi" ? "Kirim feedback" : "Tolak pengajuan"}
             </button>
           </>
         }
@@ -217,7 +217,7 @@ export default function FunderPengajuanInbox() {
         <div className="sh-field">
           <label className="sh-field__label">
             {actionModal?.kind === "revisi"
-              ? "Catatan revisi untuk organisasi"
+              ? "Feedback untuk organisasi"
               : "Alasan penolakan"}
           </label>
           <textarea
@@ -226,7 +226,7 @@ export default function FunderPengajuanInbox() {
             onChange={(e) => setNote(e.target.value)}
             placeholder={
               actionModal?.kind === "revisi"
-                ? "Jelaskan bagian yang perlu diperbaiki."
+                ? "Tulis masukan/feedback yang perlu diperbaiki organisasi."
                 : "Jelaskan alasan penolakan."
             }
           />
