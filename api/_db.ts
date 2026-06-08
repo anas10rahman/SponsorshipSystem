@@ -3,7 +3,20 @@
    memakai sql.transaction([...]). */
 import { neon } from "@neondatabase/serverless";
 
-export const sql = neon(process.env.DATABASE_URL || "");
+// Lazy: konstruksi ditunda sampai query pertama, supaya env yang belum
+// siap muncul sebagai error JSON (bukan crash saat module load).
+let _sql: ReturnType<typeof neon> | null = null;
+function realSql() {
+  if (!_sql) {
+    const url = process.env.DATABASE_URL;
+    if (!url) throw new Error("DATABASE_URL belum diset di server.");
+    _sql = neon(url);
+  }
+  return _sql;
+}
+export const sql: any = (strings: TemplateStringsArray, ...vals: any[]) =>
+  realSql()(strings, ...vals);
+sql.transaction = (...args: any[]) => (realSql() as any).transaction(...args);
 
 /* ---------- Row → object mappers (snake_case → camelCase) ---------- */
 

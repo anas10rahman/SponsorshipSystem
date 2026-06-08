@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { sql, assembleState, readBody, SUBMISSION_FEE } from "./_db";
+import { sql, assembleState, readBody, SUBMISSION_FEE } from "./_db.js";
 
 class HttpError extends Error {
   constructor(public status: number, message: string) {

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { sql } from "./_db";
+import { sql } from "./_db.js";
 
 // Lazy-load isi PDF (base64) saat preview dibuka — tidak ikut di /api/state.
 export default async function handler(req: VercelRequest, res: VercelResponse) {

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { assembleState } from "./_db";
+import { assembleState } from "./_db.js";
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   try {
