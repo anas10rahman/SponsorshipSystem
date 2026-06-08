@@ -15,18 +15,18 @@ export default function Login() {
 
   if (currentUser) return <Navigate to={rolePath[currentUser.role]} replace />;
 
-  const onSubmit = (e: React.FormEvent) => {
+  const [busy, setBusy] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = login(username.trim(), password);
+    setBusy(true);
+    const result = await login(username.trim(), password);
+    setBusy(false);
     if (!result.ok) {
       setError(result.error ?? "Login gagal.");
       return;
     }
     setError("");
-    // Setelah login, useStore akan re-render dan Navigate di atas akan eksekusi.
-    // Fallback explicit redirect:
-    const u = (window as unknown as { _LAST?: string }) ?? {};
-    void u;
     navigate("/");
   };
 
@@ -71,8 +71,13 @@ export default function Login() {
 
         {error && <div className="sh-notice sh-notice--failed">{error}</div>}
 
-        <button className="sh-btn sh-btn--primary" type="submit" style={{ width: "100%" }}>
-          Masuk
+        <button
+          className="sh-btn sh-btn--primary"
+          type="submit"
+          style={{ width: "100%" }}
+          disabled={busy}
+        >
+          {busy ? "Memproses…" : "Masuk"}
         </button>
 
         <div className="sh-login__demo">

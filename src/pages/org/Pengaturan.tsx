@@ -74,7 +74,7 @@ export default function OrgPengaturan() {
     reader.readAsDataURL(file);
   };
 
-  const save = () => {
+  const save = async () => {
     const required: Array<[boolean, string]> = [
       [form.name.trim() !== "", "Nama organisasi"],
       [form.category.trim() !== "", "Kategori organisasi"],
@@ -93,13 +93,17 @@ export default function OrgPengaturan() {
       return;
     }
     // Sinkronkan no.hp kontak ber-gate + inisial logo dari nama PIC & nama org.
-    updateOrgProfile({
-      ...form,
-      phone: form.pic.phone,
-      logoInitials: initials(form.name),
-    });
-    toast.success("Profil organisasi tersimpan.");
-    navigate("/org/profil");
+    try {
+      await updateOrgProfile({
+        ...form,
+        phone: form.pic.phone,
+        logoInitials: initials(form.name),
+      });
+      toast.success("Profil organisasi tersimpan.");
+      navigate("/org/profil");
+    } catch (e: any) {
+      toast.failed(String(e?.message || "Gagal menyimpan profil."));
+    }
   };
 
   return (

@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { StoreProvider, rolePath, useStore } from "./lib/store";
 import { RoleGuard } from "./components/RoleGuard";
 import { Shell } from "./components/Shell";
 import { ToastProvider } from "./components/Toast";
+import { BrandMark } from "./components/BrandMark";
 
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -29,10 +31,51 @@ function RootRedirect() {
   return <Navigate to={currentUser ? rolePath[currentUser.role] : "/login"} replace />;
 }
 
+function HydrationGate({ children }: { children: ReactNode }) {
+  const { status, errorMsg } = useStore();
+  if (status === "loading") {
+    return (
+      <main className="sh-login">
+        <div style={{ textAlign: "center", display: "grid", gap: 16, placeItems: "center" }}>
+          <BrandMark size={40} />
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              border: "3px solid var(--line)",
+              borderTopColor: "var(--brand-500)",
+              borderRadius: "999px",
+              animation: "sh-spin 0.7s linear infinite",
+            }}
+          />
+          <p className="sh-muted">Memuat data…</p>
+        </div>
+        <style>{`@keyframes sh-spin{to{transform:rotate(360deg)}}`}</style>
+      </main>
+    );
+  }
+  if (status === "error") {
+    return (
+      <main className="sh-login">
+        <div className="sh-login__card" style={{ textAlign: "center", gap: 12 }}>
+          <BrandMark size={40} style={{ justifyContent: "center" }} />
+          <h2>Gagal memuat data</h2>
+          <p className="sh-muted">{errorMsg || "Tidak dapat terhubung ke server."}</p>
+          <button className="sh-btn sh-btn--primary" onClick={() => location.reload()}>
+            Coba lagi
+          </button>
+        </div>
+      </main>
+    );
+  }
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <StoreProvider>
       <ToastProvider>
+      <HydrationGate>
       <Routes>
         <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<Login />} />
@@ -91,6 +134,7 @@ export default function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </HydrationGate>
       </ToastProvider>
     </StoreProvider>
   );

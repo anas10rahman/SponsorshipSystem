@@ -1,8 +1,9 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Modal } from "./Modal";
 import { StatusBadge } from "./StatusBadge";
 import { PdfPreview } from "./PdfPreview";
 import { useStore } from "@/lib/store";
+import { api } from "@/lib/api";
 import { formatDateTime, formatEventDate, formatRupiah } from "@/lib/format";
 import { pengajuanBadge } from "@/lib/pengajuan";
 import type { Pengajuan } from "@/lib/types";
@@ -14,8 +15,44 @@ type Props = {
 };
 
 export function PengajuanDetail({ pengajuan, onClose, actions }: Props) {
-  const { state } = useStore();
   if (!pengajuan) return null;
+  return <PengajuanDetailInner pengajuan={pengajuan} onClose={onClose} actions={actions} />;
+}
+
+function PengajuanDetailInner({
+  pengajuan,
+  onClose,
+  actions,
+}: {
+  pengajuan: Pengajuan;
+  onClose: () => void;
+  actions?: ReactNode;
+}) {
+  const { state } = useStore();
+  const [docData, setDocData] = useState<string | null>(null);
+  const [docLoading, setDocLoading] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    setDocData(null);
+    if (pengajuan.proposalDocUrl) {
+      setDocLoading(true);
+      api
+        .pengajuanDoc(pengajuan.id)
+        .then((d) => {
+          if (alive) {
+            setDocData(d);
+            setDocLoading(false);
+          }
+        })
+        .catch(() => {
+          if (alive) setDocLoading(false);
+        });
+    }
+    return () => {
+      alive = false;
+    };
+  }, [pengajuan.id, pengajuan.proposalDocUrl]);
 
   const org = state.organizations.find((o) => o.id === pengajuan.orgId);
   const funder = state.funders.find((f) => f.id === pengajuan.funderId);
@@ -96,14 +133,13 @@ export function PengajuanDetail({ pengajuan, onClose, actions }: Props) {
       {/* Dokumen proposal + preview */}
       <div>
         <h4 style={{ marginBottom: 12 }}>Dokumen proposal</h4>
-        {pengajuan.proposalDocData ? (
-          <PdfPreview
-            dataUrl={pengajuan.proposalDocData}
-            fileName={pengajuan.proposalDocUrl}
-          />
+        {docData ? (
+          <PdfPreview dataUrl={docData} fileName={pengajuan.proposalDocUrl} />
         ) : pengajuan.proposalDocUrl ? (
           <div className="sh-notice sh-notice--info">
-            {pengajuan.proposalDocUrl} — preview tidak tersedia untuk dokumen ini.
+            {docLoading
+              ? "Memuat dokumen…"
+              : `${pengajuan.proposalDocUrl} — dokumen tidak dapat dimuat.`}
           </div>
         ) : (
           <p className="sh-muted">Belum ada dokumen.</p>

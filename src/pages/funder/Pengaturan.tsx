@@ -58,7 +58,7 @@ export default function FunderPengaturan() {
     reader.readAsDataURL(file);
   };
 
-  const save = () => {
+  const save = async () => {
     const focus = focusText
       .split(",")
       .map((s) => s.trim())
@@ -78,13 +78,17 @@ export default function FunderPengaturan() {
       toast.failed(`${missing[1]} wajib diisi.`);
       return;
     }
-    updateFunderProfile({
-      ...form,
-      focus,
-      phone: form.pic.phone, // sinkron kontak ber-gate dari PIC
-    });
-    toast.success("Profil pendana tersimpan.");
-    navigate("/funder/profil");
+    try {
+      await updateFunderProfile({
+        ...form,
+        focus,
+        phone: form.pic.phone, // sinkron kontak ber-gate dari PIC
+      });
+      toast.success("Profil pendana tersimpan.");
+      navigate("/funder/profil");
+    } catch (e: any) {
+      toast.failed(String(e?.message || "Gagal menyimpan profil."));
+    }
   };
 
   return (

@@ -168,13 +168,17 @@ export default function BuatPengajuan() {
     return true;
   };
 
-  const persistDraft = () => {
-    savePengajuan(normalize({ ...form, status: form.status === "draf" ? "draf" : form.status }));
-    toast.success("Pengajuan disimpan sebagai draf.");
-    navigate("/org/pengajuan");
+  const persistDraft = async () => {
+    try {
+      await savePengajuan(normalize({ ...form, status: form.status === "draf" ? "draf" : form.status }));
+      toast.success("Pengajuan disimpan sebagai draf.");
+      navigate("/org/pengajuan");
+    } catch (e: any) {
+      toast.failed(String(e?.message || "Gagal menyimpan."));
+    }
   };
 
-  const finalSubmit = () => {
+  const finalSubmit = async () => {
     if (!stepValid(0) || !stepValid(1)) {
       toast.failed("Masih ada kolom wajib yang kosong.");
       return;
@@ -191,9 +195,13 @@ export default function BuatPengajuan() {
       navigate("/org/topup");
       return;
     }
-    submitPengajuan(normalize(form));
-    toast.success(`Pengajuan "${form.eventName}" dikirim ke ${funder.name}.`);
-    navigate("/org/pengajuan");
+    try {
+      await submitPengajuan(normalize(form));
+      toast.success(`Pengajuan "${form.eventName}" dikirim ke ${funder.name}.`);
+      navigate("/org/pengajuan");
+    } catch (e: any) {
+      toast.failed(String(e?.message || "Gagal mengirim pengajuan."));
+    }
   };
 
   const next = () => {

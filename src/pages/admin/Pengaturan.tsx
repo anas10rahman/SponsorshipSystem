@@ -1,21 +1,10 @@
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
-import { useActions, useStore } from "@/lib/store";
-import { useToast } from "@/components/Toast";
-import { RotateCw, Users, ShieldCheck } from "lucide-react";
+import { useStore } from "@/lib/store";
+import { Users, ShieldCheck } from "lucide-react";
 
 export default function AdminPengaturan() {
   const { state } = useStore();
-  const { resetDemo } = useActions();
-  const toast = useToast();
-
-  const onReset = () => {
-    if (!window.confirm("Reset semua data demo ke kondisi awal? Tindakan ini tidak dapat dibatalkan.")) {
-      return;
-    }
-    resetDemo();
-    toast.success("Data demo berhasil di-reset.");
-  };
 
   return (
     <>
@@ -85,26 +74,6 @@ export default function AdminPengaturan() {
             </div>
           </section>
 
-          <section className="sh-card">
-            <div className="sh-card__body">
-              <div className="sh-row" style={{ gap: 14, marginBottom: 12 }}>
-                <span className="sh-stat__icon" style={{ background: "var(--status-failed-soft)", color: "var(--status-failed)" }}>
-                  <RotateCw size={20} />
-                </span>
-                <div>
-                  <h3 style={{ marginBottom: 4 }}>Reset data demo</h3>
-                  <p className="sh-muted">
-                    Mengembalikan seluruh data (proposal, transaksi, audit log, notifikasi) ke kondisi
-                    awal seed. Sesi login akan ikut keluar.
-                  </p>
-                </div>
-              </div>
-              <button className="sh-btn sh-btn--danger" onClick={onReset}>
-                <RotateCw size={16} />
-                Reset data demo
-              </button>
-            </div>
-          </section>
         </div>
       </div>
     </>

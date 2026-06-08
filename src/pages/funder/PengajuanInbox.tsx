@@ -51,10 +51,14 @@ export default function FunderPengajuanInbox() {
 
   const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
 
-  const doApprove = (p: Pengajuan) => {
-    approvePengajuan(p.id);
-    toast.success(`Pengajuan "${p.eventName}" disetujui.`);
-    setSelectedId(null);
+  const doApprove = async (p: Pengajuan) => {
+    try {
+      await approvePengajuan(p.id);
+      toast.success(`Pengajuan "${p.eventName}" disetujui.`);
+      setSelectedId(null);
+    } catch (e: any) {
+      toast.failed(String(e?.message || "Gagal menyetujui."));
+    }
   };
 
   const openAction = (kind: "revisi" | "tolak", id: string) => {
@@ -62,22 +66,26 @@ export default function FunderPengajuanInbox() {
     setActionModal({ kind, id });
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (!actionModal) return;
     if (!note.trim()) {
       toast.failed("Tulis catatan dulu untuk organisasi.");
       return;
     }
     const p = state.pengajuan.find((x) => x.id === actionModal.id);
-    if (actionModal.kind === "revisi") {
-      requestRevisionPengajuan(actionModal.id, note.trim());
-      toast.info(`Feedback dikirim untuk "${p?.eventName ?? ""}".`);
-    } else {
-      rejectPengajuan(actionModal.id, note.trim());
-      toast.failed(`Pengajuan "${p?.eventName ?? ""}" ditolak.`);
+    try {
+      if (actionModal.kind === "revisi") {
+        await requestRevisionPengajuan(actionModal.id, note.trim());
+        toast.info(`Feedback dikirim untuk "${p?.eventName ?? ""}".`);
+      } else {
+        await rejectPengajuan(actionModal.id, note.trim());
+        toast.failed(`Pengajuan "${p?.eventName ?? ""}" ditolak.`);
+      }
+      setActionModal(null);
+      setSelectedId(null);
+    } catch (e: any) {
+      toast.failed(String(e?.message || "Gagal memproses."));
     }
-    setActionModal(null);
-    setSelectedId(null);
   };
 
   const reviewActions = (p: Pengajuan) =>

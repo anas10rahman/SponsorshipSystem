@@ -19,13 +19,17 @@ export default function OrgTopUp() {
 
   const balance = org?.balance ?? 0;
 
-  const submit = () => {
+  const submit = async () => {
     if (amount <= 0) {
       toast.failed("Masukkan nominal top-up yang valid.");
       return;
     }
-    topUpOrg(amount);
-    toast.success(`Saldo bertambah ${formatRupiah(amount)}.`);
+    try {
+      await topUpOrg(amount);
+      toast.success(`Saldo bertambah ${formatRupiah(amount)}.`);
+    } catch (e: any) {
+      toast.failed(String(e?.message || "Gagal top-up."));
+    }
   };
 
   return (

@@ -216,6 +216,7 @@ create table pengajuan (
   benefits          text[] not null default '{}',
   -- Dokumen
   proposal_doc_url  text,
+  proposal_doc_data text,                            -- isi PDF (data URL/base64) untuk preview
   extra_note        text,
   -- Lifecycle
   status            pengajuan_status not null default 'draf',
