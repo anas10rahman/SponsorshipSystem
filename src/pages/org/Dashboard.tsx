@@ -6,8 +6,8 @@ import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
-import { formatDate, formatRupiah } from "@/lib/format";
-import { pengajuanBadge } from "@/lib/pengajuan";
+import { formatRupiah, formatDate } from "@/lib/format";
+import { pengajuanBadge, pengajuanAmountLabel, packageCountLabel, selectedAmount } from "@/lib/pengajuan";
 import { Wallet, Send, CheckCircle2, ArrowRight } from "lucide-react";
 
 export default function OrgDashboard() {
@@ -20,9 +20,7 @@ export default function OrgDashboard() {
     [state.pengajuan, orgId],
   );
   const approved = mine.filter((p) => p.status === "disetujui");
-  const totalApproved = approved
-    .filter((p) => p.type === "in_cash")
-    .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+  const totalApproved = approved.reduce((s, p) => s + selectedAmount(p), 0);
   const recent = mine.slice(0, 6);
   const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
 
@@ -77,7 +75,7 @@ export default function OrgDashboard() {
                   <tr>
                     <th>Event</th>
                     <th>Pendana</th>
-                    <th>Jenis</th>
+                    <th>Paket</th>
                     <th>Nilai</th>
                     <th>Status</th>
                     <th>Diperbarui</th>
@@ -92,12 +90,8 @@ export default function OrgDashboard() {
                       <tr key={p.id}>
                         <td style={{ fontWeight: 600 }}>{p.eventName || "(tanpa judul)"}</td>
                         <td>{funder?.name ?? "—"}</td>
-                        <td>{p.type === "in_cash" ? "In-Cash" : "In-Kind"}</td>
-                        <td className="num">
-                          {p.type === "in_cash"
-                            ? formatRupiah(p.requestedAmount ?? 0)
-                            : `${(p.inKindItems ?? []).length} barang`}
-                        </td>
+                        <td>{packageCountLabel(p)}</td>
+                        <td className="num">{pengajuanAmountLabel(p)}</td>
                         <td>
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                         </td>

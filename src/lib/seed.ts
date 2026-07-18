@@ -40,6 +40,26 @@ export function createSeedState(): AppState {
         funderId: "fund-1",
         createdAt: NOW,
       },
+      {
+        id: "u-funder-2",
+        name: "Sari Wijaya",
+        email: "pendana2@sponsorhub.test",
+        username: "pendana2",
+        password: "Akundemo12345",
+        role: "funder",
+        funderId: "fund-2",
+        createdAt: NOW,
+      },
+      {
+        id: "u-funder-3",
+        name: "Andi Pratama",
+        email: "pendana3@sponsorhub.test",
+        username: "pendana3",
+        password: "Akundemo12345",
+        role: "funder",
+        funderId: "fund-3",
+        createdAt: NOW,
+      },
     ],
 
     // Profil organisasi milik akun login "organisasi".

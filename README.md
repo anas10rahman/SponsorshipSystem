@@ -67,8 +67,9 @@ Hanya **organisasi** yang dapat menginisiasi pendanaan. Pendana tidak menawarkan
 dana sendiri — mereka hanya meninjau pengajuan yang masuk.
 
 **Pengajuan terarah:** Organisasi pilih pendana spesifik di "Cari pendana" → isi form multi-step
-(informasi event → jenis sponsorship In-Cash/In-Kind → dokumen PDF wajib → review) → bayar biaya
-pengajuan Rp 50.000 → kirim ke inbox pendana → Pendana **setujui / tolak / minta revisi**.
+(informasi event → paket sponsorship [nama, nominal, detail permintaan, benefit] → dokumen PDF
+wajib → review) → bayar biaya pengajuan Rp 50.000 → kirim ke inbox pendana → Pendana memilih
+salah satu paket lalu **setujui / tolak / minta revisi**.
 Persetujuan pendana bersifat **final**; Admin hanya memantau (`/admin/pengajuan`, laporan,
 direktori). Bisa disimpan sebagai draf dan dilanjutkan.
 
@@ -90,7 +91,7 @@ Lihat PRD §13. Per milestone selesai → verifikasi acceptance criteria (§11) 
 5. Pendana ✅
 6. Data layer (refactor schema, backend opsional) ✅
 7. Polish (notifikasi, ekspor, empty/loading states) ✅
-8. Pengajuan terarah (Org → Pendana, In-Cash/In-Kind, alur revisi) ✅
+8. Pengajuan terarah (Org → Pendana, paket sponsorship, alur revisi) ✅
 
 ## Deploy Vercel
 

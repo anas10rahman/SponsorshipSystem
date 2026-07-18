@@ -9,7 +9,14 @@ import { ContactLine } from "@/components/ContactLine";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
 import { formatRupiah, formatDate } from "@/lib/format";
-import { hasPengajuanBetween, maskPhone, pengajuanBadge } from "@/lib/pengajuan";
+import {
+  hasPengajuanBetween,
+  maskPhone,
+  pengajuanBadge,
+  pengajuanAmountLabel,
+  packageCountLabel,
+  selectedAmount,
+} from "@/lib/pengajuan";
 import {
   ArrowLeft,
   Wallet,
@@ -48,9 +55,7 @@ export default function OrganisasiProfil() {
     if (!org) return null;
     const all = state.pengajuan.filter((p) => p.orgId === org.id && p.status !== "draf");
     const approved = all.filter((p) => p.status === "disetujui");
-    const totalApproved = approved
-      .filter((p) => p.type === "in_cash")
-      .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+    const totalApproved = approved.reduce((s, p) => s + selectedAmount(p), 0);
     // Daftar rinci: admin/self lihat semua; pendana hanya riwayat dengan dirinya.
     const visible = isFunderViewer
       ? all.filter((p) => p.funderId === currentUser?.funderId)
@@ -349,7 +354,7 @@ export default function OrganisasiProfil() {
                   <tr>
                     <th>Event</th>
                     {!isFunderViewer && <th>Pendana</th>}
-                    <th>Jenis</th>
+                    <th>Paket</th>
                     <th>Nilai</th>
                     <th>Status</th>
                     <th>Tanggal</th>
@@ -364,12 +369,8 @@ export default function OrganisasiProfil() {
                       <tr key={p.id}>
                         <td style={{ fontWeight: 600 }}>{p.eventName}</td>
                         {!isFunderViewer && <td>{funder?.name ?? "—"}</td>}
-                        <td>{p.type === "in_cash" ? "In-Cash" : "In-Kind"}</td>
-                        <td className="num">
-                          {p.type === "in_cash"
-                            ? formatRupiah(p.requestedAmount ?? 0)
-                            : `${(p.inKindItems ?? []).length} barang`}
-                        </td>
+                        <td>{packageCountLabel(p)}</td>
+                        <td className="num">{pengajuanAmountLabel(p)}</td>
                         <td>
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                         </td>

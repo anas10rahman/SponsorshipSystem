@@ -4,7 +4,6 @@ import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
 import { useStore } from "@/lib/store";
-import { formatRupiah, percent } from "@/lib/format";
 import { Send } from "lucide-react";
 
 export default function OrgCariPendana() {
@@ -36,7 +35,6 @@ export default function OrgCariPendana() {
         ) : (
           <div className="sh-proposal-grid">
             {rows.map((f) => {
-              const pct = percent(f.budgetTotal - f.budgetRemaining, f.budgetTotal);
               return (
                 <article key={f.id} className="sh-proposal">
                   <div className="sh-proposal__header">
@@ -61,16 +59,7 @@ export default function OrgCariPendana() {
                       {f.focus.join(", ")}
                     </div>
                   </div>
-                  <div>
-                    <div className="sh-progress">
-                      <div className="sh-progress__bar" style={{ width: `${pct}%` }} />
-                    </div>
-                    <div className="sh-progress__meta">
-                      <span>Sisa anggaran</span>
-                      <span className="num">{formatRupiah(f.budgetRemaining)}</span>
-                    </div>
-                  </div>
-                  <div className="sh-row" style={{ gap: 8 }}>
+                  <div className="sh-row" style={{ gap: 8, marginTop: "auto" }}>
                     <button
                       className="sh-btn sh-btn--secondary sh-btn--sm"
                       style={{ flex: 1 }}

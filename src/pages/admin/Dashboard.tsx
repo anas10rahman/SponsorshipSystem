@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
 import { formatRupiah, formatDate } from "@/lib/format";
-import { pengajuanBadge } from "@/lib/pengajuan";
+import { pengajuanBadge, pengajuanAmountLabel, selectedAmount } from "@/lib/pengajuan";
 import { Wallet, Send, CheckCircle2, Building2 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -16,9 +16,7 @@ export default function AdminDashboard() {
   const stats = useMemo(() => {
     const sent = state.pengajuan.filter((p) => p.status !== "draf");
     const approved = sent.filter((p) => p.status === "disetujui");
-    const approvedCash = approved
-      .filter((p) => p.type === "in_cash")
-      .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+    const approvedCash = approved.reduce((s, p) => s + selectedAmount(p), 0);
     return {
       sent: sent.length,
       approved: approved.length,
@@ -82,11 +80,7 @@ export default function AdminDashboard() {
                       <td style={{ fontWeight: 600 }}>{p.eventName}</td>
                       <td>{org?.name ?? "—"}</td>
                       <td>{funder?.name ?? "—"}</td>
-                      <td className="num">
-                        {p.type === "in_cash"
-                          ? formatRupiah(p.requestedAmount ?? 0)
-                          : `${(p.inKindItems ?? []).length} barang`}
-                      </td>
+                      <td className="num">{pengajuanAmountLabel(p)}</td>
                       <td>
                         <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                       </td>

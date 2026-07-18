@@ -7,6 +7,7 @@ import { StatCard } from "@/components/StatCard";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
 import { formatDate, formatRupiah } from "@/lib/format";
+import { pengajuanAmountLabel, packageCountLabel, selectedAmount } from "@/lib/pengajuan";
 import { Banknote, Building2, Wallet, ArrowRight } from "lucide-react";
 
 export default function FunderPortofolio() {
@@ -21,9 +22,7 @@ export default function FunderPortofolio() {
     [state.pengajuan, funderId],
   );
 
-  const totalCash = approved
-    .filter((p) => p.type === "in_cash")
-    .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+  const totalCash = approved.reduce((s, p) => s + selectedAmount(p), 0);
   const orgsFunded = new Set(approved.map((p) => p.orgId)).size;
   const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
 
@@ -35,7 +34,7 @@ export default function FunderPortofolio() {
 
         <div className="sh-stat-grid">
           <StatCard
-            label="Total disponsori (in-cash)"
+            label="Total disponsori"
             value={formatRupiah(totalCash)}
             icon={<Banknote size={20} />}
           />
@@ -77,7 +76,7 @@ export default function FunderPortofolio() {
                   <tr>
                     <th>Event</th>
                     <th>Organisasi</th>
-                    <th>Jenis</th>
+                    <th>Paket</th>
                     <th>Nilai</th>
                     <th>Tanggal</th>
                     <th />
@@ -90,12 +89,8 @@ export default function FunderPortofolio() {
                       <tr key={p.id}>
                         <td style={{ fontWeight: 600 }}>{p.eventName}</td>
                         <td>{org?.name ?? "—"}</td>
-                        <td>{p.type === "in_cash" ? "In-Cash" : "In-Kind"}</td>
-                        <td className="num">
-                          {p.type === "in_cash"
-                            ? formatRupiah(p.requestedAmount ?? 0)
-                            : `${(p.inKindItems ?? []).length} barang`}
-                        </td>
+                        <td>{packageCountLabel(p)}</td>
+                        <td className="num">{pengajuanAmountLabel(p)}</td>
                         <td className="sh-muted">{formatDate(p.updatedAt)}</td>
                         <td>
                           <button

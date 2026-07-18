@@ -8,10 +8,10 @@ import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { Modal } from "@/components/Modal";
 import { useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
-import { formatDate, formatRupiah } from "@/lib/format";
-import { pengajuanBadge } from "@/lib/pengajuan";
-import type { Pengajuan, PengajuanStatus } from "@/lib/types";
-import { CheckCircle2, XCircle, MessageSquareWarning, Eye } from "lucide-react";
+import { formatDate } from "@/lib/format";
+import { pengajuanBadge, pengajuanAmountLabel, packageCountLabel } from "@/lib/pengajuan";
+import type { PengajuanStatus } from "@/lib/types";
+import { Eye } from "lucide-react";
 
 const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
   { value: "semua", label: "Semua" },
@@ -51,10 +51,11 @@ export default function FunderPengajuanInbox() {
 
   const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
 
-  const doApprove = async (p: Pengajuan) => {
+  const doApprove = async (id: string, packageIndex: number) => {
+    const p = state.pengajuan.find((x) => x.id === id);
     try {
-      await approvePengajuan(p.id);
-      toast.success(`Pengajuan "${p.eventName}" disetujui.`);
+      await approvePengajuan(id, packageIndex);
+      toast.success(`Pengajuan "${p?.eventName ?? ""}" disetujui.`);
       setSelectedId(null);
     } catch (e: any) {
       toast.failed(String(e?.message || "Gagal menyetujui."));
@@ -88,23 +89,7 @@ export default function FunderPengajuanInbox() {
     }
   };
 
-  const reviewActions = (p: Pengajuan) =>
-    p.status === "diajukan" || p.status === "perlu_revisi" ? (
-      <>
-        <button className="sh-btn sh-btn--secondary" onClick={() => openAction("tolak", p.id)}>
-          <XCircle size={16} />
-          Tolak
-        </button>
-        <button className="sh-btn sh-btn--warning" onClick={() => openAction("revisi", p.id)}>
-          <MessageSquareWarning size={16} />
-          Berikan feedback
-        </button>
-        <button className="sh-btn sh-btn--primary" onClick={() => doApprove(p)}>
-          <CheckCircle2 size={16} />
-          Setujui
-        </button>
-      </>
-    ) : null;
+  const canReview = selected?.status === "diajukan" || selected?.status === "perlu_revisi";
 
   return (
     <>
@@ -143,7 +128,7 @@ export default function FunderPengajuanInbox() {
                   <tr>
                     <th>Event</th>
                     <th>Organisasi</th>
-                    <th>Jenis</th>
+                    <th>Paket</th>
                     <th>Nominal</th>
                     <th>Status</th>
                     <th>Tanggal</th>
@@ -169,12 +154,8 @@ export default function FunderPengajuanInbox() {
                             "—"
                           )}
                         </td>
-                        <td>{p.type === "in_cash" ? "In-Cash" : "In-Kind"}</td>
-                        <td className="num">
-                          {p.type === "in_cash"
-                            ? formatRupiah(p.requestedAmount ?? 0)
-                            : `${(p.inKindItems ?? []).length} barang`}
-                        </td>
+                        <td>{packageCountLabel(p)}</td>
+                        <td className="num">{pengajuanAmountLabel(p)}</td>
                         <td>
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                         </td>
@@ -201,7 +182,15 @@ export default function FunderPengajuanInbox() {
       <PengajuanDetail
         pengajuan={selected}
         onClose={() => setSelectedId(null)}
-        actions={selected ? reviewActions(selected) : null}
+        review={
+          selected && canReview
+            ? {
+                onApprove: (idx) => doApprove(selected.id, idx),
+                onReject: () => openAction("tolak", selected.id),
+                onFeedback: () => openAction("revisi", selected.id),
+              }
+            : undefined
+        }
       />
 
       <Modal

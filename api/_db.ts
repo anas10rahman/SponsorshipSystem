@@ -90,24 +90,19 @@ export function mapFunder(r: any) {
 
 /* ---------- Rakit AppState (tanpa password, tanpa PDF base64) ---------- */
 export async function assembleState() {
-  const [users, orgs, funders, pengajuan, items, history, audit, notifs] = await Promise.all([
+  const [users, orgs, funders, pengajuan, history, audit, notifs] = await Promise.all([
     sql`select * from users order by created_at`,
     sql`select * from organizations order by name`,
     sql`select * from funders order by name`,
     sql`select id, org_id, funder_id, event_name, event_location, event_date, description,
-               event_budget, type, requested_amount, benefits, proposal_doc_url, extra_note,
+               event_budget, packages, selected_package, proposal_doc_url, extra_note,
                status, revision_note, created_at, updated_at
           from pengajuan order by updated_at desc`,
-    sql`select * from pengajuan_items`,
     sql`select * from pengajuan_history order by created_at`,
     sql`select * from audit_logs order by created_at desc`,
     sql`select * from notifications order by created_at desc`,
   ]);
 
-  const itemsByPgj: Record<string, any[]> = {};
-  for (const it of items as any[]) {
-    (itemsByPgj[it.pengajuan_id] ||= []).push({ name: it.name, qty: it.qty, unit: it.unit });
-  }
   const histByPgj: Record<string, any[]> = {};
   for (const h of history as any[]) {
     (histByPgj[h.pengajuan_id] ||= []).push({
@@ -133,10 +128,13 @@ export async function assembleState() {
       eventDate: p.event_date ?? "",
       description: p.description,
       eventBudget: Number(p.event_budget),
-      type: p.type,
-      requestedAmount: p.requested_amount == null ? undefined : Number(p.requested_amount),
-      inKindItems: itemsByPgj[p.id] ?? [],
-      benefits: p.benefits ?? [],
+      packages: (p.packages ?? []).map((pk: any) => ({
+        name: pk.name ?? "",
+        amount: Number(pk.amount) || 0,
+        requests: pk.requests ?? [],
+        benefits: pk.benefits ?? [],
+      })),
+      selectedPackage: p.selected_package == null ? undefined : Number(p.selected_package),
       proposalDocUrl: p.proposal_doc_url ?? undefined,
       // proposalDocData sengaja TIDAK disertakan (lazy via /api/pengajuan-doc)
       extraNote: p.extra_note ?? undefined,

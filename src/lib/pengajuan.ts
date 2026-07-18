@@ -1,7 +1,35 @@
 import type { Pengajuan, PengajuanStatus } from "./types";
+import { formatRupiah } from "./format";
 
 /** Biaya yang dipotong dari saldo organisasi saat mengirim pengajuan baru. */
 export const SUBMISSION_FEE = 50_000;
+
+/** Nominal final = harga paket yang dipilih pendana. 0 bila belum ada yang dipilih. */
+export function selectedAmount(p: Pengajuan): number {
+  if (p.selectedPackage == null) return 0;
+  return p.packages[p.selectedPackage]?.amount ?? 0;
+}
+
+/** Nominal yang dihitung untuk laporan/total (hanya berarti bila sudah disetujui). */
+export function approvedAmount(p: Pengajuan): number {
+  return p.status === "disetujui" ? selectedAmount(p) : 0;
+}
+
+/** Label nominal untuk kolom daftar: harga paket terpilih, atau rentang harga paket. */
+export function pengajuanAmountLabel(p: Pengajuan): string {
+  if (p.selectedPackage != null) return formatRupiah(selectedAmount(p));
+  const amounts = (p.packages ?? []).map((pk) => pk.amount).filter((n) => n > 0);
+  if (amounts.length === 0) return "—";
+  const min = Math.min(...amounts);
+  const max = Math.max(...amounts);
+  return min === max ? formatRupiah(min) : `${formatRupiah(min)} – ${formatRupiah(max)}`;
+}
+
+/** Label ringkas jumlah paket untuk kolom "Paket". */
+export function packageCountLabel(p: Pengajuan): string {
+  const n = (p.packages ?? []).length;
+  return n === 0 ? "—" : `${n} paket`;
+}
 
 /** Kontak (no.hp) lawan baru terbuka setelah ada pengajuan terkirim
  *  (status apa pun selain draf) di antara org & pendana tersebut. */

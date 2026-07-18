@@ -1,6 +1,7 @@
 import { Wallet } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatRupiahShort } from "@/lib/format";
+import { selectedAmount } from "@/lib/pengajuan";
 
 /** Hero sapaan bergaya indigo→violet dengan kartu nilai melayang.
  *  Konten menyesuaikan peran & data nyata dari store. */
@@ -10,8 +11,8 @@ export function Hero() {
 
   const approvedCashTo = (predicate: (orgId: string, funderId: string) => boolean) =>
     state.pengajuan
-      .filter((p) => p.status === "disetujui" && p.type === "in_cash" && predicate(p.orgId, p.funderId))
-      .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+      .filter((p) => p.status === "disetujui" && predicate(p.orgId, p.funderId))
+      .reduce((s, p) => s + selectedAmount(p), 0);
 
   let greeting = "";
   let subtitle = "";

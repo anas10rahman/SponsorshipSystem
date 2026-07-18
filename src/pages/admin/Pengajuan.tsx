@@ -5,8 +5,8 @@ import { Empty } from "@/components/Empty";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
-import { formatDate, formatRupiah } from "@/lib/format";
-import { pengajuanBadge } from "@/lib/pengajuan";
+import { formatDate } from "@/lib/format";
+import { pengajuanBadge, pengajuanAmountLabel, packageCountLabel } from "@/lib/pengajuan";
 import type { PengajuanStatus } from "@/lib/types";
 
 const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
@@ -76,7 +76,7 @@ export default function AdminPengajuan() {
                     <th>Event</th>
                     <th>Organisasi</th>
                     <th>Pendana</th>
-                    <th>Jenis</th>
+                    <th>Paket</th>
                     <th>Nominal</th>
                     <th>Status</th>
                     <th>Tanggal</th>
@@ -98,12 +98,8 @@ export default function AdminPengajuan() {
                         <td>{p.eventName}</td>
                         <td>{org?.name ?? "—"}</td>
                         <td>{funder?.name ?? "—"}</td>
-                        <td>{p.type === "in_cash" ? "In-Cash" : "In-Kind"}</td>
-                        <td className="num">
-                          {p.type === "in_cash"
-                            ? formatRupiah(p.requestedAmount ?? 0)
-                            : `${(p.inKindItems ?? []).length} barang`}
-                        </td>
+                        <td>{packageCountLabel(p)}</td>
+                        <td className="num">{pengajuanAmountLabel(p)}</td>
                         <td>
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                         </td>
