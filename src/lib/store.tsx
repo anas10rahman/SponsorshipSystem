@@ -153,8 +153,8 @@ export function useActions() {
       async submitPengajuan(pengajuan: Pengajuan) {
         apply(await api.pengajuan({ op: "submit", pengajuan, actorId: actorId() }));
       },
-      async approvePengajuan(id: string) {
-        apply(await api.pengajuan({ op: "approve", id, actorId: actorId() }));
+      async approvePengajuan(id: string, selectedPackage: number) {
+        apply(await api.pengajuan({ op: "approve", id, selectedPackage, actorId: actorId() }));
       },
       async rejectPengajuan(id: string, note: string) {
         apply(await api.pengajuan({ op: "reject", id, note, actorId: actorId() }));

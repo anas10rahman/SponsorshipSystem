@@ -5,6 +5,7 @@ import { StatCard } from "@/components/StatCard";
 import { Empty } from "@/components/Empty";
 import { useStore } from "@/lib/store";
 import { formatRupiah } from "@/lib/format";
+import { selectedAmount } from "@/lib/pengajuan";
 import { Banknote, Clock, CheckCircle2 } from "lucide-react";
 
 export default function AdminLaporan() {
@@ -15,19 +16,18 @@ export default function AdminLaporan() {
     (p) => p.status === "diajukan" || p.status === "perlu_revisi",
   );
 
-  const totalApproved = approved
-    .filter((p) => p.type === "in_cash")
-    .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
-  const totalPending = pending
-    .filter((p) => p.type === "in_cash")
-    .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+  // Estimasi maksimum untuk pengajuan yang belum diputuskan (paket termahal).
+  const pkgMax = (p: (typeof state.pengajuan)[number]) =>
+    Math.max(0, ...(p.packages ?? []).map((k) => k.amount));
 
-  // Top pendana by nilai in-cash disetujui
+  const totalApproved = approved.reduce((s, p) => s + selectedAmount(p), 0);
+  const totalPending = pending.reduce((s, p) => s + pkgMax(p), 0);
+
+  // Top pendana by nilai disetujui (paket terpilih)
   const topFunders = useMemo(() => {
     const totals = new Map<string, number>();
     for (const p of approved) {
-      if (p.type !== "in_cash") continue;
-      totals.set(p.funderId, (totals.get(p.funderId) ?? 0) + (p.requestedAmount ?? 0));
+      totals.set(p.funderId, (totals.get(p.funderId) ?? 0) + selectedAmount(p));
     }
     return state.funders
       .map((f) => ({ funder: f, total: totals.get(f.id) ?? 0 }))
@@ -35,12 +35,11 @@ export default function AdminLaporan() {
       .slice(0, 5);
   }, [approved, state.funders]);
 
-  // Top organisasi by nilai in-cash disetujui
+  // Top organisasi by nilai disetujui (paket terpilih)
   const topOrgs = useMemo(() => {
     const totals = new Map<string, number>();
     for (const p of approved) {
-      if (p.type !== "in_cash") continue;
-      totals.set(p.orgId, (totals.get(p.orgId) ?? 0) + (p.requestedAmount ?? 0));
+      totals.set(p.orgId, (totals.get(p.orgId) ?? 0) + selectedAmount(p));
     }
     return state.organizations
       .map((o) => ({ org: o, total: totals.get(o.id) ?? 0 }))
@@ -54,20 +53,23 @@ export default function AdminLaporan() {
       .map((p) => {
         const org = state.organizations.find((o) => o.id === p.orgId);
         const f = state.funders.find((x) => x.id === p.funderId);
+        const chosen =
+          p.selectedPackage != null ? p.packages[p.selectedPackage]?.name ?? "" : "";
         return [
           p.id,
           p.eventName,
           org?.name ?? "",
           f?.name ?? "",
-          p.type,
-          p.type === "in_cash" ? (p.requestedAmount ?? 0) : "",
+          p.packages?.length ?? 0,
+          chosen,
+          selectedAmount(p) || "",
           p.status,
           p.createdAt,
         ]
           .map((v) => `"${String(v).replaceAll('"', '""')}"`)
           .join(",");
       });
-    const header = "id,event,organisasi,pendana,jenis,nilai_in_cash,status,dibuat";
+    const header = "id,event,organisasi,pendana,jumlah_paket,paket_terpilih,nilai,status,dibuat";
     const blob = new Blob([header + "\n" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -93,12 +95,12 @@ export default function AdminLaporan() {
 
         <div className="sh-stat-grid">
           <StatCard
-            label="Total disetujui (in-cash)"
+            label="Total disetujui"
             value={formatRupiah(totalApproved)}
             icon={<CheckCircle2 size={20} />}
           />
           <StatCard
-            label="Menunggu keputusan (in-cash)"
+            label="Menunggu keputusan (est. maks)"
             value={formatRupiah(totalPending)}
             icon={<Clock size={20} />}
           />

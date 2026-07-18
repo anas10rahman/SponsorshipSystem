@@ -85,8 +85,11 @@ export default function Login() {
             <strong>Akun demo</strong> — kata sandi: <code>Akundemo12345</code>
           </div>
           <div>
-            Admin: <code>Admin</code> · Organisasi: <code>organisasi</code> · Pendana:{" "}
-            <code>pendana</code>
+            Admin: <code>Admin</code> · Organisasi: <code>organisasi</code>
+          </div>
+          <div style={{ marginTop: 4 }}>
+            Pendana: <code>pendana</code> · <code>pendana2</code> · <code>pendana3</code>{" "}
+            (tiap akun hanya mengakses 1 pendana)
           </div>
         </div>
       </form>

@@ -6,6 +6,7 @@ import { Empty } from "@/components/Empty";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useStore } from "@/lib/store";
 import { formatRupiah } from "@/lib/format";
+import { selectedAmount } from "@/lib/pengajuan";
 
 type Filter = "semua" | "verified" | "pending";
 
@@ -69,8 +70,8 @@ export default function AdminOrganisasi() {
                     const myPengajuan = state.pengajuan.filter((p) => p.orgId === org.id);
                     const sent = myPengajuan.filter((p) => p.status !== "draf").length;
                     const approved = myPengajuan
-                      .filter((p) => p.status === "disetujui" && p.type === "in_cash")
-                      .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+                      .filter((p) => p.status === "disetujui")
+                      .reduce((s, p) => s + selectedAmount(p), 0);
                     return (
                       <tr key={org.id}>
                         <td>

@@ -18,8 +18,6 @@ create type proposal_status as enum ('draf', 'aktif', 'tercapai', 'arsip');
 -- Jalur tolak                  : menunggu → ditolak
 create type transaction_status as enum ('menunggu', 'diproses', 'disalurkan', 'ditolak');
 
-create type sponsorship_type as enum ('in_cash', 'in_kind');
-
 -- Pengajuan terarah (org → pendana spesifik).
 -- Lifecycle: draf → diajukan → (perlu_revisi → diajukan)* → disetujui | ditolak.
 -- Persetujuan pendana bersifat FINAL (admin hanya memantau).
@@ -197,8 +195,8 @@ create table transactions (
 
 -- ============================================================
 -- PENGAJUAN (terarah: Organisasi → Pendana spesifik)
--- Berisi informasi event + jenis sponsorship (in_cash / in_kind).
--- Barang in-kind disimpan di tabel anak pengajuan_items.
+-- Berisi informasi event + daftar paket sponsorship.
+-- Pendana memilih SATU paket (selected_package) saat menyetujui.
 -- ============================================================
 create table pengajuan (
   id                text primary key,            -- PGJ-YYYY-MMDD-XXXX
@@ -210,10 +208,9 @@ create table pengajuan (
   event_date        text,
   description       text not null,
   event_budget      numeric(16, 2) not null default 0 check (event_budget >= 0),
-  -- Detail sponsorship
-  type              sponsorship_type not null default 'in_cash',
-  requested_amount  numeric(16, 2) check (requested_amount is null or requested_amount >= 0),
-  benefits          text[] not null default '{}',
+  -- Detail sponsorship: array paket [{ name, amount, requests[], benefits[] }]
+  packages          jsonb not null default '[]'::jsonb,
+  selected_package  integer,                          -- index paket yang dipilih pendana
   -- Dokumen
   proposal_doc_url  text,
   proposal_doc_data text,                            -- isi PDF (data URL/base64) untuk preview
@@ -223,22 +220,9 @@ create table pengajuan (
   revision_note     text,
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now(),
-  -- in_cash wajib punya requested_amount > 0 saat sudah diajukan
-  constraint pengajuan_incash_amount
-    check (
-      status = 'draf'
-      or type <> 'in_cash'
-      or (requested_amount is not null and requested_amount > 0)
-    )
-);
-
--- Barang in-kind (anak dari pengajuan)
-create table pengajuan_items (
-  id            uuid primary key default gen_random_uuid(),
-  pengajuan_id  text not null references pengajuan(id) on delete cascade,
-  name          text not null,
-  qty           integer not null check (qty > 0),
-  unit          text not null
+  -- Minimal satu paket saat sudah diajukan
+  constraint pengajuan_has_package
+    check (status = 'draf' or jsonb_array_length(packages) > 0)
 );
 
 -- Riwayat status pengajuan (timeline)
@@ -291,7 +275,6 @@ create index transactions_created_idx      on transactions(created_at desc);
 create index pengajuan_funder_idx          on pengajuan(funder_id);
 create index pengajuan_org_idx             on pengajuan(org_id);
 create index pengajuan_status_idx          on pengajuan(status);
-create index pengajuan_items_parent_idx    on pengajuan_items(pengajuan_id);
 create index pengajuan_history_parent_idx  on pengajuan_history(pengajuan_id, created_at desc);
 create index audit_logs_entity_idx         on audit_logs(entity, entity_id);
 create index audit_logs_actor_idx          on audit_logs(actor_id);

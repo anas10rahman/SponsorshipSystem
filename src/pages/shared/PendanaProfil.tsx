@@ -7,7 +7,13 @@ import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useStore } from "@/lib/store";
 import { formatRupiah, initials, percent } from "@/lib/format";
-import { hasPengajuanBetween, maskPhone } from "@/lib/pengajuan";
+import {
+  hasPengajuanBetween,
+  maskPhone,
+  pengajuanAmountLabel,
+  packageCountLabel,
+  selectedAmount,
+} from "@/lib/pengajuan";
 import { ContactLine } from "@/components/ContactLine";
 import {
   ArrowLeft,
@@ -41,9 +47,7 @@ export default function PendanaProfil() {
     const approved = state.pengajuan.filter(
       (p) => p.funderId === funder.id && p.status === "disetujui",
     );
-    const totalDisbursed = approved
-      .filter((p) => p.type === "in_cash")
-      .reduce((s, p) => s + (p.requestedAmount ?? 0), 0);
+    const totalDisbursed = approved.reduce((s, p) => s + selectedAmount(p), 0);
     const orgs = new Set(approved.map((p) => p.orgId));
     return { approved, totalDisbursed, orgsFunded: orgs.size };
   }, [funder, state.pengajuan]);
@@ -257,23 +261,27 @@ export default function PendanaProfil() {
           </div>
         </section>
 
-        {/* Stats */}
+        {/* Stats — informasi dana pendana disembunyikan dari sisi organisasi */}
         <div className="sh-stat-grid">
-          <StatCard
-            label="Sisa anggaran"
-            value={formatRupiah(funder.budgetRemaining)}
-            icon={<Wallet size={20} />}
-          />
+          {!isOrgViewer && (
+            <StatCard
+              label="Sisa anggaran"
+              value={formatRupiah(funder.budgetRemaining)}
+              icon={<Wallet size={20} />}
+            />
+          )}
           <StatCard
             label="Pengajuan disetujui"
             value={stats?.approved.length ?? 0}
             icon={<CheckCircle2 size={20} />}
           />
-          <StatCard
-            label="Total disalurkan"
-            value={formatRupiah(stats?.totalDisbursed ?? 0)}
-            icon={<HandCoins size={20} />}
-          />
+          {!isOrgViewer && (
+            <StatCard
+              label="Total disalurkan"
+              value={formatRupiah(stats?.totalDisbursed ?? 0)}
+              icon={<HandCoins size={20} />}
+            />
+          )}
           <StatCard
             label="Organisasi didanai"
             value={stats?.orgsFunded ?? 0}
@@ -294,8 +302,8 @@ export default function PendanaProfil() {
                     <tr>
                       <th>Event</th>
                       <th>Organisasi</th>
-                      <th>Jenis</th>
-                      <th>Nilai</th>
+                      <th>Paket</th>
+                      {!isOrgViewer && <th>Nilai</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -305,12 +313,10 @@ export default function PendanaProfil() {
                         <tr key={p.id}>
                           <td style={{ fontWeight: 600 }}>{p.eventName}</td>
                           <td>{org?.name ?? "—"}</td>
-                          <td>{p.type === "in_cash" ? "In-Cash" : "In-Kind"}</td>
-                          <td className="num">
-                            {p.type === "in_cash"
-                              ? formatRupiah(p.requestedAmount ?? 0)
-                              : `${(p.inKindItems ?? []).length} barang`}
-                          </td>
+                          <td>{packageCountLabel(p)}</td>
+                          {!isOrgViewer && (
+                            <td className="num">{pengajuanAmountLabel(p)}</td>
+                          )}
                         </tr>
                       );
                     })}
@@ -324,31 +330,33 @@ export default function PendanaProfil() {
             )}
           </section>
 
-          {/* Kapasitas anggaran */}
-          <aside className="sh-card">
-            <header className="sh-card__header">
-              <h3>Kapasitas anggaran</h3>
-            </header>
-            <div className="sh-card__body sh-stack">
-              <div>
-                <div className="sh-meta-label">Anggaran total</div>
-                <div className="sh-meta-value num">{formatRupiah(funder.budgetTotal)}</div>
-              </div>
-              <div>
-                <div className="sh-progress">
-                  <div className="sh-progress__bar" style={{ width: `${usedPct}%` }} />
+          {/* Kapasitas anggaran — hanya untuk admin & pendana sendiri, bukan sisi organisasi */}
+          {!isOrgViewer && (
+            <aside className="sh-card">
+              <header className="sh-card__header">
+                <h3>Kapasitas anggaran</h3>
+              </header>
+              <div className="sh-card__body sh-stack">
+                <div>
+                  <div className="sh-meta-label">Anggaran total</div>
+                  <div className="sh-meta-value num">{formatRupiah(funder.budgetTotal)}</div>
                 </div>
-                <div className="sh-progress__meta">
-                  <span>{formatRupiah(used)} terpakai</span>
-                  <span>{usedPct}%</span>
+                <div>
+                  <div className="sh-progress">
+                    <div className="sh-progress__bar" style={{ width: `${usedPct}%` }} />
+                  </div>
+                  <div className="sh-progress__meta">
+                    <span>{formatRupiah(used)} terpakai</span>
+                    <span>{usedPct}%</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="sh-meta-label">Sisa anggaran</div>
+                  <div className="sh-meta-value num">{formatRupiah(funder.budgetRemaining)}</div>
                 </div>
               </div>
-              <div>
-                <div className="sh-meta-label">Sisa anggaran</div>
-                <div className="sh-meta-value num">{formatRupiah(funder.budgetRemaining)}</div>
-              </div>
-            </div>
-          </aside>
+            </aside>
+          )}
         </div>
       </div>
     </>

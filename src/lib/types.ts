@@ -117,12 +117,13 @@ export type Transaction = {
    Berbeda dari Proposal (katalog publik). PRD flow D + ekspansi.
    ============================================================ */
 
-export type SponsorshipType = "in_cash" | "in_kind";
-
-export type InKindItem = {
-  name: string;
-  qty: number;
-  unit: string;
+/** Satu paket sponsorship yang ditawarkan organisasi ke pendana.
+ *  Pendana memilih SATU paket saat menyetujui pengajuan. */
+export type SponsorshipPackage = {
+  name: string; // Nama paket (mis. "Gold")
+  amount: number; // Nominal pendanaan (Rp)
+  requests: string[]; // Detail permintaan ke pendana (per poin)
+  benefits: string[]; // Benefit untuk pendana (per poin)
 };
 
 /* Lifecycle pengajuan terarah:
@@ -152,11 +153,9 @@ export type Pengajuan = {
   eventDate?: string;
   description: string;
   eventBudget: number;
-  // Detail sponsorship
-  type: SponsorshipType;
-  requestedAmount?: number; // in_cash
-  inKindItems?: InKindItem[]; // in_kind
-  benefits: string[];
+  // Detail sponsorship — daftar paket yang ditawarkan
+  packages: SponsorshipPackage[];
+  selectedPackage?: number; // index paket yang dipilih pendana saat menyetujui
   // Dokumen
   proposalDocUrl?: string; // nama berkas
   proposalDocData?: string; // isi berkas PDF (data URL) untuk preview

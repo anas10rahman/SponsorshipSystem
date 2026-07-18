@@ -36,22 +36,24 @@ const [f1] = await sql`
      'Budi Santoso', '0815-1111-2222', 'Manajer CSR', 'budi@sinerginusantara.co.id')
   returning id`;
 
-await sql`
+const [f2] = await sql`
   insert into funders (name, type, focus, budget_total, budget_remaining, phone, email, description,
      website, instagram, pic_name, pic_phone, pic_position, pic_email)
   values ('Yayasan Cahaya', 'Filantropi', ARRAY['Pendidikan','Kesehatan'], 500000000, 500000000, '0816-3333-4444',
      'kontak@yayasancahaya.org',
      'Yayasan filantropi yang mendukung program pendidikan dan kesehatan masyarakat prasejahtera.',
-     'yayasancahaya.org', '@yayasancahaya', 'Sari Wijaya', '0816-3333-4444', 'Direktur Program', 'sari@yayasancahaya.org')`;
+     'yayasancahaya.org', '@yayasancahaya', 'Sari Wijaya', '0816-3333-4444', 'Direktur Program', 'sari@yayasancahaya.org')
+  returning id`;
 
-await sql`
+const [f3] = await sql`
   insert into funders (name, type, focus, budget_total, budget_remaining, phone, email, description,
      website, instagram, twitter, facebook, pic_name, pic_phone, pic_position, pic_email)
   values ('Bank Daya', 'Perbankan', ARRAY['Olahraga','Komunitas'], 2000000000, 2000000000, '0817-5555-6666',
      'sponsorship@bankdaya.co.id',
      'Bank nasional dengan program sponsorship untuk olahraga dan kegiatan komunitas di seluruh Indonesia.',
      'bankdaya.co.id', '@bankdaya', '@bankdaya', 'BankDaya',
-     'Andi Pratama', '0817-5555-6666', 'Head of Sponsorship', 'andi@bankdaya.co.id')`;
+     'Andi Pratama', '0817-5555-6666', 'Head of Sponsorship', 'andi@bankdaya.co.id')
+  returning id`;
 
 // ---- Users (password di-hash via pgcrypto bcrypt) ----
 await sql`
@@ -63,5 +65,11 @@ await sql`
 await sql`
   insert into users (name, email, username, password_hash, role, funder_id)
   values ('Budi Santoso', 'pendana@sponsorhub.test', 'pendana', crypt(${PW}, gen_salt('bf')), 'funder', ${f1.id})`;
+await sql`
+  insert into users (name, email, username, password_hash, role, funder_id)
+  values ('Sari Wijaya', 'pendana2@sponsorhub.test', 'pendana2', crypt(${PW}, gen_salt('bf')), 'funder', ${f2.id})`;
+await sql`
+  insert into users (name, email, username, password_hash, role, funder_id)
+  values ('Andi Pratama', 'pendana3@sponsorhub.test', 'pendana3', crypt(${PW}, gen_salt('bf')), 'funder', ${f3.id})`;
 
-console.log("✓ Seed selesai: 1 organisasi, 3 pendana, 3 akun login.");
+console.log("✓ Seed selesai: 1 organisasi, 3 pendana (+akun login masing-masing), 5 akun login.");

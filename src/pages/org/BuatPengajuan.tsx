@@ -7,7 +7,7 @@ import { useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
 import { formatEventDate, formatRupiah, makePengajuanId, nowIso } from "@/lib/format";
 import { SUBMISSION_FEE } from "@/lib/pengajuan";
-import type { InKindItem, Pengajuan, SponsorshipType } from "@/lib/types";
+import type { Pengajuan, SponsorshipPackage } from "@/lib/types";
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,9 +19,17 @@ import {
   UploadCloud,
   FileText,
   X,
+  Package as PackageIcon,
 } from "lucide-react";
 
-const STEPS = ["Informasi umum", "Detail sponsorship", "Dokumen", "Review"] as const;
+const STEPS = ["Informasi umum", "Paket sponsorship", "Dokumen", "Review"] as const;
+
+const emptyPackage = (): SponsorshipPackage => ({
+  name: "",
+  amount: 0,
+  requests: [""],
+  benefits: [""],
+});
 
 export default function BuatPengajuan() {
   const { id } = useParams();
@@ -41,7 +49,11 @@ export default function BuatPengajuan() {
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<Pengajuan>(() => {
-    if (editing) return editing;
+    if (editing)
+      return {
+        ...editing,
+        packages: editing.packages.length ? editing.packages : [emptyPackage()],
+      };
     return {
       id: makePengajuanId(state.pengajuan.length + 1),
       orgId,
@@ -51,10 +63,7 @@ export default function BuatPengajuan() {
       eventDate: "",
       description: "",
       eventBudget: 0,
-      type: "in_cash",
-      requestedAmount: 0,
-      inKindItems: [{ name: "", qty: 1, unit: "Unit" }],
-      benefits: [],
+      packages: [emptyPackage()],
       proposalDocUrl: "",
       extraNote: "",
       status: "draf",
@@ -100,14 +109,23 @@ export default function BuatPengajuan() {
 
   const set = (patch: Partial<Pengajuan>) => setForm((f) => ({ ...f, ...patch }));
 
-  // ---- Item helpers (in-kind) ----
-  const items = form.inKindItems ?? [];
-  const setItem = (i: number, patch: Partial<InKindItem>) =>
-    set({ inKindItems: items.map((it, idx) => (idx === i ? { ...it, ...patch } : it)) });
-  const addItem = () =>
-    set({ inKindItems: [...items, { name: "", qty: 1, unit: "Unit" }] });
-  const removeItem = (i: number) =>
-    set({ inKindItems: items.filter((_, idx) => idx !== i) });
+  // ---- Package helpers ----
+  const packages = form.packages;
+  const setPackage = (i: number, patch: Partial<SponsorshipPackage>) =>
+    set({ packages: packages.map((pk, idx) => (idx === i ? { ...pk, ...patch } : pk)) });
+  const addPackage = () => set({ packages: [...packages, emptyPackage()] });
+  const removePackage = (i: number) =>
+    set({ packages: packages.filter((_, idx) => idx !== i) });
+
+  type PointField = "requests" | "benefits";
+  const setPoint = (pi: number, field: PointField, li: number, value: string) =>
+    setPackage(pi, {
+      [field]: packages[pi][field].map((v, idx) => (idx === li ? value : v)),
+    });
+  const addPoint = (pi: number, field: PointField) =>
+    setPackage(pi, { [field]: [...packages[pi][field], ""] });
+  const removePoint = (pi: number, field: PointField, li: number) =>
+    setPackage(pi, { [field]: packages[pi][field].filter((_, idx) => idx !== li) });
 
   // ---- File upload (PDF only) ----
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,15 +157,23 @@ export default function BuatPengajuan() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // In-cash: nominal yang diajukan = total anggaran event.
+  // Bersihkan paket: buang paket tanpa nama & poin kosong.
   const normalize = (f: Pengajuan): Pengajuan => ({
     ...f,
-    requestedAmount: f.type === "in_cash" ? f.eventBudget : undefined,
-    benefits: [],
+    packages: f.packages
+      .filter((pk) => pk.name.trim() !== "")
+      .map((pk) => ({
+        ...pk,
+        name: pk.name.trim(),
+        amount: Number(pk.amount) || 0,
+        requests: pk.requests.map((s) => s.trim()).filter(Boolean),
+        benefits: pk.benefits.map((s) => s.trim()).filter(Boolean),
+      })),
     updatedAt: nowIso(),
   });
 
   // ---- Validation per step ----
+  const validPackages = packages.filter((pk) => pk.name.trim() !== "" && pk.amount > 0);
   const stepValid = (s: number): boolean => {
     if (s === 0) {
       return (
@@ -158,8 +184,8 @@ export default function BuatPengajuan() {
       );
     }
     if (s === 1) {
-      if (form.type === "in_cash") return form.eventBudget > 0;
-      return items.some((it) => it.name.trim() !== "" && it.qty > 0);
+      // Minimal 1 paket dengan nama + nominal.
+      return validPackages.length > 0;
     }
     if (s === 2) {
       // Berkas proposal (PDF) wajib diunggah.
@@ -179,8 +205,14 @@ export default function BuatPengajuan() {
   };
 
   const finalSubmit = async () => {
-    if (!stepValid(0) || !stepValid(1)) {
+    if (!stepValid(0)) {
       toast.failed("Masih ada kolom wajib yang kosong.");
+      setStep(0);
+      return;
+    }
+    if (!stepValid(1)) {
+      toast.failed("Isi minimal satu paket dengan nama & nominal.");
+      setStep(1);
       return;
     }
     if (!stepValid(2)) {
@@ -209,7 +241,9 @@ export default function BuatPengajuan() {
       toast.failed(
         step === 2
           ? "Unggah berkas proposal (PDF) dulu — wajib diisi."
-          : "Lengkapi kolom wajib di langkah ini dulu.",
+          : step === 1
+            ? "Isi minimal satu paket dengan nama & nominal."
+            : "Lengkapi kolom wajib di langkah ini dulu.",
       );
       return;
     }
@@ -333,106 +367,93 @@ export default function BuatPengajuan() {
             </div>
           )}
 
-          {/* STEP 1 — Detail sponsorship */}
+          {/* STEP 1 — Paket sponsorship */}
           {step === 1 && (
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
-              <h3 className="sh-form-section__title">2. Detail sponsorship</h3>
+              <h3 className="sh-form-section__title">2. Paket sponsorship</h3>
+              <p className="sh-muted" style={{ marginTop: -6, marginBottom: 18 }}>
+                Susun paket yang bisa dipilih pendana. Tiap paket: nama, nominal, detail
+                permintaan, dan benefit untuk pendana.
+              </p>
 
-              <div className="sh-field" style={{ marginBottom: 20 }}>
-                <label className="sh-field__label">Jenis sponsorship</label>
-                <div className="sh-row" style={{ gap: 8 }}>
-                  {(["in_cash", "in_kind"] as SponsorshipType[]).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      className={`sh-chip${form.type === t ? " is-active" : ""}`}
-                      onClick={() => set({ type: t })}
-                    >
-                      {t === "in_cash" ? "In-Cash (uang)" : "In-Kind (barang)"}
-                    </button>
-                  ))}
-                </div>
+              <div style={{ display: "grid", gap: 16 }}>
+                {packages.map((pk, pi) => (
+                  <div
+                    key={pi}
+                    style={{
+                      border: "1px solid var(--line)",
+                      borderRadius: "var(--radius-lg)",
+                      padding: 18,
+                      background: "var(--canvas-soft)",
+                    }}
+                  >
+                    <div className="sh-row sh-row--between" style={{ marginBottom: 14 }}>
+                      <div className="sh-row" style={{ gap: 8 }}>
+                        <PackageIcon size={16} style={{ color: "var(--brand-500)" }} />
+                        <strong>Paket {pi + 1}</strong>
+                      </div>
+                      <button
+                        className="sh-btn sh-btn--ghost sh-btn--icon"
+                        onClick={() => removePackage(pi)}
+                        title="Hapus paket"
+                        disabled={packages.length <= 1}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    <div className="sh-form-grid" style={{ marginBottom: 8 }}>
+                      <div className="sh-field">
+                        <label className="sh-field__label">Nama paket</label>
+                        <input
+                          value={pk.name}
+                          onChange={(e) => setPackage(pi, { name: e.target.value })}
+                          placeholder="Misal: Gold"
+                        />
+                      </div>
+                      <div className="sh-field">
+                        <label className="sh-field__label">Nominal (Rp)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={pk.amount || ""}
+                          onChange={(e) => setPackage(pi, { amount: Number(e.target.value) })}
+                          placeholder="Misal: 5000000"
+                        />
+                      </div>
+                    </div>
+
+                    <PointEditor
+                      label="Detail permintaan"
+                      hint="Apa yang diminta organisasi dari pendana pada paket ini."
+                      placeholder="Misal: Dana tunai Rp 5.000.000"
+                      values={pk.requests}
+                      onChange={(li, v) => setPoint(pi, "requests", li, v)}
+                      onAdd={() => addPoint(pi, "requests")}
+                      onRemove={(li) => removePoint(pi, "requests", li)}
+                    />
+
+                    <PointEditor
+                      label="Benefit untuk pendana"
+                      hint="Imbalan/keuntungan yang didapat pendana pada paket ini."
+                      placeholder="Misal: Logo di poster kegiatan"
+                      values={pk.benefits}
+                      onChange={(li, v) => setPoint(pi, "benefits", li, v)}
+                      onAdd={() => addPoint(pi, "benefits")}
+                      onRemove={(li) => removePoint(pi, "benefits", li)}
+                    />
+                  </div>
+                ))}
               </div>
 
-              {form.type === "in_cash" ? (
-                <div>
-                  <div className="sh-field" style={{ maxWidth: 360 }}>
-                    <label className="sh-field__label">Total anggaran event (Rp)</label>
-                    <input type="number" value={form.eventBudget || ""} disabled />
-                    <span className="sh-field__hint">
-                      Nominal yang diajukan ke pendana mengikuti total anggaran event.
-                      Ubah di langkah 1 bila perlu.
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="sh-meta-label" style={{ marginBottom: 8 }}>
-                    Daftar kebutuhan barang
-                  </div>
-                  <div className="sh-table-wrap">
-                    <table className="sh-table" style={{ minWidth: 480 }}>
-                      <thead>
-                        <tr>
-                          <th>Nama barang</th>
-                          <th style={{ width: 110 }}>Jumlah</th>
-                          <th style={{ width: 130 }}>Satuan</th>
-                          <th style={{ width: 56 }} />
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {items.map((it, i) => (
-                          <tr key={i}>
-                            <td>
-                              <input
-                                className="sh-input"
-                                value={it.name}
-                                onChange={(e) => setItem(i, { name: e.target.value })}
-                                placeholder="Misal: Laptop untuk peserta"
-                              />
-                            </td>
-                            <td>
-                              <input
-                                className="sh-input"
-                                type="number"
-                                min={1}
-                                value={it.qty}
-                                onChange={(e) => setItem(i, { qty: Number(e.target.value) })}
-                              />
-                            </td>
-                            <td>
-                              <input
-                                className="sh-input"
-                                value={it.unit}
-                                onChange={(e) => setItem(i, { unit: e.target.value })}
-                                placeholder="Unit / Pcs"
-                              />
-                            </td>
-                            <td>
-                              <button
-                                className="sh-btn sh-btn--ghost sh-btn--icon"
-                                onClick={() => removeItem(i)}
-                                title="Hapus baris"
-                                disabled={items.length <= 1}
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <button
-                    className="sh-btn sh-btn--secondary sh-btn--sm"
-                    onClick={addItem}
-                    style={{ marginTop: 12 }}
-                  >
-                    <Plus size={14} />
-                    Tambah barang
-                  </button>
-                </div>
-              )}
+              <button
+                className="sh-btn sh-btn--secondary sh-btn--sm"
+                onClick={addPackage}
+                style={{ marginTop: 14 }}
+              >
+                <Plus size={14} />
+                Tambah paket
+              </button>
             </div>
           )}
 
@@ -517,28 +538,17 @@ export default function BuatPengajuan() {
                 <ReviewRow label="Lokasi" value={form.eventLocation || "—"} />
                 <ReviewRow label="Tanggal" value={formatEventDate(form.eventDate)} />
                 <ReviewRow label="Deskripsi" value={form.description || "—"} />
-                <ReviewRow
-                  label={form.type === "in_cash" ? "Total anggaran / nominal diajukan" : "Total anggaran"}
-                  value={formatRupiah(form.eventBudget)}
-                />
-                <ReviewRow
-                  label="Jenis"
-                  value={form.type === "in_cash" ? "In-Cash (uang)" : "In-Kind (barang)"}
-                />
-                {form.type === "in_kind" && (
-                  <div>
-                    <div className="sh-meta-label">Barang yang diminta</div>
-                    <ul style={{ margin: "6px 0 0 18px" }}>
-                      {items
-                        .filter((it) => it.name.trim())
-                        .map((it, i) => (
-                          <li key={i}>
-                            {it.name} — {it.qty} {it.unit}
-                          </li>
-                        ))}
-                    </ul>
+                <ReviewRow label="Total anggaran event" value={formatRupiah(form.eventBudget)} />
+                <div>
+                  <div className="sh-meta-label" style={{ marginBottom: 8 }}>
+                    Paket sponsorship ({validPackages.length})
                   </div>
-                )}
+                  <div style={{ display: "grid", gap: 12 }}>
+                    {validPackages.map((pk, i) => (
+                      <PackageCard key={i} pkg={pk} />
+                    ))}
+                  </div>
+                </div>
                 <ReviewRow label="Dokumen" value={form.proposalDocUrl || "—"} />
               </div>
 
@@ -562,8 +572,8 @@ export default function BuatPengajuan() {
                 ))}
 
               <div className="sh-notice sh-notice--info" style={{ marginTop: 12 }}>
-                Setelah dikirim, pengajuan masuk ke pendana untuk ditinjau. Pendana dapat
-                menyetujui, menolak, atau meminta revisi.
+                Setelah dikirim, pengajuan masuk ke pendana untuk ditinjau. Pendana memilih
+                salah satu paket lalu menyetujui, atau menolak/meminta revisi.
               </div>
             </div>
           )}
@@ -601,6 +611,110 @@ export default function BuatPengajuan() {
         </section>
       </div>
     </>
+  );
+}
+
+function PointEditor({
+  label,
+  hint,
+  placeholder,
+  values,
+  onChange,
+  onAdd,
+  onRemove,
+}: {
+  label: string;
+  hint?: string;
+  placeholder: string;
+  values: string[];
+  onChange: (i: number, v: string) => void;
+  onAdd: () => void;
+  onRemove: (i: number) => void;
+}) {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div className="sh-field__label" style={{ marginBottom: 2 }}>
+        {label}
+      </div>
+      {hint && (
+        <div className="sh-muted" style={{ fontSize: 12, marginBottom: 8 }}>
+          {hint}
+        </div>
+      )}
+      <div style={{ display: "grid", gap: 8 }}>
+        {values.map((v, i) => (
+          <div key={i} className="sh-row" style={{ gap: 8 }}>
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 999,
+                background: "var(--line-strong)",
+                flex: "none",
+              }}
+            />
+            <input
+              className="sh-input"
+              style={{ flex: 1 }}
+              value={v}
+              onChange={(e) => onChange(i, e.target.value)}
+              placeholder={placeholder}
+            />
+            <button
+              className="sh-btn sh-btn--ghost sh-btn--icon"
+              onClick={() => onRemove(i)}
+              title="Hapus poin"
+              disabled={values.length <= 1}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button className="sh-btn sh-btn--ghost sh-btn--sm" onClick={onAdd} style={{ marginTop: 8 }}>
+        <Plus size={14} />
+        Tambah poin
+      </button>
+    </div>
+  );
+}
+
+function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
+  return (
+    <div
+      style={{
+        border: "1px solid var(--line)",
+        borderRadius: "var(--radius-lg)",
+        padding: 16,
+      }}
+    >
+      <div className="sh-row sh-row--between" style={{ marginBottom: 10 }}>
+        <strong>{pkg.name}</strong>
+        <strong className="num" style={{ color: "var(--brand-600)" }}>
+          {formatRupiah(pkg.amount)}
+        </strong>
+      </div>
+      {pkg.requests.length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          <div className="sh-meta-label">Detail permintaan</div>
+          <ul style={{ margin: "4px 0 0 18px" }}>
+            {pkg.requests.map((r, i) => (
+              <li key={i}>{r}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {pkg.benefits.length > 0 && (
+        <div>
+          <div className="sh-meta-label">Benefit untuk pendana</div>
+          <ul style={{ margin: "4px 0 0 18px" }}>
+            {pkg.benefits.map((b, i) => (
+              <li key={i}>{b}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 
