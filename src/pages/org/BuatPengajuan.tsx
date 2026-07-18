@@ -6,8 +6,9 @@ import { Empty } from "@/components/Empty";
 import { useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
 import { formatEventDate, formatRupiah, makePengajuanId, nowIso } from "@/lib/format";
-import { SUBMISSION_FEE } from "@/lib/pengajuan";
-import type { Pengajuan, SponsorshipPackage } from "@/lib/types";
+import { SUBMISSION_FEE, packageAmount, requestLabel } from "@/lib/pengajuan";
+import { CurrencyInput } from "@/components/CurrencyInput";
+import type { Pengajuan, SponsorshipPackage, SponsorshipRequest } from "@/lib/types";
 import {
   ArrowLeft,
   ArrowRight,
@@ -24,12 +25,17 @@ import {
 
 const STEPS = ["Informasi umum", "Paket sponsorship", "Dokumen", "Review"] as const;
 
+const emptyRequest = (): SponsorshipRequest => ({ type: "in_cash", amount: 0, spec: "" });
+
 const emptyPackage = (): SponsorshipPackage => ({
   name: "",
-  amount: 0,
-  requests: [""],
+  requests: [emptyRequest()],
   benefits: [""],
 });
+
+/** Poin detail permintaan dianggap terisi bila in_cash>0 atau in_kind ada spesifikasi. */
+const requestFilled = (r: SponsorshipRequest): boolean =>
+  r.type === "in_cash" ? Number(r.amount) > 0 : r.spec.trim() !== "";
 
 export default function BuatPengajuan() {
   const { id } = useParams();
@@ -117,15 +123,23 @@ export default function BuatPengajuan() {
   const removePackage = (i: number) =>
     set({ packages: packages.filter((_, idx) => idx !== i) });
 
-  type PointField = "requests" | "benefits";
-  const setPoint = (pi: number, field: PointField, li: number, value: string) =>
+  // Detail permintaan (poin bertipe in_cash / in_kind)
+  const setRequest = (pi: number, li: number, patch: Partial<SponsorshipRequest>) =>
     setPackage(pi, {
-      [field]: packages[pi][field].map((v, idx) => (idx === li ? value : v)),
+      requests: packages[pi].requests.map((r, idx) => (idx === li ? { ...r, ...patch } : r)),
     });
-  const addPoint = (pi: number, field: PointField) =>
-    setPackage(pi, { [field]: [...packages[pi][field], ""] });
-  const removePoint = (pi: number, field: PointField, li: number) =>
-    setPackage(pi, { [field]: packages[pi][field].filter((_, idx) => idx !== li) });
+  const addRequest = (pi: number) =>
+    setPackage(pi, { requests: [...packages[pi].requests, emptyRequest()] });
+  const removeRequest = (pi: number, li: number) =>
+    setPackage(pi, { requests: packages[pi].requests.filter((_, idx) => idx !== li) });
+
+  // Benefit untuk pendana (poin teks bebas)
+  const setBenefit = (pi: number, li: number, value: string) =>
+    setPackage(pi, { benefits: packages[pi].benefits.map((v, idx) => (idx === li ? value : v)) });
+  const addBenefit = (pi: number) =>
+    setPackage(pi, { benefits: [...packages[pi].benefits, ""] });
+  const removeBenefit = (pi: number, li: number) =>
+    setPackage(pi, { benefits: packages[pi].benefits.filter((_, idx) => idx !== li) });
 
   // ---- File upload (PDF only) ----
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,23 +171,30 @@ export default function BuatPengajuan() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Bersihkan paket: buang paket tanpa nama & poin kosong.
+  // Bersihkan paket: buang paket tanpa nama & poin kosong; rapikan tiap poin per tipe.
   const normalize = (f: Pengajuan): Pengajuan => ({
     ...f,
     packages: f.packages
       .filter((pk) => pk.name.trim() !== "")
       .map((pk) => ({
-        ...pk,
         name: pk.name.trim(),
-        amount: Number(pk.amount) || 0,
-        requests: pk.requests.map((s) => s.trim()).filter(Boolean),
+        requests: pk.requests
+          .filter(requestFilled)
+          .map((r) =>
+            r.type === "in_cash"
+              ? { type: "in_cash" as const, amount: Number(r.amount) || 0, spec: "" }
+              : { type: "in_kind" as const, amount: 0, spec: r.spec.trim() },
+          ),
         benefits: pk.benefits.map((s) => s.trim()).filter(Boolean),
       })),
     updatedAt: nowIso(),
   });
 
   // ---- Validation per step ----
-  const validPackages = packages.filter((pk) => pk.name.trim() !== "" && pk.amount > 0);
+  // Paket valid: punya nama & minimal satu poin detail permintaan terisi.
+  const validPackages = packages.filter(
+    (pk) => pk.name.trim() !== "" && pk.requests.some(requestFilled),
+  );
   const stepValid = (s: number): boolean => {
     if (s === 0) {
       return (
@@ -211,7 +232,7 @@ export default function BuatPengajuan() {
       return;
     }
     if (!stepValid(1)) {
-      toast.failed("Isi minimal satu paket dengan nama & nominal.");
+      toast.failed("Isi minimal satu paket dengan nama & satu detail permintaan.");
       setStep(1);
       return;
     }
@@ -242,7 +263,7 @@ export default function BuatPengajuan() {
         step === 2
           ? "Unggah berkas proposal (PDF) dulu — wajib diisi."
           : step === 1
-            ? "Isi minimal satu paket dengan nama & nominal."
+            ? "Isi minimal satu paket dengan nama & satu detail permintaan."
             : "Lengkapi kolom wajib di langkah ini dulu.",
       );
       return;
@@ -355,12 +376,10 @@ export default function BuatPengajuan() {
                 </div>
                 <div className="sh-field">
                   <label className="sh-field__label">Total anggaran event (Rp)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={form.eventBudget || ""}
-                    onChange={(e) => set({ eventBudget: Number(e.target.value) })}
-                    placeholder="Misal: 300000000"
+                  <CurrencyInput
+                    value={form.eventBudget}
+                    onChange={(n) => set({ eventBudget: n })}
+                    placeholder="Misal: 300.000.000"
                   />
                 </div>
               </div>
@@ -372,8 +391,8 @@ export default function BuatPengajuan() {
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <h3 className="sh-form-section__title">2. Paket sponsorship</h3>
               <p className="sh-muted" style={{ marginTop: -6, marginBottom: 18 }}>
-                Susun paket yang bisa dipilih pendana. Tiap paket: nama, nominal, detail
-                permintaan, dan benefit untuk pendana.
+                Susun paket yang bisa dipilih pendana. Tiap paket: nama, detail permintaan
+                (in-cash / in-kind), dan benefit untuk pendana.
               </p>
 
               <div style={{ display: "grid", gap: 16 }}>
@@ -402,35 +421,25 @@ export default function BuatPengajuan() {
                       </button>
                     </div>
 
-                    <div className="sh-form-grid" style={{ marginBottom: 8 }}>
-                      <div className="sh-field">
-                        <label className="sh-field__label">Nama paket</label>
-                        <input
-                          value={pk.name}
-                          onChange={(e) => setPackage(pi, { name: e.target.value })}
-                          placeholder="Misal: Gold"
-                        />
-                      </div>
-                      <div className="sh-field">
-                        <label className="sh-field__label">Nominal (Rp)</label>
-                        <input
-                          type="number"
-                          min={0}
-                          value={pk.amount || ""}
-                          onChange={(e) => setPackage(pi, { amount: Number(e.target.value) })}
-                          placeholder="Misal: 5000000"
-                        />
-                      </div>
+                    <div className="sh-field" style={{ marginBottom: 8, maxWidth: 320 }}>
+                      <label className="sh-field__label">Nama paket</label>
+                      <input
+                        value={pk.name}
+                        onChange={(e) => setPackage(pi, { name: e.target.value })}
+                        placeholder="Misal: Gold"
+                      />
                     </div>
 
-                    <PointEditor
-                      label="Detail permintaan"
-                      hint="Apa yang diminta organisasi dari pendana pada paket ini."
-                      placeholder="Misal: Dana tunai Rp 5.000.000"
-                      values={pk.requests}
-                      onChange={(li, v) => setPoint(pi, "requests", li, v)}
-                      onAdd={() => addPoint(pi, "requests")}
-                      onRemove={(li) => removePoint(pi, "requests", li)}
+                    <RequestEditor
+                      requests={pk.requests}
+                      total={packageAmount(pk)}
+                      onChangeType={(li, t) =>
+                        setRequest(pi, li, { type: t, amount: 0, spec: "" })
+                      }
+                      onChangeAmount={(li, n) => setRequest(pi, li, { amount: n })}
+                      onChangeSpec={(li, v) => setRequest(pi, li, { spec: v })}
+                      onAdd={() => addRequest(pi)}
+                      onRemove={(li) => removeRequest(pi, li)}
                     />
 
                     <PointEditor
@@ -438,9 +447,9 @@ export default function BuatPengajuan() {
                       hint="Imbalan/keuntungan yang didapat pendana pada paket ini."
                       placeholder="Misal: Logo di poster kegiatan"
                       values={pk.benefits}
-                      onChange={(li, v) => setPoint(pi, "benefits", li, v)}
-                      onAdd={() => addPoint(pi, "benefits")}
-                      onRemove={(li) => removePoint(pi, "benefits", li)}
+                      onChange={(li, v) => setBenefit(pi, li, v)}
+                      onAdd={() => addBenefit(pi)}
+                      onRemove={(li) => removeBenefit(pi, li)}
                     />
                   </div>
                 ))}
@@ -679,6 +688,89 @@ function PointEditor({
   );
 }
 
+/** Editor "Detail permintaan": tiap poin punya dropdown tipe (In-Cash / In-Kind).
+ *  In-Cash → nominal rupiah berformat; In-Kind → spesifikasi barang. */
+function RequestEditor({
+  requests,
+  total,
+  onChangeType,
+  onChangeAmount,
+  onChangeSpec,
+  onAdd,
+  onRemove,
+}: {
+  requests: SponsorshipRequest[];
+  total: number;
+  onChangeType: (i: number, t: SponsorshipRequest["type"]) => void;
+  onChangeAmount: (i: number, n: number) => void;
+  onChangeSpec: (i: number, v: string) => void;
+  onAdd: () => void;
+  onRemove: (i: number) => void;
+}) {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div className="sh-row sh-row--between" style={{ marginBottom: 2 }}>
+        <div className="sh-field__label">Detail permintaan</div>
+        {total > 0 && (
+          <div className="sh-muted" style={{ fontSize: 12 }}>
+            Total dana:{" "}
+            <strong className="num" style={{ color: "var(--brand-600)" }}>
+              {formatRupiah(total)}
+            </strong>
+          </div>
+        )}
+      </div>
+      <div className="sh-muted" style={{ fontSize: 12, marginBottom: 8 }}>
+        Apa yang diminta organisasi dari pendana. Pilih jenis tiap poin: In-Cash (dana) atau
+        In-Kind (barang/jasa).
+      </div>
+      <div style={{ display: "grid", gap: 8 }}>
+        {requests.map((r, i) => (
+          <div key={i} className="sh-row" style={{ gap: 8, alignItems: "flex-start" }}>
+            <select
+              className="sh-input"
+              style={{ flex: "none", width: 116 }}
+              value={r.type}
+              onChange={(e) => onChangeType(i, e.target.value as SponsorshipRequest["type"])}
+            >
+              <option value="in_cash">In-Cash</option>
+              <option value="in_kind">In-Kind</option>
+            </select>
+            {r.type === "in_cash" ? (
+              <CurrencyInput
+                value={r.amount}
+                onChange={(n) => onChangeAmount(i, n)}
+                placeholder="Nominal, mis: 5.000.000"
+                style={{ flex: 1 }}
+              />
+            ) : (
+              <input
+                className="sh-input"
+                style={{ flex: 1 }}
+                value={r.spec}
+                onChange={(e) => onChangeSpec(i, e.target.value)}
+                placeholder="Spesifikasi barang, mis: 100 kaos katun ukuran M"
+              />
+            )}
+            <button
+              className="sh-btn sh-btn--ghost sh-btn--icon"
+              onClick={() => onRemove(i)}
+              title="Hapus poin"
+              disabled={requests.length <= 1}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button className="sh-btn sh-btn--ghost sh-btn--sm" onClick={onAdd} style={{ marginTop: 8 }}>
+        <Plus size={14} />
+        Tambah poin
+      </button>
+    </div>
+  );
+}
+
 function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
   return (
     <div
@@ -691,7 +783,7 @@ function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
       <div className="sh-row sh-row--between" style={{ marginBottom: 10 }}>
         <strong>{pkg.name}</strong>
         <strong className="num" style={{ color: "var(--brand-600)" }}>
-          {formatRupiah(pkg.amount)}
+          {formatRupiah(packageAmount(pkg))}
         </strong>
       </div>
       {pkg.requests.length > 0 && (
@@ -699,7 +791,7 @@ function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
           <div className="sh-meta-label">Detail permintaan</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.requests.map((r, i) => (
-              <li key={i}>{r}</li>
+              <li key={i}>{requestLabel(r)}</li>
             ))}
           </ul>
         </div>

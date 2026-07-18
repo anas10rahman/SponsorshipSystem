@@ -5,7 +5,7 @@ import { PdfPreview } from "./PdfPreview";
 import { useStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import { formatDateTime, formatEventDate, formatRupiah } from "@/lib/format";
-import { pengajuanBadge } from "@/lib/pengajuan";
+import { pengajuanBadge, packageAmount, requestLabel } from "@/lib/pengajuan";
 import type { Pengajuan, SponsorshipPackage } from "@/lib/types";
 import { CheckCircle2, XCircle, MessageSquareWarning, Wallet } from "lucide-react";
 
@@ -103,7 +103,7 @@ function PengajuanDetailInner({
         <CheckCircle2 size={16} />
         {selectedPkg == null
           ? "Setujui Pendanaan"
-          : `Setujui Pendanaan · ${formatRupiah(chosen?.amount ?? 0)}`}
+          : `Setujui Pendanaan · ${formatRupiah(chosen ? packageAmount(chosen) : 0)}`}
       </button>
     </>
   ) : (
@@ -198,7 +198,7 @@ function PengajuanDetailInner({
           <div style={{ textAlign: "right" }}>
             <div className="sh-meta-label">Total pendanaan</div>
             <strong className="num" style={{ color: "var(--brand-600)" }}>
-              {formatRupiah(chosen?.amount ?? 0)}
+              {formatRupiah(chosen ? packageAmount(chosen) : 0)}
             </strong>
           </div>
         </div>
@@ -298,7 +298,7 @@ function PackageCard({
           )}
         </div>
         <strong className="num" style={{ color: "var(--brand-600)" }}>
-          {formatRupiah(pkg.amount)}
+          {formatRupiah(packageAmount(pkg))}
         </strong>
       </div>
       {pkg.requests.length > 0 && (
@@ -306,7 +306,7 @@ function PackageCard({
           <div className="sh-meta-label">Detail permintaan</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.requests.map((r, i) => (
-              <li key={i}>{r}</li>
+              <li key={i}>{requestLabel(r)}</li>
             ))}
           </ul>
         </div>

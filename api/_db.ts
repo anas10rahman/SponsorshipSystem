@@ -130,8 +130,15 @@ export async function assembleState() {
       eventBudget: Number(p.event_budget),
       packages: (p.packages ?? []).map((pk: any) => ({
         name: pk.name ?? "",
-        amount: Number(pk.amount) || 0,
-        requests: pk.requests ?? [],
+        requests: (Array.isArray(pk.requests) ? pk.requests : []).map((r: any) =>
+          typeof r === "string"
+            ? { type: "in_kind", amount: 0, spec: r }
+            : {
+                type: r?.type === "in_cash" ? "in_cash" : "in_kind",
+                amount: Number(r?.amount) || 0,
+                spec: String(r?.spec ?? ""),
+              },
+        ),
         benefits: pk.benefits ?? [],
       })),
       selectedPackage: p.selected_package == null ? undefined : Number(p.selected_package),

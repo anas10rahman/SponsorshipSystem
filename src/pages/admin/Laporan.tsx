@@ -5,7 +5,7 @@ import { StatCard } from "@/components/StatCard";
 import { Empty } from "@/components/Empty";
 import { useStore } from "@/lib/store";
 import { formatRupiah } from "@/lib/format";
-import { selectedAmount } from "@/lib/pengajuan";
+import { selectedAmount, packageAmount } from "@/lib/pengajuan";
 import { Banknote, Clock, CheckCircle2 } from "lucide-react";
 
 export default function AdminLaporan() {
@@ -18,7 +18,7 @@ export default function AdminLaporan() {
 
   // Estimasi maksimum untuk pengajuan yang belum diputuskan (paket termahal).
   const pkgMax = (p: (typeof state.pengajuan)[number]) =>
-    Math.max(0, ...(p.packages ?? []).map((k) => k.amount));
+    Math.max(0, ...(p.packages ?? []).map((k) => packageAmount(k)));
 
   const totalApproved = approved.reduce((s, p) => s + selectedAmount(p), 0);
   const totalPending = pending.reduce((s, p) => s + pkgMax(p), 0);

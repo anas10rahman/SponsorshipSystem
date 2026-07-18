@@ -7,15 +7,43 @@ class HttpError extends Error {
   }
 }
 
+/* Normalisasi satu poin detail permintaan. Toleran data lama (string → in_kind).
+   Kembalikan null bila poin kosong (in_cash tanpa nominal / in_kind tanpa spec). */
+function normalizeRequest(r: any): any | null {
+  if (typeof r === "string") {
+    const s = r.trim();
+    return s ? { type: "in_kind", amount: 0, spec: s } : null;
+  }
+  if (r && r.type === "in_cash") {
+    const a = Number(r.amount) || 0;
+    return a > 0 ? { type: "in_cash", amount: a, spec: "" } : null;
+  }
+  if (r && r.type === "in_kind") {
+    const s = String(r.spec || "").trim();
+    return s ? { type: "in_kind", amount: 0, spec: s } : null;
+  }
+  return null;
+}
+
+/* Nominal paket = jumlah seluruh poin in_cash (toleran `amount` legacy). */
+function packageAmount(pk: any): number {
+  const reqs = Array.isArray(pk?.requests) ? pk.requests : [];
+  const sum = reqs.reduce(
+    (s: number, r: any) =>
+      s + (r && typeof r === "object" && r.type === "in_cash" ? Number(r.amount) || 0 : 0),
+    0,
+  );
+  return sum > 0 ? sum : Number(pk?.amount) || 0;
+}
+
 /* Normalisasi paket agar aman disimpan ke JSONB. */
 function cleanPackages(packages: any): any[] {
   return (Array.isArray(packages) ? packages : [])
     .filter((pk: any) => (pk?.name || "").trim())
     .map((pk: any) => ({
       name: String(pk.name),
-      amount: Number(pk.amount) || 0,
       requests: (Array.isArray(pk.requests) ? pk.requests : [])
-        .map((s: any) => String(s).trim())
+        .map(normalizeRequest)
         .filter(Boolean),
       benefits: (Array.isArray(pk.benefits) ? pk.benefits : [])
         .map((s: any) => String(s).trim())
@@ -110,7 +138,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!Number.isInteger(idx) || idx < 0 || idx >= packages.length)
         throw new HttpError(400, "Pilih paket sponsorship yang ingin didanai dulu.");
       const chosen = packages[idx];
-      const amount = Number(chosen?.amount) || 0;
+      const amount = packageAmount(chosen);
       const tx: any[] = [
         sql`update pengajuan set status = 'disetujui', selected_package = ${idx}, updated_at = now() where id = ${b.id}`,
         histQ(

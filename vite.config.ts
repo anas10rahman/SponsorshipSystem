@@ -11,5 +11,9 @@ export default defineConfig({
   },
   server: {
     port: Number(process.env.PORT) || 5173,
+    // Dev opsional: teruskan /api ke backend live (set API_PROXY=https://...).
+    proxy: process.env.API_PROXY
+      ? { "/api": { target: process.env.API_PROXY, changeOrigin: true, secure: true } }
+      : undefined,
   },
 });

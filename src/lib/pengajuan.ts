@@ -1,13 +1,33 @@
-import type { Pengajuan, PengajuanStatus } from "./types";
+import type { Pengajuan, PengajuanStatus, SponsorshipPackage, SponsorshipRequest } from "./types";
 import { formatRupiah } from "./format";
 
 /** Biaya yang dipotong dari saldo organisasi saat mengirim pengajuan baru. */
 export const SUBMISSION_FEE = 50_000;
 
-/** Nominal final = harga paket yang dipilih pendana. 0 bila belum ada yang dipilih. */
+/** Nominal satu paket = jumlah seluruh poin in_cash. Toleran data lama
+ *  (poin berupa string / properti `amount` legacy pada paket). */
+export function packageAmount(pkg: SponsorshipPackage | any): number {
+  const reqs = Array.isArray(pkg?.requests) ? pkg.requests : [];
+  const sum = reqs.reduce(
+    (s: number, r: any) =>
+      s + (r && typeof r === "object" && r.type === "in_cash" ? Number(r.amount) || 0 : 0),
+    0,
+  );
+  return sum > 0 ? sum : Number(pkg?.amount) || 0;
+}
+
+/** Label satu poin detail permintaan (toleran data lama berupa string). */
+export function requestLabel(r: SponsorshipRequest | string): string {
+  if (typeof r === "string") return r;
+  if (r?.type === "in_cash") return `Dana tunai — ${formatRupiah(Number(r.amount) || 0)}`;
+  return r?.spec || "";
+}
+
+/** Nominal final = nominal paket yang dipilih pendana. 0 bila belum ada yang dipilih. */
 export function selectedAmount(p: Pengajuan): number {
   if (p.selectedPackage == null) return 0;
-  return p.packages[p.selectedPackage]?.amount ?? 0;
+  const pkg = p.packages[p.selectedPackage];
+  return pkg ? packageAmount(pkg) : 0;
 }
 
 /** Nominal yang dihitung untuk laporan/total (hanya berarti bila sudah disetujui). */
@@ -18,7 +38,7 @@ export function approvedAmount(p: Pengajuan): number {
 /** Label nominal untuk kolom daftar: harga paket terpilih, atau rentang harga paket. */
 export function pengajuanAmountLabel(p: Pengajuan): string {
   if (p.selectedPackage != null) return formatRupiah(selectedAmount(p));
-  const amounts = (p.packages ?? []).map((pk) => pk.amount).filter((n) => n > 0);
+  const amounts = (p.packages ?? []).map((pk) => packageAmount(pk)).filter((n) => n > 0);
   if (amounts.length === 0) return "—";
   const min = Math.min(...amounts);
   const max = Math.max(...amounts);

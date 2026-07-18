@@ -10,6 +10,18 @@ export function formatRupiah(value: number | null | undefined): string {
   return rupiahFmt.format(Number(value || 0)).replace("Rp", "Rp ");
 }
 
+/** Angka → string ribuan id-ID ("5000000" → "5.000.000"). Kosong bila 0. */
+export function formatThousands(value: number | null | undefined): string {
+  const n = Number(value || 0);
+  return n ? n.toLocaleString("id-ID") : "";
+}
+
+/** Ambil angka dari input bebas ("Rp 5.000.000" → 5000000). */
+export function parseDigits(str: string): number {
+  const digits = String(str).replace(/\D/g, "");
+  return digits ? Number(digits) : 0;
+}
+
 export function formatRupiahShort(value: number): string {
   const v = Number(value || 0);
   if (v >= 1_000_000_000) return `Rp ${(v / 1_000_000_000).toFixed(1)} M`;
