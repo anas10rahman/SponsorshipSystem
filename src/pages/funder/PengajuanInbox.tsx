@@ -4,10 +4,7 @@ import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
 import { StatusBadge } from "@/components/StatusBadge";
-import { PengajuanDetail } from "@/components/PengajuanDetail";
-import { Modal } from "@/components/Modal";
-import { useActions, useStore } from "@/lib/store";
-import { useToast } from "@/components/Toast";
+import { useStore } from "@/lib/store";
 import { formatDate } from "@/lib/format";
 import { pengajuanBadge, pengajuanAmountLabel, packageCountLabel } from "@/lib/pengajuan";
 import type { PengajuanStatus } from "@/lib/types";
@@ -23,17 +20,9 @@ const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
 
 export default function FunderPengajuanInbox() {
   const { state, currentUser } = useStore();
-  const { approvePengajuan, rejectPengajuan, requestRevisionPengajuan } = useActions();
-  const toast = useToast();
   const funderId = currentUser?.funderId ?? "";
 
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("diajukan");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  // revision/reject modal
-  const [actionModal, setActionModal] = useState<{ kind: "revisi" | "tolak"; id: string } | null>(
-    null,
-  );
-  const [note, setNote] = useState("");
 
   const inbox = useMemo(
     () => state.pengajuan.filter((p) => p.funderId === funderId && p.status !== "draf"),
@@ -48,48 +37,6 @@ export default function FunderPengajuanInbox() {
     }
     return c;
   }, [inbox]);
-
-  const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
-
-  const doApprove = async (id: string, packageIndex: number) => {
-    const p = state.pengajuan.find((x) => x.id === id);
-    try {
-      await approvePengajuan(id, packageIndex);
-      toast.success(`Pengajuan "${p?.eventName ?? ""}" disetujui.`);
-      setSelectedId(null);
-    } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal menyetujui."));
-    }
-  };
-
-  const openAction = (kind: "revisi" | "tolak", id: string) => {
-    setNote("");
-    setActionModal({ kind, id });
-  };
-
-  const confirmAction = async () => {
-    if (!actionModal) return;
-    if (!note.trim()) {
-      toast.failed("Tulis catatan dulu untuk organisasi.");
-      return;
-    }
-    const p = state.pengajuan.find((x) => x.id === actionModal.id);
-    try {
-      if (actionModal.kind === "revisi") {
-        await requestRevisionPengajuan(actionModal.id, note.trim());
-        toast.info(`Feedback dikirim untuk "${p?.eventName ?? ""}".`);
-      } else {
-        await rejectPengajuan(actionModal.id, note.trim());
-        toast.failed(`Pengajuan "${p?.eventName ?? ""}" ditolak.`);
-      }
-      setActionModal(null);
-      setSelectedId(null);
-    } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal memproses."));
-    }
-  };
-
-  const canReview = selected?.status === "diajukan" || selected?.status === "perlu_revisi";
 
   return (
     <>
@@ -161,13 +108,13 @@ export default function FunderPengajuanInbox() {
                         </td>
                         <td className="sh-muted">{formatDate(p.updatedAt)}</td>
                         <td>
-                          <button
+                          <Link
+                            to={`/funder/pengajuan/${p.id}`}
                             className="sh-btn sh-btn--ghost sh-btn--sm"
-                            onClick={() => setSelectedId(p.id)}
                           >
                             <Eye size={14} />
                             Tinjau
-                          </button>
+                          </Link>
                         </td>
                       </tr>
                     );
@@ -178,57 +125,6 @@ export default function FunderPengajuanInbox() {
           </section>
         )}
       </div>
-
-      <PengajuanDetail
-        pengajuan={selected}
-        onClose={() => setSelectedId(null)}
-        review={
-          selected && canReview
-            ? {
-                onApprove: (idx) => doApprove(selected.id, idx),
-                onReject: () => openAction("tolak", selected.id),
-                onFeedback: () => openAction("revisi", selected.id),
-              }
-            : undefined
-        }
-      />
-
-      <Modal
-        open={!!actionModal}
-        onClose={() => setActionModal(null)}
-        title={actionModal?.kind === "revisi" ? "Berikan feedback" : "Tolak pengajuan"}
-        footer={
-          <>
-            <button className="sh-btn sh-btn--secondary" onClick={() => setActionModal(null)}>
-              Batal
-            </button>
-            <button
-              className={`sh-btn ${actionModal?.kind === "revisi" ? "sh-btn--warning" : "sh-btn--danger"}`}
-              onClick={confirmAction}
-            >
-              {actionModal?.kind === "revisi" ? "Kirim feedback" : "Tolak pengajuan"}
-            </button>
-          </>
-        }
-      >
-        <div className="sh-field">
-          <label className="sh-field__label">
-            {actionModal?.kind === "revisi"
-              ? "Feedback untuk organisasi"
-              : "Alasan penolakan"}
-          </label>
-          <textarea
-            rows={4}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder={
-              actionModal?.kind === "revisi"
-                ? "Tulis masukan/feedback yang perlu diperbaiki organisasi."
-                : "Jelaskan alasan penolakan."
-            }
-          />
-        </div>
-      </Modal>
     </>
   );
 }
