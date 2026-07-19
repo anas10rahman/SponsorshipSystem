@@ -51,7 +51,7 @@ export default function Login() {
             autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Admin / organisasi / pendana"
+            placeholder="Admin / organisasi / bankdaya"
           />
         </div>
 
@@ -87,9 +87,17 @@ export default function Login() {
           <div>
             Admin: <code>Admin</code> · Organisasi: <code>organisasi</code>
           </div>
-          <div style={{ marginTop: 4 }}>
-            Pendana: <code>pendana</code> · <code>pendana2</code> · <code>pendana3</code>{" "}
-            (tiap akun hanya mengakses 1 pendana)
+          <div style={{ marginTop: 6 }}>
+            Pendana <span className="sh-muted">(1 akun = 1 pendana)</span>:
+            <div style={{ marginTop: 2 }}>
+              <code>bankdaya</code> → Bank Daya
+            </div>
+            <div style={{ marginTop: 2 }}>
+              <code>sinergi</code> → Sinergi Nusantara
+            </div>
+            <div style={{ marginTop: 2 }}>
+              <code>cahaya</code> → Yayasan Cahaya
+            </div>
           </div>
         </div>
       </form>
