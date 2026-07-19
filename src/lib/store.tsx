@@ -142,6 +142,19 @@ export function useActions() {
         }
       },
 
+      async register(
+        payload: Record<string, unknown>,
+      ): Promise<{ ok: boolean; error?: string }> {
+        try {
+          const { userId, state } = await api.register(payload);
+          dispatch({ type: "hydrate", data: state }); // masukkan entitas+user baru
+          dispatch({ type: "auth/login", userId }); // langsung login
+          return { ok: true };
+        } catch (e: any) {
+          return { ok: false, error: String(e?.message || "Registrasi gagal.") };
+        }
+      },
+
       logout() {
         dispatch({ type: "auth/logout" });
       },

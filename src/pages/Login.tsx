@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate, Link } from "react-router-dom";
 import { BrandMark } from "@/components/BrandMark";
 import { rolePath, useActions, useStore } from "@/lib/store";
-import { Navigate } from "react-router-dom";
 
 export default function Login() {
   const { currentUser } = useStore();
@@ -79,6 +78,14 @@ export default function Login() {
         >
           {busy ? "Memproses…" : "Masuk"}
         </button>
+
+        <Link
+          to="/register"
+          className="sh-btn sh-btn--secondary"
+          style={{ width: "100%", justifyContent: "center" }}
+        >
+          Registrasi akun baru
+        </Link>
 
         <div className="sh-login__demo">
           <div style={{ marginBottom: 6 }}>

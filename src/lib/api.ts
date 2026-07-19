@@ -33,6 +33,17 @@ export const api = {
     return data as { user: { id: string } };
   },
 
+  async register(payload: Record<string, unknown>) {
+    const r = await fetch(`${BASE}/register`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error((data as any).error || "Registrasi gagal.");
+    return data as { userId: string; state: AppState };
+  },
+
   pengajuan: (body: Record<string, unknown>) => post("pengajuan", body),
   org: (body: Record<string, unknown>) => post("org", body),
   funder: (body: Record<string, unknown>) => post("funder", body),
