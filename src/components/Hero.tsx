@@ -28,12 +28,11 @@ export function Hero() {
     label = "Total disetujui";
   } else if (currentUser.role === "org") {
     const org = state.organizations.find((o) => o.id === currentUser.orgId);
-    const total = approvedCashTo((orgId) => orgId === currentUser.orgId);
     greeting = `Halo, ${org?.name ?? "Organisasi"}! 👋`;
     subtitle =
-      "Wujudkan programmu — susun pengajuan yang menarik lalu ajukan ke pendana yang tepat.";
-    value = formatRupiahShort(total);
-    label = "Total terkumpul";
+      "Top-up saldo dulu, lalu susun pengajuan yang menarik dan ajukan ke pendana yang tepat.";
+    value = formatRupiahShort(org?.balance ?? 0);
+    label = "Saldo";
   } else {
     const funder = state.funders.find((f) => f.id === currentUser.funderId);
     const total = approvedCashTo((_o, funderId) => funderId === currentUser.funderId);

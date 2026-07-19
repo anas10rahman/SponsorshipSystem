@@ -1,5 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { sql, assembleState, readBody, SUBMISSION_FEE } from "./_db.js";
+import {
+  sql,
+  assembleState,
+  readBody,
+  SUBMISSION_FEE,
+  ADMIN_FEE,
+  APPROVE_REFUND,
+  REJECT_REFUND,
+} from "./_db.js";
 
 class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -155,6 +163,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await sql.transaction(tx);
     } else if (op === "approve") {
       const p = await getPengajuan(b.id);
+      if (p.status === "disetujui" || p.status === "ditolak")
+        throw new HttpError(400, "Pengajuan sudah diputuskan.");
       const packages = Array.isArray(p.packages) ? p.packages : [];
       const idx = Number(b.selectedPackage);
       if (!Number.isInteger(idx) || idx < 0 || idx >= packages.length)
@@ -167,25 +177,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           b.id,
           "Disetujui pendana",
           "Pendana",
-          `Pendana menyetujui paket "${chosen?.name ?? ""}" (Rp ${amount.toLocaleString("id-ID")}). Kesepakatan final.`,
+          `Pendana menyetujui paket "${chosen?.name ?? ""}". Kesepakatan final. Biaya admin Rp ${ADMIN_FEE.toLocaleString("id-ID")} ditahan; Rp ${APPROVE_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo organisasi.`,
         ),
-        auditQ(b.actorId, "pengajuan.disetujui", b.id, { amount, package: chosen?.name ?? "" }),
+        auditQ(b.actorId, "pengajuan.disetujui", b.id, { amount, package: chosen?.name ?? "", adminFee: ADMIN_FEE, refund: APPROVE_REFUND }),
+        // Kembalikan sebagian biaya pengajuan (dikurangi biaya admin) ke saldo organisasi.
+        sql`update organizations set balance = balance + ${APPROVE_REFUND} where id = ${p.org_id}`,
       ];
       if (amount > 0)
         tx.push(sql`update funders set budget_remaining = greatest(0, budget_remaining - ${amount}) where id = ${p.funder_id}`);
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Pengajuan "${p.event_name}" disetujui pendana (paket ${chosen?.name ?? ""}).`));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Pengajuan "${p.event_name}" disetujui pendana. Rp ${APPROVE_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo (biaya admin Rp ${ADMIN_FEE.toLocaleString("id-ID")}).`));
       await sql.transaction(tx);
     } else if (op === "reject") {
       const p = await getPengajuan(b.id);
+      if (p.status === "disetujui" || p.status === "ditolak")
+        throw new HttpError(400, "Pengajuan sudah diputuskan.");
       const note = (b.note || "").trim() || "Pendana menolak pengajuan.";
       const tx: any[] = [
         sql`update pengajuan set status = 'ditolak', updated_at = now() where id = ${b.id}`,
-        histQ(b.id, "Ditolak pendana", "Pendana", note),
-        auditQ(b.actorId, "pengajuan.ditolak", b.id),
+        histQ(b.id, "Ditolak pendana", "Pendana", `${note} Biaya pengajuan Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan penuh ke saldo organisasi.`),
+        auditQ(b.actorId, "pengajuan.ditolak", b.id, { refund: REJECT_REFUND }),
+        // Tolak → kembalikan seluruh biaya pengajuan ke saldo organisasi.
+        sql`update organizations set balance = balance + ${REJECT_REFUND} where id = ${p.org_id}`,
       ];
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Pengajuan "${p.event_name}" ditolak pendana.`));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Pengajuan "${p.event_name}" ditolak pendana. Biaya pengajuan Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan penuh ke saldo.`));
       await sql.transaction(tx);
     } else if (op === "feedback") {
       const p = await getPengajuan(b.id);

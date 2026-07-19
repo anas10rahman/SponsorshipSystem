@@ -322,9 +322,6 @@ function PackageCard({
             <StatusBadge kind="custom" label="Dipilih pendana" variant="success" />
           )}
         </div>
-        <strong className="num" style={{ color: "var(--brand-600)" }}>
-          {formatRupiah(packageAmount(pkg))}
-        </strong>
       </div>
       {pkg.requests.length > 0 && (
         <div style={{ marginBottom: 8 }}>

@@ -205,4 +205,12 @@ export function makePengajuanId() {
   ).padStart(2, "0")}-${tail}`;
 }
 
+/* Alur biaya pengajuan:
+   - Saat organisasi mengirim pengajuan: saldo dipotong SUBMISSION_FEE (50rb).
+   - Bila disetujui pendana: ADMIN_FEE (20rb) ditahan sbg biaya admin,
+     sisanya (30rb) dikembalikan ke saldo organisasi.
+   - Bila ditolak: seluruh SUBMISSION_FEE (50rb) dikembalikan. */
 export const SUBMISSION_FEE = 50000;
+export const ADMIN_FEE = 20000;
+export const APPROVE_REFUND = SUBMISSION_FEE - ADMIN_FEE; // 30rb
+export const REJECT_REFUND = SUBMISSION_FEE; // 50rb
