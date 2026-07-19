@@ -9,11 +9,10 @@ import { useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
 import { formatEventDate, formatRupiah } from "@/lib/format";
-import { pengajuanBadge, packageAmount, requestLabel } from "@/lib/pengajuan";
+import { pengajuanBadge, requestLabel } from "@/lib/pengajuan";
 import type { SponsorshipPackage } from "@/lib/types";
 import {
   ArrowLeft,
-  Wallet,
   FileText,
   Eye,
   CheckCircle2,
@@ -57,7 +56,6 @@ export default function FunderPengajuanReview() {
   const documents = pengajuan.documents ?? [];
   const canReview = pengajuan.status === "diajukan" || pengajuan.status === "perlu_revisi";
   const chosenIdx = canReview ? selectedPkg : pengajuan.selectedPackage ?? null;
-  const chosen = chosenIdx != null ? packages[chosenIdx] : undefined;
 
   const openPreview = (index: number, name: string) => {
     setPreview({ index, name, data: null });
@@ -234,31 +232,6 @@ export default function FunderPengajuanReview() {
           </div>
         </section>
 
-        {/* Ringkasan pilihan */}
-        <div
-          className="sh-row sh-row--between"
-          style={{
-            padding: "16px 20px",
-            borderRadius: "var(--radius-lg)",
-            background: "var(--canvas-tint)",
-            marginBottom: 16,
-          }}
-        >
-          <div className="sh-row" style={{ gap: 12 }}>
-            <Wallet size={20} style={{ color: "var(--brand-500)" }} />
-            <div>
-              <div className="sh-meta-label">Paket terpilih</div>
-              <strong style={{ fontSize: 18 }}>{chosen?.name ?? "Belum dipilih"}</strong>
-            </div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div className="sh-meta-label">Total Pendanaan</div>
-            <strong className="num" style={{ color: "var(--brand-600)", fontSize: 18 }}>
-              {formatRupiah(chosen ? packageAmount(chosen) : 0)}
-            </strong>
-          </div>
-        </div>
-
         {/* Aksi tinjauan */}
         {canReview && (
           <div className="sh-row" style={{ justifyContent: "flex-end", gap: 10 }}>
@@ -380,36 +353,31 @@ function PackageCard({
         background: selected ? "var(--brand-50, var(--canvas-tint))" : "var(--canvas)",
       }}
     >
-      <div className="sh-row sh-row--between" style={{ marginBottom: 12 }}>
-        <div className="sh-row" style={{ gap: 10 }}>
-          {selectable && (
-            <span
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: 999,
-                border: `2px solid ${selected ? "var(--brand-500)" : "var(--line-strong)"}`,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flex: "none",
-              }}
-            >
-              {selected && (
-                <span
-                  style={{ width: 8, height: 8, borderRadius: 999, background: "var(--brand-500)" }}
-                />
-              )}
-            </span>
-          )}
-          <strong style={{ fontSize: 16 }}>{pkg.name || `Paket ${index + 1}`}</strong>
-          {selected && !selectable && (
-            <StatusBadge kind="custom" label="Dipilih" variant="success" />
-          )}
-        </div>
-        <strong className="num" style={{ color: "var(--brand-600)", fontSize: 16 }}>
-          {formatRupiah(packageAmount(pkg))}
-        </strong>
+      <div className="sh-row" style={{ gap: 10, marginBottom: 12 }}>
+        {selectable && (
+          <span
+            style={{
+              width: 18,
+              height: 18,
+              borderRadius: 999,
+              border: `2px solid ${selected ? "var(--brand-500)" : "var(--line-strong)"}`,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: "none",
+            }}
+          >
+            {selected && (
+              <span
+                style={{ width: 8, height: 8, borderRadius: 999, background: "var(--brand-500)" }}
+              />
+            )}
+          </span>
+        )}
+        <strong style={{ fontSize: 16 }}>{pkg.name || `Paket ${index + 1}`}</strong>
+        {selected && !selectable && (
+          <StatusBadge kind="custom" label="Dipilih" variant="success" />
+        )}
       </div>
       {pkg.requests.length > 0 && (
         <div style={{ marginBottom: 10 }}>
