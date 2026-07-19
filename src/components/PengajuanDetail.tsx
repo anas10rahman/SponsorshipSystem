@@ -90,9 +90,7 @@ function PengajuanDetailInner({
         onClick={() => selectedPkg != null && review!.onApprove(selectedPkg)}
       >
         <CheckCircle2 size={16} />
-        {selectedPkg == null
-          ? "Setujui Pendanaan"
-          : `Setujui Pendanaan · ${formatRupiah(chosen ? packageAmount(chosen) : 0)}`}
+        Setujui Pendanaan
       </button>
     </>
   ) : (
