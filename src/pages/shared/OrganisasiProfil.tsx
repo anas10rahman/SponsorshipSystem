@@ -263,24 +263,26 @@ export default function OrganisasiProfil() {
           </div>
         </section>
 
-        {/* Stats */}
-        <div className="sh-stat-grid">
-          <StatCard
-            label="Total disetujui (in-cash)"
-            value={formatRupiah(data?.totalApproved ?? 0)}
-            icon={<Wallet size={20} />}
-          />
-          <StatCard
-            label="Pengajuan dikirim"
-            value={data?.sent ?? 0}
-            icon={<Send size={20} />}
-          />
-          <StatCard
-            label="Pengajuan disetujui"
-            value={data?.approvedCount ?? 0}
-            icon={<CheckCircle2 size={20} />}
-          />
-        </div>
+        {/* Stats — disembunyikan dari pendana (tak relevan di sisi pendana) */}
+        {!isFunderViewer && (
+          <div className="sh-stat-grid">
+            <StatCard
+              label="Total disetujui (in-cash)"
+              value={formatRupiah(data?.totalApproved ?? 0)}
+              icon={<Wallet size={20} />}
+            />
+            <StatCard
+              label="Pengajuan dikirim"
+              value={data?.sent ?? 0}
+              icon={<Send size={20} />}
+            />
+            <StatCard
+              label="Pengajuan disetujui"
+              value={data?.approvedCount ?? 0}
+              icon={<CheckCircle2 size={20} />}
+            />
+          </div>
+        )}
 
         {/* Sensitive info — admin / self only */}
         {canSeeSensitive && (
