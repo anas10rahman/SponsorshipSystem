@@ -38,11 +38,14 @@ export const api = {
   funder: (body: Record<string, unknown>) => post("funder", body),
   notifications: (body: Record<string, unknown>) => post("notifications", body),
 
-  async pengajuanDoc(id: string): Promise<string | null> {
-    const r = await fetch(`${BASE}/pengajuan-doc?id=${encodeURIComponent(id)}`);
+  /** Ambil isi (data URL) satu dokumen pendukung berdasarkan indeks. */
+  async pengajuanDoc(id: string, index = 0): Promise<string | null> {
+    const r = await fetch(
+      `${BASE}/pengajuan-doc?id=${encodeURIComponent(id)}&index=${index}`,
+    );
     if (!r.ok) return null;
     const d = await r.json().catch(() => ({}));
-    return (d as any).proposalDocData ?? null;
+    return (d as any).data ?? (d as any).proposalDocData ?? null;
   },
 };
 

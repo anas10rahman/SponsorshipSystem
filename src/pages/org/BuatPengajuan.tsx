@@ -8,7 +8,14 @@ import { useToast } from "@/components/Toast";
 import { formatEventDate, formatRupiah, makePengajuanId, nowIso } from "@/lib/format";
 import { SUBMISSION_FEE, packageAmount, requestLabel } from "@/lib/pengajuan";
 import { CurrencyInput } from "@/components/CurrencyInput";
-import type { Pengajuan, SponsorshipPackage, SponsorshipRequest } from "@/lib/types";
+import { Modal } from "@/components/Modal";
+import { PdfPreview } from "@/components/PdfPreview";
+import type {
+  Pengajuan,
+  PengajuanDoc,
+  SponsorshipPackage,
+  SponsorshipRequest,
+} from "@/lib/types";
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,6 +26,7 @@ import {
   Check,
   UploadCloud,
   FileText,
+  Eye,
   X,
   Package as PackageIcon,
 } from "lucide-react";
@@ -54,6 +62,7 @@ export default function BuatPengajuan() {
   const preselectedFunder = params.get("funder") ?? editing?.funderId ?? "";
 
   const [step, setStep] = useState(0);
+  const [previewDoc, setPreviewDoc] = useState<PengajuanDoc | null>(null);
   const [form, setForm] = useState<Pengajuan>(() => {
     if (editing)
       return {
@@ -70,7 +79,7 @@ export default function BuatPengajuan() {
       description: "",
       eventBudget: 0,
       packages: [emptyPackage()],
-      proposalDocUrl: "",
+      documents: [],
       extraNote: "",
       status: "draf",
       history: [
@@ -141,35 +150,49 @@ export default function BuatPengajuan() {
   const removeBenefit = (pi: number, li: number) =>
     setPackage(pi, { benefits: packages[pi].benefits.filter((_, idx) => idx !== li) });
 
-  // ---- File upload (PDF only) ----
-  const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const isPdf =
-      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      toast.failed("Hanya berkas PDF yang diperbolehkan.");
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
+  // ---- File upload (PDF, bisa lebih dari satu) ----
+  const readFileAsDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (fileInputRef.current) fileInputRef.current.value = ""; // izinkan pilih berkas sama lagi
+    if (!files.length) return;
+    const added: PengajuanDoc[] = [];
+    for (const file of files) {
+      const isPdf =
+        file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+      if (!isPdf) {
+        toast.failed(`"${file.name}" bukan PDF — dilewati.`);
+        continue;
+      }
+      if (file.size > 4 * 1024 * 1024) {
+        toast.failed(`"${file.name}" melebihi 4 MB — dilewati.`);
+        continue;
+      }
+      if ((form.documents ?? []).some((d) => d.name === file.name)) {
+        toast.failed(`"${file.name}" sudah ditambahkan.`);
+        continue;
+      }
+      added.push({ name: file.name, data: await readFileAsDataUrl(file) });
     }
-    if (file.size > 4 * 1024 * 1024) {
-      toast.failed("Ukuran PDF maksimal 4 MB.");
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
+    if (added.length) {
+      set({ documents: [...(form.documents ?? []), ...added] });
+      toast.success(
+        added.length === 1
+          ? `Berkas "${added[0].name}" ditambahkan.`
+          : `${added.length} berkas ditambahkan.`,
+      );
     }
-    // Simpan nama + isi (data URL) agar pendana bisa preview.
-    const reader = new FileReader();
-    reader.onload = () => {
-      set({ proposalDocUrl: file.name, proposalDocData: String(reader.result) });
-      toast.success(`Berkas "${file.name}" dipilih.`);
-    };
-    reader.readAsDataURL(file);
   };
 
-  const clearFile = () => {
-    set({ proposalDocUrl: "", proposalDocData: undefined });
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+  const removeDoc = (index: number) =>
+    set({ documents: (form.documents ?? []).filter((_, i) => i !== index) });
 
   // Bersihkan paket: buang paket tanpa nama & poin kosong; rapikan tiap poin per tipe.
   const normalize = (f: Pengajuan): Pengajuan => ({
@@ -209,8 +232,8 @@ export default function BuatPengajuan() {
       return validPackages.length > 0;
     }
     if (s === 2) {
-      // Berkas proposal (PDF) wajib diunggah.
-      return (form.proposalDocUrl ?? "").trim() !== "";
+      // Minimal satu berkas pendukung (PDF) wajib diunggah.
+      return (form.documents ?? []).length > 0;
     }
     return true;
   };
@@ -474,57 +497,70 @@ export default function BuatPengajuan() {
                 <span style={{ color: "var(--status-failed)", marginLeft: 4 }}>*</span>
               </h3>
               <div className="sh-field__label" style={{ marginBottom: 8 }}>
-                Berkas proposal (PDF) — wajib
+                Berkas pendukung (PDF) — wajib, bisa lebih dari satu
               </div>
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="application/pdf,.pdf"
+                multiple
                 style={{ display: "none" }}
                 onChange={onPickFile}
               />
-              {form.proposalDocUrl ? (
-                <div
-                  className="sh-row sh-row--between"
-                  style={{
-                    marginBottom: 16,
-                    padding: "14px 16px",
-                    border: "1px solid var(--line)",
-                    borderRadius: "var(--radius-md)",
-                    background: "var(--canvas-soft)",
-                  }}
-                >
-                  <div className="sh-row" style={{ gap: 10 }}>
-                    <FileText size={20} style={{ color: "var(--status-failed)" }} />
-                    <div>
-                      <div style={{ fontWeight: 600 }}>{form.proposalDocUrl}</div>
-                      <div className="sh-muted" style={{ fontSize: 12 }}>
-                        Berkas PDF proposal
+              {(form.documents ?? []).length > 0 && (
+                <div style={{ display: "grid", gap: 8, marginBottom: 12 }}>
+                  {form.documents.map((doc, i) => (
+                    <div
+                      key={i}
+                      className="sh-row sh-row--between"
+                      style={{
+                        padding: "12px 14px",
+                        border: "1px solid var(--line)",
+                        borderRadius: "var(--radius-md)",
+                        background: "var(--canvas-soft)",
+                      }}
+                    >
+                      <div className="sh-row" style={{ gap: 10, minWidth: 0 }}>
+                        <FileText size={20} style={{ color: "var(--status-failed)", flex: "none" }} />
+                        <div style={{ fontWeight: 600, wordBreak: "break-all" }}>{doc.name}</div>
+                      </div>
+                      <div className="sh-row" style={{ gap: 4, flex: "none" }}>
+                        <button
+                          className="sh-btn sh-btn--ghost sh-btn--icon"
+                          onClick={() => setPreviewDoc(doc)}
+                          title="Pratinjau"
+                          disabled={!doc.data}
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          className="sh-btn sh-btn--ghost sh-btn--icon"
+                          onClick={() => removeDoc(i)}
+                          title="Hapus berkas"
+                        >
+                          <X size={16} />
+                        </button>
                       </div>
                     </div>
-                  </div>
-                  <button
-                    className="sh-btn sh-btn--ghost sh-btn--icon"
-                    onClick={clearFile}
-                    title="Hapus berkas"
-                  >
-                    <X size={16} />
-                  </button>
+                  ))}
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  className="sh-file-drop"
-                  style={{ marginBottom: 16, width: "100%", cursor: "pointer" }}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
-                  <span>Klik untuk unggah berkas proposal.</span>
-                  <span className="sh-muted" style={{ fontSize: 12 }}>
-                    Wajib diisi · hanya format PDF yang diperbolehkan.
-                  </span>
-                </button>
               )}
+              <button
+                type="button"
+                className="sh-file-drop"
+                style={{ marginBottom: 16, width: "100%", cursor: "pointer" }}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
+                <span>
+                  {(form.documents ?? []).length > 0
+                    ? "Tambah berkas lain."
+                    : "Klik untuk unggah berkas pendukung."}
+                </span>
+                <span className="sh-muted" style={{ fontSize: 12 }}>
+                  Bisa pilih beberapa sekaligus · hanya PDF · maks 4 MB per berkas.
+                </span>
+              </button>
               <div className="sh-field">
                 <label className="sh-field__label">Catatan tambahan (opsional)</label>
                 <textarea
@@ -558,7 +594,42 @@ export default function BuatPengajuan() {
                     ))}
                   </div>
                 </div>
-                <ReviewRow label="Dokumen" value={form.proposalDocUrl || "—"} />
+                <div>
+                  <div className="sh-meta-label" style={{ marginBottom: 8 }}>
+                    Dokumen pendukung ({(form.documents ?? []).length})
+                  </div>
+                  {(form.documents ?? []).length === 0 ? (
+                    <div className="sh-meta-value" style={{ fontWeight: 600 }}>—</div>
+                  ) : (
+                    <div style={{ display: "grid", gap: 8 }}>
+                      {form.documents.map((doc, i) => (
+                        <div
+                          key={i}
+                          className="sh-row sh-row--between"
+                          style={{
+                            padding: "10px 14px",
+                            border: "1px solid var(--line)",
+                            borderRadius: "var(--radius-md)",
+                          }}
+                        >
+                          <div className="sh-row" style={{ gap: 10, minWidth: 0 }}>
+                            <FileText size={18} style={{ color: "var(--status-failed)", flex: "none" }} />
+                            <span style={{ fontWeight: 600, wordBreak: "break-all" }}>{doc.name}</span>
+                          </div>
+                          <button
+                            className="sh-btn sh-btn--ghost sh-btn--sm"
+                            onClick={() => setPreviewDoc(doc)}
+                            disabled={!doc.data}
+                            style={{ flex: "none" }}
+                          >
+                            <Eye size={14} />
+                            Pratinjau
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {feeDue > 0 &&
@@ -619,6 +690,21 @@ export default function BuatPengajuan() {
           </div>
         </section>
       </div>
+
+      {previewDoc && (
+        <Modal
+          open
+          onClose={() => setPreviewDoc(null)}
+          title={previewDoc.name || "Pratinjau dokumen"}
+          width={760}
+        >
+          {previewDoc.data ? (
+            <PdfPreview dataUrl={previewDoc.data} fileName={previewDoc.name} />
+          ) : (
+            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+          )}
+        </Modal>
+      )}
     </>
   );
 }

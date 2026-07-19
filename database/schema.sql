@@ -208,12 +208,13 @@ create table pengajuan (
   event_date        text,
   description       text not null,
   event_budget      numeric(16, 2) not null default 0 check (event_budget >= 0),
-  -- Detail sponsorship: array paket [{ name, amount, requests[], benefits[] }]
+  -- Detail sponsorship: array paket [{ name, requests[{type,amount,spec}], benefits[] }]
   packages          jsonb not null default '[]'::jsonb,
   selected_package  integer,                          -- index paket yang dipilih pendana
-  -- Dokumen
-  proposal_doc_url  text,
-  proposal_doc_data text,                            -- isi PDF (data URL/base64) untuk preview
+  -- Dokumen pendukung: array [{ name, data(base64) }] — bisa lebih dari satu
+  documents         jsonb not null default '[]'::jsonb,
+  proposal_doc_url  text,                              -- legacy: nama dokumen pertama
+  proposal_doc_data text,                              -- legacy: isi dokumen tunggal
   extra_note        text,
   -- Lifecycle
   status            pengajuan_status not null default 'draf',

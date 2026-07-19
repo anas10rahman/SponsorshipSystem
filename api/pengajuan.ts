@@ -52,25 +52,45 @@ function cleanPackages(packages: any): any[] {
 }
 
 /* Bangun query upsert pengajuan (dipakai save & submit). */
-function upsertPengajuan(p: any, status: string, revisionNote: string | null) {
+/* Gabungkan dokumen masuk dengan yang tersimpan: poin tanpa `data` (mis. saat
+   edit draf tanpa unggah ulang) mempertahankan data lama berdasarkan nama.
+   Hanya dokumen yang akhirnya punya data yang disimpan. */
+async function resolveDocuments(id: string, incoming: any): Promise<any[]> {
+  const docs = Array.isArray(incoming) ? incoming : [];
+  const prev = (await sql`select documents from pengajuan where id = ${id} limit 1`) as any[];
+  const stored: any[] = Array.isArray(prev[0]?.documents) ? prev[0].documents : [];
+  const byName = new Map<string, string>();
+  for (const d of stored) if (d?.name && d?.data) byName.set(String(d.name), String(d.data));
+  return docs
+    .filter((d: any) => (d?.name || "").trim())
+    .map((d: any) => ({
+      name: String(d.name),
+      data: d?.data ? String(d.data) : byName.get(String(d.name)) ?? null,
+    }))
+    .filter((d: any) => d.data);
+}
+
+/* Bangun query upsert pengajuan. `documents` sudah di-resolve (dengan data). */
+function upsertPengajuan(p: any, status: string, revisionNote: string | null, documents: any[]) {
   const packages = JSON.stringify(cleanPackages(p.packages));
+  const docsJson = JSON.stringify(documents);
+  const firstName = documents[0]?.name ?? null; // fallback tampilan legacy
   return sql`
     insert into pengajuan
       (id, org_id, funder_id, event_name, event_location, event_date, description,
-       event_budget, packages, selected_package, proposal_doc_url, proposal_doc_data,
+       event_budget, packages, selected_package, documents, proposal_doc_url,
        extra_note, status, revision_note)
     values
       (${p.id}, ${p.orgId}, ${p.funderId}, ${p.eventName}, ${p.eventLocation},
        ${p.eventDate || null}, ${p.description}, ${p.eventBudget}, ${packages}::jsonb,
-       ${p.selectedPackage ?? null}, ${p.proposalDocUrl ?? null},
-       ${p.proposalDocData ?? null}, ${p.extraNote ?? null}, ${status}, ${revisionNote})
+       ${p.selectedPackage ?? null}, ${docsJson}::jsonb, ${firstName},
+       ${p.extraNote ?? null}, ${status}, ${revisionNote})
     on conflict (id) do update set
       event_name = excluded.event_name, event_location = excluded.event_location,
       event_date = excluded.event_date, description = excluded.description,
       event_budget = excluded.event_budget, packages = excluded.packages,
       selected_package = excluded.selected_package,
-      proposal_doc_url = excluded.proposal_doc_url,
-      proposal_doc_data = coalesce(excluded.proposal_doc_data, pengajuan.proposal_doc_data),
+      documents = excluded.documents, proposal_doc_url = excluded.proposal_doc_url,
       extra_note = excluded.extra_note, status = excluded.status,
       revision_note = excluded.revision_note, updated_at = now()`;
 }
@@ -109,7 +129,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (op === "save") {
       const p = b.pengajuan;
       const existing = (await sql`select id from pengajuan where id = ${p.id} limit 1`) as any[];
-      const tx = [upsertPengajuan(p, p.status || "draf", p.revisionNote ?? null)];
+      const docs = await resolveDocuments(p.id, p.documents);
+      const tx = [upsertPengajuan(p, p.status || "draf", p.revisionNote ?? null, docs)];
       if (!existing.length) tx.push(histQ(p.id, "Pengajuan dibuat", "Organisasi", "Draf pengajuan disimpan."));
       await sql.transaction(tx);
     } else if (op === "submit") {
@@ -125,7 +146,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const note = isFirst
         ? `Pengajuan dikirim ke pendana. Biaya pengajuan ${SUBMISSION_FEE.toLocaleString("id-ID")} dipotong dari saldo.`
         : "Pengajuan dikirim ke pendana untuk ditinjau.";
-      const tx: any[] = [upsertPengajuan(p, "diajukan", null), histQ(p.id, action, "Organisasi", note)];
+      const docs = await resolveDocuments(p.id, p.documents);
+      const tx: any[] = [upsertPengajuan(p, "diajukan", null, docs), histQ(p.id, action, "Organisasi", note)];
       if (isFirst) tx.push(sql`update organizations set balance = greatest(0, balance - ${SUBMISSION_FEE}) where id = ${p.orgId}`);
       tx.push(auditQ(b.actorId, "pengajuan.diajukan", p.id, { packages: cleanPackages(p.packages).length }));
       const fUser = await userIdForFunder(p.funderId);

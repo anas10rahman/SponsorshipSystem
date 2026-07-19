@@ -96,7 +96,12 @@ export async function assembleState() {
     sql`select * from funders order by name`,
     sql`select id, org_id, funder_id, event_name, event_location, event_date, description,
                event_budget, packages, selected_package, proposal_doc_url, extra_note,
-               status, revision_note, created_at, updated_at
+               status, revision_note, created_at, updated_at,
+               coalesce(
+                 (select jsonb_agg(jsonb_build_object('name', elem->>'name'))
+                    from jsonb_array_elements(documents) elem),
+                 '[]'::jsonb
+               ) as documents
           from pengajuan order by updated_at desc`,
     sql`select * from pengajuan_history order by created_at`,
     sql`select * from audit_logs order by created_at desc`,
@@ -142,8 +147,14 @@ export async function assembleState() {
         benefits: pk.benefits ?? [],
       })),
       selectedPackage: p.selected_package == null ? undefined : Number(p.selected_package),
-      proposalDocUrl: p.proposal_doc_url ?? undefined,
-      // proposalDocData sengaja TIDAK disertakan (lazy via /api/pengajuan-doc)
+      // Dokumen: hanya nama (data diambil lazy via /api/pengajuan-doc).
+      // Fallback data lama: proposal_doc_url tunggal → satu dokumen.
+      documents:
+        Array.isArray(p.documents) && p.documents.length
+          ? p.documents.map((d: any) => ({ name: String(d?.name ?? "") }))
+          : p.proposal_doc_url
+            ? [{ name: String(p.proposal_doc_url) }]
+            : [],
       extraNote: p.extra_note ?? undefined,
       status: p.status,
       revisionNote: p.revision_note ?? undefined,

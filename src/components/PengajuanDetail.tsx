@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Modal } from "./Modal";
 import { StatusBadge } from "./StatusBadge";
 import { PdfPreview } from "./PdfPreview";
@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import { formatDateTime, formatEventDate, formatRupiah } from "@/lib/format";
 import { pengajuanBadge, packageAmount, requestLabel } from "@/lib/pengajuan";
 import type { Pengajuan, SponsorshipPackage } from "@/lib/types";
-import { CheckCircle2, XCircle, MessageSquareWarning, Wallet } from "lucide-react";
+import { CheckCircle2, XCircle, MessageSquareWarning, Wallet, FileText, Eye } from "lucide-react";
 
 /** Aksi tinjauan pendana. Bila diisi, paket jadi bisa dipilih (radio)
  *  dan footer menampilkan tombol Setujui Pendanaan. */
@@ -48,31 +48,20 @@ function PengajuanDetailInner({
   review?: PengajuanReview;
 }) {
   const { state } = useStore();
-  const [docData, setDocData] = useState<string | null>(null);
-  const [docLoading, setDocLoading] = useState(false);
   const [selectedPkg, setSelectedPkg] = useState<number | null>(null);
+  const documents = pengajuan.documents ?? [];
+  // Pratinjau dokumen (lazy per index): { index, name, data|null(loading) }
+  const [preview, setPreview] = useState<{ index: number; name: string; data: string | null } | null>(
+    null,
+  );
 
-  useEffect(() => {
-    let alive = true;
-    setDocData(null);
-    if (pengajuan.proposalDocUrl) {
-      setDocLoading(true);
-      api
-        .pengajuanDoc(pengajuan.id)
-        .then((d) => {
-          if (alive) {
-            setDocData(d);
-            setDocLoading(false);
-          }
-        })
-        .catch(() => {
-          if (alive) setDocLoading(false);
-        });
-    }
-    return () => {
-      alive = false;
-    };
-  }, [pengajuan.id, pengajuan.proposalDocUrl]);
+  const openPreview = (index: number, name: string) => {
+    setPreview({ index, name, data: null });
+    api
+      .pengajuanDoc(pengajuan.id, index)
+      .then((d) => setPreview((cur) => (cur && cur.index === index ? { ...cur, data: d } : cur)))
+      .catch(() => setPreview((cur) => (cur && cur.index === index ? { ...cur, data: "" } : cur)));
+  };
 
   const org = state.organizations.find((o) => o.id === pengajuan.orgId);
   const funder = state.funders.find((f) => f.id === pengajuan.funderId);
@@ -111,6 +100,7 @@ function PengajuanDetailInner({
   );
 
   return (
+    <>
     <Modal
       open
       onClose={onClose}
@@ -204,19 +194,38 @@ function PengajuanDetailInner({
         </div>
       )}
 
-      {/* Dokumen proposal + preview */}
+      {/* Dokumen pendukung — daftar + pratinjau (icon mata) */}
       <div>
-        <h4 style={{ marginBottom: 12 }}>Dokumen proposal</h4>
-        {docData ? (
-          <PdfPreview dataUrl={docData} fileName={pengajuan.proposalDocUrl} />
-        ) : pengajuan.proposalDocUrl ? (
-          <div className="sh-notice sh-notice--info">
-            {docLoading
-              ? "Memuat dokumen…"
-              : `${pengajuan.proposalDocUrl} — dokumen tidak dapat dimuat.`}
-          </div>
-        ) : (
+        <h4 style={{ marginBottom: 12 }}>Dokumen pendukung ({documents.length})</h4>
+        {documents.length === 0 ? (
           <p className="sh-muted">Belum ada dokumen.</p>
+        ) : (
+          <div style={{ display: "grid", gap: 8 }}>
+            {documents.map((doc, i) => (
+              <div
+                key={i}
+                className="sh-row sh-row--between"
+                style={{
+                  padding: "10px 14px",
+                  border: "1px solid var(--line)",
+                  borderRadius: "var(--radius-md)",
+                }}
+              >
+                <div className="sh-row" style={{ gap: 10, minWidth: 0 }}>
+                  <FileText size={18} style={{ color: "var(--status-failed)", flex: "none" }} />
+                  <span style={{ fontWeight: 600, wordBreak: "break-all" }}>{doc.name}</span>
+                </div>
+                <button
+                  className="sh-btn sh-btn--ghost sh-btn--sm"
+                  onClick={() => openPreview(i, doc.name)}
+                  style={{ flex: "none" }}
+                >
+                  <Eye size={14} />
+                  Pratinjau
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
@@ -234,6 +243,24 @@ function PengajuanDetailInner({
         </div>
       </div>
     </Modal>
+
+    {preview && (
+      <Modal
+        open
+        onClose={() => setPreview(null)}
+        title={preview.name || "Pratinjau dokumen"}
+        width={760}
+      >
+        {preview.data === null ? (
+          <p className="sh-muted">Memuat dokumen…</p>
+        ) : preview.data ? (
+          <PdfPreview dataUrl={preview.data} fileName={preview.name} />
+        ) : (
+          <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+        )}
+      </Modal>
+    )}
+    </>
   );
 }
 

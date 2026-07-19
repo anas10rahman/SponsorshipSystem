@@ -138,6 +138,14 @@ export type SponsorshipPackage = {
   benefits: string[]; // Benefit untuk pendana (per poin)
 };
 
+/** Satu dokumen pendukung (PDF). `data` (data URL base64) hanya ada saat
+ *  berkas baru diunggah atau diambil lazy via /api/pengajuan-doc; di AppState
+ *  hanya `name` yang disertakan agar payload ringan. */
+export type PengajuanDoc = {
+  name: string;
+  data?: string;
+};
+
 /* Lifecycle pengajuan terarah:
    draf → diajukan → (perlu_revisi → diajukan)* → disetujui | ditolak
    Persetujuan pendana bersifat FINAL (admin hanya memantau). */
@@ -168,9 +176,8 @@ export type Pengajuan = {
   // Detail sponsorship — daftar paket yang ditawarkan
   packages: SponsorshipPackage[];
   selectedPackage?: number; // index paket yang dipilih pendana saat menyetujui
-  // Dokumen
-  proposalDocUrl?: string; // nama berkas
-  proposalDocData?: string; // isi berkas PDF (data URL) untuk preview
+  // Dokumen pendukung (bisa lebih dari satu berkas PDF)
+  documents: PengajuanDoc[];
   extraNote?: string;
   // Lifecycle
   status: PengajuanStatus;
