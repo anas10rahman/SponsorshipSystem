@@ -4,8 +4,7 @@ import {
   assembleState,
   readBody,
   SUBMISSION_FEE,
-  ADMIN_FEE,
-  APPROVE_REFUND,
+  REJECT_ADMIN_FEE,
   REJECT_REFUND,
 } from "./_db.js";
 
@@ -177,16 +176,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           b.id,
           "Disetujui pendana",
           "Pendana",
-          `Pendana menyetujui paket "${chosen?.name ?? ""}". Kesepakatan final. Biaya admin Rp ${ADMIN_FEE.toLocaleString("id-ID")} ditahan; Rp ${APPROVE_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo organisasi.`,
+          `Pendana menyetujui paket "${chosen?.name ?? ""}". Kesepakatan final. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin (tidak dikembalikan).`,
         ),
-        auditQ(b.actorId, "pengajuan.disetujui", b.id, { amount, package: chosen?.name ?? "", adminFee: ADMIN_FEE, refund: APPROVE_REFUND }),
-        // Kembalikan sebagian biaya pengajuan (dikurangi biaya admin) ke saldo organisasi.
-        sql`update organizations set balance = balance + ${APPROVE_REFUND} where id = ${p.org_id}`,
+        auditQ(b.actorId, "pengajuan.disetujui", b.id, { amount, package: chosen?.name ?? "", adminFee: SUBMISSION_FEE, refund: 0 }),
       ];
       if (amount > 0)
         tx.push(sql`update funders set budget_remaining = greatest(0, budget_remaining - ${amount}) where id = ${p.funder_id}`);
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Pengajuan "${p.event_name}" disetujui pendana. Rp ${APPROVE_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo (biaya admin Rp ${ADMIN_FEE.toLocaleString("id-ID")}).`));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Pengajuan "${p.event_name}" disetujui pendana. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin.`));
       await sql.transaction(tx);
     } else if (op === "reject") {
       const p = await getPengajuan(b.id);
@@ -195,13 +192,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const note = (b.note || "").trim() || "Pendana menolak pengajuan.";
       const tx: any[] = [
         sql`update pengajuan set status = 'ditolak', updated_at = now() where id = ${b.id}`,
-        histQ(b.id, "Ditolak pendana", "Pendana", `${note} Biaya pengajuan Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan penuh ke saldo organisasi.`),
-        auditQ(b.actorId, "pengajuan.ditolak", b.id, { refund: REJECT_REFUND }),
-        // Tolak → kembalikan seluruh biaya pengajuan ke saldo organisasi.
+        histQ(b.id, "Ditolak pendana", "Pendana", `${note} Biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")} ditahan; Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo organisasi.`),
+        auditQ(b.actorId, "pengajuan.ditolak", b.id, { adminFee: REJECT_ADMIN_FEE, refund: REJECT_REFUND }),
+        // Tolak → kembalikan sisa biaya (dikurangi biaya admin) ke saldo organisasi.
         sql`update organizations set balance = balance + ${REJECT_REFUND} where id = ${p.org_id}`,
       ];
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Pengajuan "${p.event_name}" ditolak pendana. Biaya pengajuan Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan penuh ke saldo.`));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Pengajuan "${p.event_name}" ditolak pendana. Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo (biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")}).`));
       await sql.transaction(tx);
     } else if (op === "feedback") {
       const p = await getPengajuan(b.id);

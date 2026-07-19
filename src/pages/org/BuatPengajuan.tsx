@@ -636,9 +636,10 @@ export default function BuatPengajuan() {
                 (balanceOk ? (
                   <div className="sh-notice" style={{ marginTop: 16 }}>
                     Saldo Anda akan terpotong <strong>{formatRupiah(SUBMISSION_FEE)}</strong>{" "}
-                    sebagai biaya pengajuan. Jika <strong>disetujui</strong>, {formatRupiah(30000)}{" "}
-                    dikembalikan (biaya admin {formatRupiah(20000)}); jika <strong>ditolak</strong>,{" "}
-                    dikembalikan penuh. Saldo saat ini: <strong>{formatRupiah(balance)}</strong>.
+                    sebagai biaya pengajuan. Jika <strong>disetujui</strong>, biaya tidak
+                    dikembalikan (biaya admin); jika <strong>ditolak</strong>,{" "}
+                    {formatRupiah(40000)} dikembalikan (biaya admin {formatRupiah(10000)}). Saldo
+                    saat ini: <strong>{formatRupiah(balance)}</strong>.
                   </div>
                 ) : (
                   <div className="sh-notice sh-notice--failed" style={{ marginTop: 16 }}>
