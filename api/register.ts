@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { sql, assembleState, readBody } from "./_db.js";
+import { hasEmailProvider, makeOtp, sendVerificationEmail, OTP_TTL_MIN } from "./_email.js";
 
 class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -49,6 +50,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (dupE.length) throw new HttpError(409, "Email sudah terdaftar.");
 
     const initials = initialsOf(name);
+    // Bila provider email aktif: akun dibuat belum terverifikasi + kirim OTP.
+    // Bila belum: fallback — akun langsung terverifikasi (perilaku lama).
+    const provider = hasEmailProvider();
+    const verified = !provider;
     let userId: string;
 
     if (role === "org") {
@@ -60,8 +65,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         returning id`) as any[];
       const orgId = orgRows[0].id;
       const uRows = (await sql`
-        insert into users (name, email, username, password_hash, role, org_id)
-        values (${name}, ${email}, ${username}, crypt(${password}, gen_salt('bf')), 'org', ${orgId})
+        insert into users (name, email, username, password_hash, role, org_id, email_verified)
+        values (${name}, ${email}, ${username}, crypt(${password}, gen_salt('bf')), 'org', ${orgId}, ${verified})
         returning id`) as any[];
       userId = uRows[0].id;
     } else {
@@ -72,10 +77,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         returning id`) as any[];
       const funderId = fRows[0].id;
       const uRows = (await sql`
-        insert into users (name, email, username, password_hash, role, funder_id)
-        values (${name}, ${email}, ${username}, crypt(${password}, gen_salt('bf')), 'funder', ${funderId})
+        insert into users (name, email, username, password_hash, role, funder_id, email_verified)
+        values (${name}, ${email}, ${username}, crypt(${password}, gen_salt('bf')), 'funder', ${funderId}, ${verified})
         returning id`) as any[];
       userId = uRows[0].id;
+    }
+
+    if (provider) {
+      // Simpan kode OTP (di-hash) + kadaluarsa, lalu kirim email.
+      const code = makeOtp();
+      await sql`
+        update users set verify_code = crypt(${code}, gen_salt('bf')),
+          verify_expires = now() + make_interval(mins => ${OTP_TTL_MIN})
+        where id = ${userId}`;
+      const mail = await sendVerificationEmail(email, code);
+      return res.status(200).json({
+        needsVerification: true,
+        email,
+        emailSent: mail.ok,
+        ...(mail.ok ? {} : { emailError: mail.error }),
+      });
     }
 
     res.status(200).json({ userId, state: await assembleState() });

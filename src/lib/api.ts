@@ -29,6 +29,8 @@ export const api = {
       body: JSON.stringify({ username, password }),
     });
     const data = await r.json().catch(() => ({}));
+    if (r.status === 403 && (data as any).needsVerification)
+      return data as { needsVerification: true; email: string };
     if (!r.ok) throw new Error((data as any).error || "Login gagal.");
     return data as { user: { id: string } };
   },
@@ -41,7 +43,36 @@ export const api = {
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error((data as any).error || "Registrasi gagal.");
+    return data as {
+      needsVerification?: true;
+      email?: string;
+      emailSent?: boolean;
+      emailError?: string;
+      userId?: string;
+      state?: AppState;
+    };
+  },
+
+  async verifyEmail(email: string, code: string) {
+    const r = await fetch(`${BASE}/verify-email`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email, code }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error((data as any).error || "Verifikasi gagal.");
     return data as { userId: string; state: AppState };
+  },
+
+  async resendCode(email: string) {
+    const r = await fetch(`${BASE}/resend-code`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error((data as any).error || "Gagal kirim ulang kode.");
+    return data as { ok: true; emailSent: boolean; emailError?: string };
   },
 
   pengajuan: (body: Record<string, unknown>) => post("pengajuan", body),

@@ -8,6 +8,7 @@ import { BrandMark } from "./components/BrandMark";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Verify from "./pages/Verify";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminOrganisasi from "./pages/admin/Organisasi";
@@ -82,6 +83,7 @@ export default function App() {
         <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify" element={<Verify />} />
 
         {/* === Admin === */}
         <Route

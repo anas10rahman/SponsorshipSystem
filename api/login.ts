@@ -13,6 +13,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       limit 1`) as any[];
     if (!rows.length)
       return res.status(401).json({ error: "Username atau kata sandi tidak sesuai." });
+    // Gate: email harus terverifikasi sebelum bisa masuk.
+    if (rows[0].email_verified === false)
+      return res.status(403).json({
+        error: "Email belum diverifikasi. Cek email untuk kode verifikasi.",
+        needsVerification: true,
+        email: rows[0].email,
+      });
     res.status(200).json({ user: mapUser(rows[0]) });
   } catch (e: any) {
     res.status(500).json({ error: String(e?.message || e) });

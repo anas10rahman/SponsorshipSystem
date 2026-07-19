@@ -69,6 +69,10 @@ create table users (
   role       user_role not null,
   org_id     uuid,                                 -- ditautkan ke organizations
   funder_id  uuid,                                 -- ditautkan ke funders
+  -- Verifikasi email (OTP): akun harus verifikasi sebelum bisa login
+  email_verified boolean not null default false,
+  verify_code    text,                             -- kode OTP di-hash (pgcrypto)
+  verify_expires timestamptz,                      -- kadaluarsa kode OTP
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

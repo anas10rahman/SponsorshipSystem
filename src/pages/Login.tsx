@@ -22,6 +22,10 @@ export default function Login() {
     const result = await login(username.trim(), password);
     setBusy(false);
     if (!result.ok) {
+      if (result.needsVerification) {
+        navigate(`/verify?email=${encodeURIComponent(result.email ?? "")}`);
+        return;
+      }
       setError(result.error ?? "Login gagal.");
       return;
     }

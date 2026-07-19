@@ -132,26 +132,70 @@ export function useActions() {
     const actorId = () => currentUser?.id;
 
     return {
-      async login(username: string, password: string): Promise<{ ok: boolean; error?: string }> {
+      async login(
+        username: string,
+        password: string,
+      ): Promise<{ ok: boolean; error?: string; needsVerification?: boolean; email?: string }> {
         try {
-          const { user } = await api.login(username.trim(), password);
-          dispatch({ type: "auth/login", userId: user.id });
+          const res = await api.login(username.trim(), password);
+          if ("needsVerification" in res)
+            return { ok: false, needsVerification: true, email: res.email };
+          dispatch({ type: "auth/login", userId: res.user.id });
           return { ok: true };
         } catch (e: any) {
           return { ok: false, error: String(e?.message || "Login gagal.") };
         }
       },
 
-      async register(
-        payload: Record<string, unknown>,
-      ): Promise<{ ok: boolean; error?: string }> {
+      async register(payload: Record<string, unknown>): Promise<{
+        ok: boolean;
+        error?: string;
+        needsVerification?: boolean;
+        email?: string;
+        emailSent?: boolean;
+        emailError?: string;
+      }> {
         try {
-          const { userId, state } = await api.register(payload);
-          dispatch({ type: "hydrate", data: state }); // masukkan entitas+user baru
-          dispatch({ type: "auth/login", userId }); // langsung login
+          const res = await api.register(payload);
+          if (res.needsVerification)
+            return {
+              ok: true,
+              needsVerification: true,
+              email: res.email,
+              emailSent: res.emailSent,
+              emailError: res.emailError,
+            };
+          // Fallback (provider email belum diset): langsung login.
+          dispatch({ type: "hydrate", data: res.state! });
+          dispatch({ type: "auth/login", userId: res.userId! });
           return { ok: true };
         } catch (e: any) {
           return { ok: false, error: String(e?.message || "Registrasi gagal.") };
+        }
+      },
+
+      async verifyEmail(
+        email: string,
+        code: string,
+      ): Promise<{ ok: boolean; error?: string }> {
+        try {
+          const { userId, state } = await api.verifyEmail(email, code);
+          dispatch({ type: "hydrate", data: state });
+          dispatch({ type: "auth/login", userId }); // verifikasi sukses → langsung login
+          return { ok: true };
+        } catch (e: any) {
+          return { ok: false, error: String(e?.message || "Verifikasi gagal.") };
+        }
+      },
+
+      async resendCode(
+        email: string,
+      ): Promise<{ ok: boolean; error?: string; emailSent?: boolean }> {
+        try {
+          const r = await api.resendCode(email);
+          return { ok: true, emailSent: r.emailSent };
+        } catch (e: any) {
+          return { ok: false, error: String(e?.message || "Gagal kirim ulang kode.") };
         }
       },
 

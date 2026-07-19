@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { BrandMark } from "@/components/BrandMark";
 import { rolePath, useActions, useStore } from "@/lib/store";
+import { useToast } from "@/components/Toast";
 import { Building2, HandCoins, ArrowLeft } from "lucide-react";
 
 type Role = "org" | "funder";
@@ -10,6 +11,7 @@ const FUNDER_TYPES = ["Korporasi", "Individu", "Filantropi", "Perbankan"] as con
 export default function Register() {
   const { currentUser } = useStore();
   const { register } = useActions();
+  const toast = useToast();
   const navigate = useNavigate();
 
   const [role, setRole] = useState<Role | null>(null);
@@ -71,7 +73,13 @@ export default function Register() {
       setError(result.error ?? "Registrasi gagal.");
       return;
     }
-    navigate("/");
+    if (result.needsVerification) {
+      if (result.emailSent === false)
+        toast.failed("Email kode gagal terkirim — coba 'Kirim ulang kode' di halaman berikutnya.");
+      navigate(`/verify?email=${encodeURIComponent(result.email ?? form.email.trim())}`);
+      return;
+    }
+    navigate("/"); // fallback: provider email belum diset → langsung masuk
   };
 
   // --- Langkah 1: pilih peran ---
