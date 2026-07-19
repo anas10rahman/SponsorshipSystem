@@ -1,11 +1,12 @@
+import nodemailer, { type Transporter } from "nodemailer";
 import { randomInt } from "node:crypto";
 
 /** Masa berlaku kode OTP (menit). */
 export const OTP_TTL_MIN = 15;
 
-/** True bila provider email (Resend) sudah dikonfigurasi. */
+/** True bila kredensial Gmail SMTP sudah dikonfigurasi. */
 export function hasEmailProvider(): boolean {
-  return !!process.env.RESEND_API_KEY;
+  return !!(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD);
 }
 
 /** Kode OTP 6 digit. */
@@ -13,14 +14,28 @@ export function makeOtp(): string {
   return String(randomInt(100000, 1000000));
 }
 
-/** Kirim email berisi kode verifikasi via Resend HTTP API (tanpa SDK). */
+let _transporter: Transporter | null = null;
+function transporter(): Transporter {
+  if (!_transporter) {
+    _transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        // App Password sering di-copy dengan spasi — bersihkan.
+        pass: (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, ""),
+      },
+    });
+  }
+  return _transporter;
+}
+
+/** Kirim email berisi kode verifikasi lewat Gmail SMTP (App Password). */
 export async function sendVerificationEmail(
   to: string,
   code: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return { ok: false, error: "no_provider" };
-  const from = process.env.MAIL_FROM || "SponsorHub <onboarding@resend.dev>";
+  if (!hasEmailProvider()) return { ok: false, error: "no_provider" };
+  const from = process.env.MAIL_FROM || `SponsorHub <${process.env.GMAIL_USER}>`;
   const html = `
     <div style="font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:480px;margin:auto;padding:24px">
       <h2 style="margin:0 0 8px">Verifikasi email SponsorHub</h2>
@@ -29,20 +44,12 @@ export async function sendVerificationEmail(
       <p style="color:#999;font-size:12px;margin:20px 0 0">Abaikan email ini jika Anda tidak mendaftar di SponsorHub.</p>
     </div>`;
   try {
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-      body: JSON.stringify({
-        from,
-        to,
-        subject: `Kode verifikasi SponsorHub: ${code}`,
-        html,
-      }),
+    await transporter().sendMail({
+      from,
+      to,
+      subject: `Kode verifikasi SponsorHub: ${code}`,
+      html,
     });
-    if (!r.ok) {
-      const t = await r.text().catch(() => "");
-      return { ok: false, error: `resend ${r.status}: ${t.slice(0, 300)}` };
-    }
     return { ok: true };
   } catch (e: any) {
     return { ok: false, error: String(e?.message || e) };
