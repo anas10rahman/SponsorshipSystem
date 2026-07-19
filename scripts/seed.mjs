@@ -64,12 +64,12 @@ await sql`
   values ('Rani Prameswari', 'organisasi@sponsorhub.test', 'organisasi', crypt(${PW}, gen_salt('bf')), 'org', ${org.id})`;
 await sql`
   insert into users (name, email, username, password_hash, role, funder_id)
-  values ('Budi Santoso', 'pendana@sponsorhub.test', 'pendana', crypt(${PW}, gen_salt('bf')), 'funder', ${f1.id})`;
+  values ('Budi Santoso', 'sinergi@sponsorhub.test', 'sinergi', crypt(${PW}, gen_salt('bf')), 'funder', ${f1.id})`;
 await sql`
   insert into users (name, email, username, password_hash, role, funder_id)
-  values ('Sari Wijaya', 'pendana2@sponsorhub.test', 'pendana2', crypt(${PW}, gen_salt('bf')), 'funder', ${f2.id})`;
+  values ('Sari Wijaya', 'cahaya@sponsorhub.test', 'cahaya', crypt(${PW}, gen_salt('bf')), 'funder', ${f2.id})`;
 await sql`
   insert into users (name, email, username, password_hash, role, funder_id)
-  values ('Andi Pratama', 'pendana3@sponsorhub.test', 'pendana3', crypt(${PW}, gen_salt('bf')), 'funder', ${f3.id})`;
+  values ('Andi Pratama', 'bankdaya@sponsorhub.test', 'bankdaya', crypt(${PW}, gen_salt('bf')), 'funder', ${f3.id})`;
 
 console.log("✓ Seed selesai: 1 organisasi, 3 pendana (+akun login masing-masing), 5 akun login.");
