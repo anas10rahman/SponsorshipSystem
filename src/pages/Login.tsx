@@ -40,9 +40,7 @@ export default function Login() {
           <BrandMark />
         </div>
         <h1 className="sh-login__title">Login Sponsorship</h1>
-        <p className="sh-login__sub">
-          Masuk dengan salah satu akun demo di bawah.
-        </p>
+        <p className="sh-login__sub">Masuk ke akun Anda, atau daftar akun baru.</p>
 
         <div className="sh-field">
           <label className="sh-field__label" htmlFor="username">
@@ -54,7 +52,7 @@ export default function Login() {
             autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Admin / organisasi / bankdaya"
+            placeholder="Username"
           />
         </div>
 
@@ -91,25 +89,11 @@ export default function Login() {
           Registrasi akun baru
         </Link>
 
-        <div className="sh-login__demo">
-          <div style={{ marginBottom: 6 }}>
-            <strong>Akun demo</strong> — kata sandi: <code>Akundemo12345</code>
-          </div>
-          <div>
-            Admin: <code>Admin</code> · Organisasi: <code>organisasi</code>
-          </div>
-          <div style={{ marginTop: 6 }}>
-            Pendana <span className="sh-muted">(1 akun = 1 pendana)</span>:
-            <div style={{ marginTop: 2 }}>
-              <code>bankdaya</code> → Bank Daya
-            </div>
-            <div style={{ marginTop: 2 }}>
-              <code>sinergi</code> → Sinergi Nusantara
-            </div>
-            <div style={{ marginTop: 2 }}>
-              <code>cahaya</code> → Yayasan Cahaya
-            </div>
-          </div>
+        <div className="sh-login__demo" style={{ textAlign: "center" }}>
+          Belum punya akun?{" "}
+          <Link to="/register" style={{ fontWeight: 700 }}>
+            Daftar sebagai organisasi / pendana
+          </Link>
         </div>
       </form>
     </main>
