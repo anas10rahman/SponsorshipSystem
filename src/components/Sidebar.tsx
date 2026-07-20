@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -47,8 +48,19 @@ const ROLE_LABEL: Record<Role, string> = {
 
 export function Sidebar({ role }: { role: Role }) {
   const { logout } = useActions();
-  const { currentUser } = useStore();
+  const { state, currentUser } = useStore();
   const items = NAV[role];
+
+  // Jumlah pengajuan baru yang perlu ditinjau pendana (untuk badge sidebar).
+  const pendingPengajuan = useMemo(() => {
+    if (role !== "funder" || !currentUser?.funderId) return 0;
+    return state.pengajuan.filter(
+      (p) => p.funderId === currentUser.funderId && p.status === "diajukan",
+    ).length;
+  }, [role, currentUser, state.pengajuan]);
+
+  const badgeFor = (to: string) =>
+    to === "/funder/pengajuan" && pendingPengajuan > 0 ? pendingPengajuan : 0;
 
   return (
     <aside className="sh-sidebar">
@@ -69,6 +81,27 @@ export function Sidebar({ role }: { role: Role }) {
           >
             {item.icon}
             <span>{item.label}</span>
+            {badgeFor(item.to) > 0 && (
+              <span
+                style={{
+                  marginLeft: "auto",
+                  background: "var(--status-failed)",
+                  color: "#fff",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  minWidth: 18,
+                  height: 18,
+                  borderRadius: 999,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "0 5px",
+                  lineHeight: 1,
+                }}
+              >
+                {badgeFor(item.to)}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

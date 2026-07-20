@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, CheckCheck, Info } from "lucide-react";
 import { useActions, useStore } from "@/lib/store";
 import { formatDateTime } from "@/lib/format";
@@ -6,6 +7,7 @@ import { formatDateTime } from "@/lib/format";
 export function NotificationsMenu() {
   const { state, currentUser } = useStore();
   const { markNotificationRead } = useActions();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -40,8 +42,15 @@ export function NotificationsMenu() {
       <button
         className="sh-btn sh-btn--ghost sh-btn--icon"
         aria-label={`Notifikasi${unread ? ` (${unread} belum dibaca)` : ""}`}
-        title="Notifikasi"
-        onClick={() => setOpen((v) => !v)}
+        title={currentUser?.role === "funder" ? "Ke Pengajuan masuk" : "Notifikasi"}
+        onClick={() => {
+          // Pendana: bell langsung menuju halaman Pengajuan masuk.
+          if (currentUser?.role === "funder") {
+            navigate("/funder/pengajuan");
+            return;
+          }
+          setOpen((v) => !v);
+        }}
         style={{ position: "relative" }}
       >
         <Bell size={18} />
