@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminOrganisasi from "./pages/admin/Organisasi";
 import AdminPendana from "./pages/admin/Pendana";
+import AdminPengguna from "./pages/admin/Pengguna";
 import AdminLaporan from "./pages/admin/Laporan";
 import AdminPengaturan from "./pages/admin/Pengaturan";
 import AdminPengajuan from "./pages/admin/Pengajuan";
@@ -99,6 +100,7 @@ export default function App() {
           <Route path="/admin/pendana/:id" element={<PendanaProfil />} />
           <Route path="/admin/organisasi" element={<AdminOrganisasi />} />
           <Route path="/admin/pendana" element={<AdminPendana />} />
+          <Route path="/admin/pengguna" element={<AdminPengguna />} />
           <Route path="/admin/laporan" element={<AdminLaporan />} />
           <Route path="/admin/pengaturan" element={<AdminPengaturan />} />
         </Route>

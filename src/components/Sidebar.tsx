@@ -12,6 +12,7 @@ import {
   Send,
   Inbox,
   Wallet,
+  UserCog,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { BrandMark } from "./BrandMark";
@@ -25,6 +26,7 @@ const NAV: Record<Role, Item[]> = {
     { to: "/admin/pengajuan", label: "Pengajuan", icon: <Send size={18} /> },
     { to: "/admin/organisasi", label: "Organisasi", icon: <Building2 size={18} /> },
     { to: "/admin/pendana", label: "Pendana", icon: <Users size={18} /> },
+    { to: "/admin/pengguna", label: "Pengguna", icon: <UserCog size={18} /> },
     { to: "/admin/laporan", label: "Laporan", icon: <FileText size={18} /> },
     { to: "/admin/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],

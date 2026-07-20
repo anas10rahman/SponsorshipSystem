@@ -11,7 +11,7 @@ import { formatRupiah } from "@/lib/format";
 import { selectedAmount } from "@/lib/pengajuan";
 import { orgVerifyBadge } from "@/lib/orgVerify";
 import type { OrgVerificationStatus } from "@/lib/types";
-import { CheckCircle2, XCircle, FileText, ShieldCheck, Trash2 } from "lucide-react";
+import { CheckCircle2, XCircle, FileText, ShieldCheck } from "lucide-react";
 
 type Filter = "semua" | "menunggu" | "terverifikasi" | "ditolak" | "belum_diajukan";
 
@@ -25,7 +25,7 @@ const FILTERS: Array<{ value: Filter; label: string }> = [
 
 export default function AdminOrganisasi() {
   const { state } = useStore();
-  const { verifyOrg, rejectOrg, deleteOrg } = useActions();
+  const { verifyOrg, rejectOrg } = useActions();
   const toast = useToast();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("menunggu");
@@ -33,22 +33,6 @@ export default function AdminOrganisasi() {
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const delTarget = state.organizations.find((o) => o.id === deleteId) ?? null;
-  const doDelete = async () => {
-    if (!delTarget) return;
-    setBusy(true);
-    try {
-      await deleteOrg(delTarget.id);
-      toast.success(`Organisasi "${delTarget.name}" dihapus.`);
-      setDeleteId(null);
-    } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal menghapus."));
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { semua: state.organizations.length };
@@ -174,26 +158,17 @@ export default function AdminOrganisasi() {
                         </td>
                         <td>{sent}</td>
                         <td>
-                          <div className="sh-row" style={{ gap: 4 }}>
-                            <button
-                              className="sh-btn sh-btn--ghost sh-btn--sm"
-                              onClick={() => {
-                                setNote("");
-                                setRejecting(false);
-                                setReviewId(org.id);
-                              }}
-                            >
-                              <ShieldCheck size={14} />
-                              Tinjau
-                            </button>
-                            <button
-                              className="sh-btn sh-btn--ghost sh-btn--icon"
-                              onClick={() => setDeleteId(org.id)}
-                              title="Hapus organisasi"
-                            >
-                              <Trash2 size={14} style={{ color: "var(--status-failed)" }} />
-                            </button>
-                          </div>
+                          <button
+                            className="sh-btn sh-btn--ghost sh-btn--sm"
+                            onClick={() => {
+                              setNote("");
+                              setRejecting(false);
+                              setReviewId(org.id);
+                            }}
+                          >
+                            <ShieldCheck size={14} />
+                            Tinjau
+                          </button>
                         </td>
                       </tr>
                     );
@@ -302,31 +277,6 @@ export default function AdminOrganisasi() {
               />
             </div>
           )}
-        </Modal>
-      )}
-
-      {delTarget && (
-        <Modal
-          open
-          onClose={() => setDeleteId(null)}
-          title="Hapus organisasi?"
-          width={460}
-          footer={
-            <>
-              <button className="sh-btn sh-btn--secondary" onClick={() => setDeleteId(null)} disabled={busy}>
-                Batal
-              </button>
-              <button className="sh-btn sh-btn--danger" onClick={doDelete} disabled={busy}>
-                <Trash2 size={16} />
-                {busy ? "Menghapus…" : "Hapus permanen"}
-              </button>
-            </>
-          }
-        >
-          <p>
-            Organisasi <strong>{delTarget.name}</strong> akan dihapus <strong>permanen</strong> —
-            beserta akun loginnya dan seluruh pengajuannya. Tindakan ini tidak bisa dibatalkan.
-          </p>
         </Modal>
       )}
     </>
