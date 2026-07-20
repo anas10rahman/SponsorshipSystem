@@ -23,6 +23,9 @@ export type OrgPic = {
   idDocUrl: string; // KTP/KTM (PDF) — wajib
 };
 
+/** Status verifikasi organisasi oleh admin (gate pengajuan). */
+export type OrgVerificationStatus = "belum_diajukan" | "menunggu" | "terverifikasi" | "ditolak";
+
 export type Organization = {
   id: string;
   name: string;
@@ -31,6 +34,8 @@ export type Organization = {
   logoInitials: string;
   logoUrl?: string; // logo organisasi (data URL/base64) — opsional, fallback ke inisial
   verified: boolean;
+  verificationStatus: OrgVerificationStatus;
+  verificationNote?: string; // alasan bila ditolak admin
   legalDocs: string[];
   payoutAccount: string;
   balance: number; // saldo untuk biaya pengajuan
@@ -223,7 +228,10 @@ export type NotificationType =
   | "pengajuan.diajukan"
   | "pengajuan.disetujui"
   | "pengajuan.ditolak"
-  | "pengajuan.revisi";
+  | "pengajuan.revisi"
+  | "verifikasi.diajukan"
+  | "verifikasi.disetujui"
+  | "verifikasi.ditolak";
 
 export type Notification = {
   id: string;

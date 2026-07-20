@@ -43,6 +43,8 @@ export function mapOrg(r: any) {
     logoInitials: r.logo_initials,
     logoUrl: r.logo_url ?? undefined,
     verified: r.verified,
+    verificationStatus: r.verification_status ?? "belum_diajukan",
+    verificationNote: r.verification_note ?? undefined,
     legalDocs: r.legal_docs ?? [],
     payoutAccount: r.payout_account,
     balance: Number(r.balance),

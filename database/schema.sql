@@ -54,8 +54,14 @@ create type notification_type as enum (
   'pengajuan.diajukan',
   'pengajuan.disetujui',
   'pengajuan.ditolak',
-  'pengajuan.revisi'
+  'pengajuan.revisi',
+  'verifikasi.diajukan',
+  'verifikasi.disetujui',
+  'verifikasi.ditolak'
 );
+
+-- Status verifikasi organisasi oleh admin (gate pengajuan)
+create type org_verify_status as enum ('belum_diajukan', 'menunggu', 'terverifikasi', 'ditolak');
 
 -- ============================================================
 -- USERS
@@ -88,6 +94,9 @@ create table organizations (
   logo_initials   text not null,                   -- contoh "YS"
   logo_url        text,                             -- logo organisasi (URL/base64), opsional
   verified        boolean not null default false,
+  -- Verifikasi oleh admin (gate pengajuan); verified disinkron dgn status
+  verification_status org_verify_status not null default 'belum_diajukan',
+  verification_note   text,                          -- alasan bila ditolak
   legal_docs      text[] not null default '{}',    -- nama berkas / URL
   payout_account  text not null,                   -- contoh "BCA 0123456789"
   balance         numeric(16, 2) not null default 0 check (balance >= 0), -- saldo biaya pengajuan

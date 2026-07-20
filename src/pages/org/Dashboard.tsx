@@ -5,6 +5,7 @@ import { Hero } from "@/components/Hero";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
+import { OrgVerifyBanner } from "@/components/OrgVerifyBanner";
 import { useStore } from "@/lib/store";
 import { formatRupiah, formatDate } from "@/lib/format";
 import { pengajuanBadge, pengajuanAmountLabel, packageCountLabel, selectedAmount } from "@/lib/pengajuan";
@@ -23,12 +24,15 @@ export default function OrgDashboard() {
   const totalApproved = approved.reduce((s, p) => s + selectedAmount(p), 0);
   const recent = mine.slice(0, 6);
   const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
+  const org = state.organizations.find((o) => o.id === orgId);
 
   return (
     <>
       <Topbar title="Dashboard Organisasi" />
       <div className="sh-shell__content">
         <Hero />
+
+        {org && <OrgVerifyBanner org={org} />}
 
         <div className="sh-stat-grid">
           <StatCard

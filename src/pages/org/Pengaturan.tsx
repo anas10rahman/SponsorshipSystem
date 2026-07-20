@@ -29,6 +29,7 @@ export default function OrgPengaturan() {
   const org = state.organizations.find((o) => o.id === currentUser?.orgId);
   const fileRef = useRef<HTMLInputElement>(null);
   const logoRef = useRef<HTMLInputElement>(null);
+  const legalRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<Organization | null>(org ?? null);
 
@@ -52,6 +53,22 @@ export default function OrgPengaturan() {
     setPic({ idDocUrl: file.name });
     toast.success(`Berkas "${file.name}" dipilih.`);
   };
+
+  const onPickLegal = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (legalRef.current) legalRef.current.value = "";
+    const names = files
+      .filter((f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf"))
+      .map((f) => f.name)
+      .filter((n) => !(form.legalDocs ?? []).includes(n));
+    if (names.length < files.length) toast.failed("Sebagian dilewati — hanya PDF & tanpa duplikat.");
+    if (names.length) {
+      set({ legalDocs: [...(form.legalDocs ?? []), ...names] });
+      toast.success(`${names.length} dokumen legal ditambahkan.`);
+    }
+  };
+  const removeLegal = (i: number) =>
+    set({ legalDocs: (form.legalDocs ?? []).filter((_, idx) => idx !== i) });
 
   const onPickLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -382,6 +399,68 @@ export default function OrgPengaturan() {
                     </span>
                   </button>
                 )}
+              </div>
+
+              {/* Dokumen legalitas (akta/SK) — untuk verifikasi admin */}
+              <div style={{ marginTop: 18 }}>
+                <label className="sh-field__label" style={{ display: "block", marginBottom: 4 }}>
+                  Dokumen legalitas (akta/SK) <Req />
+                </label>
+                <div className="sh-muted" style={{ fontSize: 12, marginBottom: 8 }}>
+                  Bukti legalitas organisasi (PDF, boleh lebih dari satu). Diperlukan untuk verifikasi admin.
+                </div>
+                <input
+                  ref={legalRef}
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={onPickLegal}
+                />
+                {(form.legalDocs ?? []).length > 0 && (
+                  <div style={{ display: "grid", gap: 8, marginBottom: 10 }}>
+                    {form.legalDocs.map((name, i) => (
+                      <div
+                        key={i}
+                        className="sh-row sh-row--between"
+                        style={{
+                          padding: "12px 14px",
+                          border: "1px solid var(--line)",
+                          borderRadius: "var(--radius-md)",
+                          background: "var(--canvas-soft)",
+                        }}
+                      >
+                        <div className="sh-row" style={{ gap: 10, minWidth: 0 }}>
+                          <FileText size={18} style={{ color: "var(--status-failed)", flex: "none" }} />
+                          <span style={{ fontWeight: 600, wordBreak: "break-all" }}>{name}</span>
+                        </div>
+                        <button
+                          className="sh-btn sh-btn--ghost sh-btn--icon"
+                          onClick={() => removeLegal(i)}
+                          title="Hapus berkas"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className="sh-file-drop"
+                  style={{ width: "100%", cursor: "pointer" }}
+                  onClick={() => legalRef.current?.click()}
+                >
+                  <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
+                  <span>
+                    {(form.legalDocs ?? []).length > 0
+                      ? "Tambah dokumen legal."
+                      : "Klik untuk unggah dokumen legal."}
+                  </span>
+                  <span className="sh-muted" style={{ fontSize: 12 }}>
+                    Bisa lebih dari satu · hanya PDF.
+                  </span>
+                </button>
               </div>
             </div>
           </section>

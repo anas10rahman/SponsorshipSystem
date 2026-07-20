@@ -98,6 +98,7 @@ export default function BuatPengajuan() {
   const funder = state.funders.find((f) => f.id === form.funderId);
   const org = state.organizations.find((o) => o.id === orgId);
   const balance = org?.balance ?? 0;
+  const notVerified = !!org && org.verificationStatus !== "terverifikasi";
   const isFirstSubmit = form.status === "draf";
   const feeDue = isFirstSubmit ? SUBMISSION_FEE : 0;
   const balanceOk = balance >= feeDue;
@@ -249,6 +250,11 @@ export default function BuatPengajuan() {
   };
 
   const finalSubmit = async () => {
+    if (org && org.verificationStatus !== "terverifikasi") {
+      toast.failed("Organisasi belum terverifikasi admin. Ajukan verifikasi dulu di Dashboard.");
+      navigate("/org/dashboard");
+      return;
+    }
     if (!stepValid(0)) {
       toast.failed("Masih ada kolom wajib yang kosong.");
       setStep(0);
@@ -653,6 +659,17 @@ export default function BuatPengajuan() {
                   </div>
                 ))}
 
+              {notVerified && (
+                <div className="sh-notice sh-notice--failed" style={{ marginTop: 12 }}>
+                  Organisasi Anda belum terverifikasi admin, jadi pengajuan belum bisa dikirim. Draf
+                  tetap bisa disimpan.{" "}
+                  <Link to="/org/dashboard" style={{ fontWeight: 700 }}>
+                    Ajukan verifikasi di Dashboard
+                  </Link>
+                  .
+                </div>
+              )}
+
               <div className="sh-notice sh-notice--info" style={{ marginTop: 12 }}>
                 Setelah dikirim, pengajuan masuk ke pendana untuk ditinjau. Pendana memilih
                 salah satu paket lalu menyetujui, atau menolak/meminta revisi.
@@ -682,8 +699,12 @@ export default function BuatPengajuan() {
               <button
                 className="sh-btn sh-btn--primary"
                 onClick={finalSubmit}
-                disabled={feeDue > 0 && !balanceOk}
-                style={feeDue > 0 && !balanceOk ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
+                disabled={(feeDue > 0 && !balanceOk) || notVerified}
+                style={
+                  (feeDue > 0 && !balanceOk) || notVerified
+                    ? { opacity: 0.55, cursor: "not-allowed" }
+                    : undefined
+                }
               >
                 <Send size={16} />
                 Kirim pengajuan

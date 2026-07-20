@@ -71,6 +71,7 @@ export function createSeedState(): AppState {
         city: "Jakarta",
         logoInitials: "YS",
         verified: true,
+        verificationStatus: "terverifikasi",
         legalDocs: ["akta-yayasan.pdf", "skt-kemenkumham.pdf"],
         payoutAccount: "BCA 0123456789",
         balance: 100_000,

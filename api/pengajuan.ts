@@ -142,6 +142,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await sql.transaction(tx);
     } else if (op === "submit") {
       const p = b.pengajuan;
+      // Gate: organisasi wajib terverifikasi admin sebelum boleh mengirim pengajuan.
+      const org = (await sql`select verification_status from organizations where id = ${p.orgId} limit 1`) as any[];
+      if (org[0]?.verification_status !== "terverifikasi")
+        throw new HttpError(400, "Organisasi belum terverifikasi admin. Ajukan verifikasi dulu sebelum mengirim pengajuan.");
       const existing = (await sql`select status from pengajuan where id = ${p.id} limit 1`) as any[];
       const isFirst = !existing.length || existing[0].status === "draf";
       if (isFirst) {

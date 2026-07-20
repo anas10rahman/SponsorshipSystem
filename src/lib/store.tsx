@@ -228,6 +228,18 @@ export function useActions() {
         if (!currentUser?.orgId || amount <= 0) return;
         apply(await api.org({ op: "topup", orgId: currentUser.orgId, amount }));
       },
+      // Organisasi mengajukan verifikasi ke admin.
+      async requestOrgVerification() {
+        if (!currentUser?.orgId) return;
+        apply(await api.org({ op: "request_verification", orgId: currentUser.orgId, actorId: actorId() }));
+      },
+      // Admin: verifikasi / tolak organisasi.
+      async verifyOrg(orgId: string) {
+        apply(await api.org({ op: "verify_org", orgId, actorId: actorId() }));
+      },
+      async rejectOrg(orgId: string, note: string) {
+        apply(await api.org({ op: "reject_org", orgId, note, actorId: actorId() }));
+      },
 
       // ---- Pendana ----
       async updateFunderProfile(funder: Funder) {
