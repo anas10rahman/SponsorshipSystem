@@ -281,6 +281,8 @@ export default function PendanaProfil() {
           />
         </div>
 
+        {/* Rekam jejak & kapasitas anggaran — privat: hanya pendana sendiri */}
+        {isSelf && (
         <div className="sh-detail-layout">
           {/* Rekam jejak */}
           <section className="sh-card">
@@ -350,6 +352,7 @@ export default function PendanaProfil() {
             </aside>
           )}
         </div>
+        )}
       </div>
     </>
   );
