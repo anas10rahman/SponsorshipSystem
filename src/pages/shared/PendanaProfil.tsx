@@ -322,8 +322,8 @@ export default function PendanaProfil() {
             )}
           </section>
 
-          {/* Kapasitas anggaran — hanya untuk admin & pendana sendiri, bukan sisi organisasi */}
-          {!isOrgViewer && (
+          {/* Kapasitas anggaran — privat: hanya pendana sendiri yang bisa melihat */}
+          {isSelf && (
             <aside className="sh-card">
               <header className="sh-card__header">
                 <h3>Kapasitas anggaran</h3>

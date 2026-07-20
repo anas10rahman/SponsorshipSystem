@@ -4,6 +4,7 @@ import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { useStore, useActions } from "@/lib/store";
 import { useToast } from "@/components/Toast";
+import { CurrencyInput } from "@/components/CurrencyInput";
 import { initials } from "@/lib/format";
 import type { Funder, FunderType } from "@/lib/types";
 import {
@@ -212,6 +213,16 @@ export default function FunderPengaturan() {
                     value={focusText}
                     onChange={(e) => setFocusText(e.target.value)}
                     placeholder="Teknologi, Edukasi, Olahraga"
+                  />
+                </Field>
+                <Field
+                  label="Anggaran total"
+                  hint="Kapasitas dana yang Anda sediakan. Hanya Anda yang bisa melihat."
+                >
+                  <CurrencyInput
+                    value={form.budgetTotal}
+                    onChange={(n) => set({ budgetTotal: n })}
+                    placeholder="Misal: 500.000.000"
                   />
                 </Field>
                 <div className="sh-field sh-field--wide">
