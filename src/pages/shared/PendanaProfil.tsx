@@ -18,7 +18,6 @@ import { ContactLine } from "@/components/ContactLine";
 import {
   ArrowLeft,
   Send,
-  Wallet,
   CheckCircle2,
   Building2,
   HandCoins,
@@ -263,13 +262,6 @@ export default function PendanaProfil() {
 
         {/* Stats — informasi dana pendana disembunyikan dari sisi organisasi */}
         <div className="sh-stat-grid">
-          {!isOrgViewer && (
-            <StatCard
-              label="Sisa anggaran"
-              value={formatRupiah(funder.budgetRemaining)}
-              icon={<Wallet size={20} />}
-            />
-          )}
           <StatCard
             label="Pengajuan disetujui"
             value={stats?.approved.length ?? 0}
