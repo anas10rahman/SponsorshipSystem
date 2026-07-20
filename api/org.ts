@@ -97,6 +97,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (oUser)
         tx.push(notifQ(oUser, "verifikasi.ditolak", `Verifikasi organisasi "${o.name}" ditolak: ${note}`));
       await sql.transaction(tx);
+    } else if (b.op === "delete_org") {
+      // Admin hapus organisasi: hapus akun login + transaksi dulu (FK), lalu
+      // organisasi (pengajuan & turunannya ikut cascade).
+      await getOrg(b.orgId); // pastikan ada (404 bila tidak)
+      await sql.transaction([
+        sql`delete from transactions where org_id = ${b.orgId}`,
+        sql`delete from users where org_id = ${b.orgId}`,
+        sql`delete from organizations where id = ${b.orgId}`,
+      ]);
     } else {
       return res.status(400).json({ error: "op tidak dikenal" });
     }

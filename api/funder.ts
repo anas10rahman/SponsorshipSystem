@@ -22,6 +22,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           pic_name = ${f.pic.name}, pic_phone = ${f.pic.phone},
           pic_position = ${f.pic.position}, pic_email = ${f.pic.email}
         where id = ${f.id}`;
+    } else if (b.op === "delete_funder") {
+      // Admin hapus pendana: hapus akun login + transaksi dulu (FK), lalu
+      // pendana (pengajuan & proposal_supporters ikut cascade).
+      const exists = (await sql`select 1 from funders where id = ${b.funderId} limit 1`) as any[];
+      if (!exists.length) return res.status(404).json({ error: "Pendana tidak ditemukan." });
+      await sql.transaction([
+        sql`delete from transactions where funder_id = ${b.funderId}`,
+        sql`delete from users where funder_id = ${b.funderId}`,
+        sql`delete from funders where id = ${b.funderId}`,
+      ]);
     } else {
       return res.status(400).json({ error: "op tidak dikenal" });
     }

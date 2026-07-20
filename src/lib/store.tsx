@@ -240,6 +240,14 @@ export function useActions() {
       async rejectOrg(orgId: string, note: string) {
         apply(await api.org({ op: "reject_org", orgId, note, actorId: actorId() }));
       },
+      // Admin: hapus organisasi (beserta akun & data terkait).
+      async deleteOrg(orgId: string) {
+        apply(await api.org({ op: "delete_org", orgId, actorId: actorId() }));
+      },
+      // Admin: hapus pendana (beserta akun & data terkait).
+      async deleteFunder(funderId: string) {
+        apply(await api.funder({ op: "delete_funder", funderId, actorId: actorId() }));
+      },
 
       // ---- Pendana ----
       async updateFunderProfile(funder: Funder) {

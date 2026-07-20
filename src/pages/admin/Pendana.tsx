@@ -3,12 +3,34 @@ import { Link } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
-import { useStore } from "@/lib/store";
+import { Modal } from "@/components/Modal";
+import { useActions, useStore } from "@/lib/store";
+import { useToast } from "@/components/Toast";
 import { formatRupiah, percent } from "@/lib/format";
+import { Trash2 } from "lucide-react";
 
 export default function AdminPendana() {
   const { state } = useStore();
+  const { deleteFunder } = useActions();
+  const toast = useToast();
   const [search, setSearch] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const delTarget = state.funders.find((f) => f.id === deleteId) ?? null;
+  const doDelete = async () => {
+    if (!delTarget) return;
+    setBusy(true);
+    try {
+      await deleteFunder(delTarget.id);
+      toast.success(`Pendana "${delTarget.name}" dihapus.`);
+      setDeleteId(null);
+    } catch (e: any) {
+      toast.failed(String(e?.message || "Gagal menghapus."));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -44,6 +66,7 @@ export default function AdminPendana() {
                     <th>Anggaran total</th>
                     <th>Sisa anggaran</th>
                     <th style={{ width: 180 }}>Penggunaan</th>
+                    <th style={{ width: 60 }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -72,6 +95,15 @@ export default function AdminPendana() {
                             <span>{pct}% terpakai</span>
                           </div>
                         </td>
+                        <td>
+                          <button
+                            className="sh-btn sh-btn--ghost sh-btn--icon"
+                            onClick={() => setDeleteId(f.id)}
+                            title="Hapus pendana"
+                          >
+                            <Trash2 size={14} style={{ color: "var(--status-failed)" }} />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -81,6 +113,32 @@ export default function AdminPendana() {
           )}
         </section>
       </div>
+
+      {delTarget && (
+        <Modal
+          open
+          onClose={() => setDeleteId(null)}
+          title="Hapus pendana?"
+          width={460}
+          footer={
+            <>
+              <button className="sh-btn sh-btn--secondary" onClick={() => setDeleteId(null)} disabled={busy}>
+                Batal
+              </button>
+              <button className="sh-btn sh-btn--danger" onClick={doDelete} disabled={busy}>
+                <Trash2 size={16} />
+                {busy ? "Menghapus…" : "Hapus permanen"}
+              </button>
+            </>
+          }
+        >
+          <p>
+            Pendana <strong>{delTarget.name}</strong> akan dihapus <strong>permanen</strong> —
+            beserta akun loginnya dan seluruh pengajuan yang masuk ke pendana ini. Tindakan ini
+            tidak bisa dibatalkan.
+          </p>
+        </Modal>
+      )}
     </>
   );
 }
