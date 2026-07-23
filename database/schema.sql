@@ -106,8 +106,9 @@ create table organizations (
   description     text not null default '',
   website         text,
   instagram       text,
-  twitter         text,                              -- X
-  facebook        text,
+  twitter         text,                              -- X (legacy)
+  facebook        text,                              -- legacy
+  tiktok          text,
   -- Penanggung jawab (PIC)
   pic_name        text not null default '',
   pic_phone       text not null default '',          -- no.WA aktif PIC

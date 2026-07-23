@@ -252,13 +252,6 @@ export default function AdminOrganisasi() {
 
           <h4 style={{ margin: "14px 0 8px" }}>Dokumen</h4>
           <DocRow label="KTP/KTM PIC" name={review.pic.idDocUrl} />
-          {(review.legalDocs ?? []).length === 0 ? (
-            <DocRow label="Dokumen legal" name="" />
-          ) : (
-            review.legalDocs.map((n, i) => (
-              <DocRow key={i} label={i === 0 ? "Dokumen legal" : ""} name={n} />
-            ))
-          )}
 
           {review.verificationStatus === "ditolak" && review.verificationNote && (
             <div className="sh-notice sh-notice--failed" style={{ marginTop: 12 }}>

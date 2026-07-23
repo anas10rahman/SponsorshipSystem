@@ -45,8 +45,9 @@ export type Organization = {
   description: string;
   website?: string;
   instagram?: string;
-  twitter?: string; // X
-  facebook?: string;
+  tiktok?: string;
+  twitter?: string; // X (legacy)
+  facebook?: string; // legacy
   // Penanggung jawab
   pic: OrgPic;
 };

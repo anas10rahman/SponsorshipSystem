@@ -53,6 +53,7 @@ export function mapOrg(r: any) {
     description: r.description ?? "",
     website: r.website ?? undefined,
     instagram: r.instagram ?? undefined,
+    tiktok: r.tiktok ?? undefined,
     twitter: r.twitter ?? undefined,
     facebook: r.facebook ?? undefined,
     pic: {

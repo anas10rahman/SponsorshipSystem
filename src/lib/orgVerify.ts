@@ -1,10 +1,9 @@
 import type { Organization, OrgVerificationStatus } from "./types";
 
 /** Cek kelengkapan data pendaftaran organisasi (syarat "Ajukan verifikasi").
- *  Wajib: dokumen legal, KTP/KTM PIC, rekening pencairan, data PIC lengkap. */
+ *  Wajib: KTP/KTM PIC, rekening pencairan, data PIC lengkap. */
 export function orgDataComplete(org: Organization): { complete: boolean; missing: string[] } {
   const missing: string[] = [];
-  if (!(org.legalDocs?.length > 0)) missing.push("Dokumen legal (akta/SK)");
   if (!org.pic?.idDocUrl?.trim()) missing.push("KTP/KTM penanggung jawab");
   if (!org.payoutAccount?.trim()) missing.push("Rekening pencairan");
   const picOk =

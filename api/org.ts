@@ -26,9 +26,7 @@ async function adminUserIds(): Promise<string[]> {
 
 /* Data pendaftaran lengkap? (syarat ajukan verifikasi) — pakai baris DB (snake_case). */
 function orgRowComplete(o: any): boolean {
-  const legalOk = Array.isArray(o.legal_docs) && o.legal_docs.length > 0;
   return (
-    legalOk &&
     !!String(o.pic_id_doc_url || "").trim() &&
     !!String(o.payout_account || "").trim() &&
     !!String(o.pic_name || "").trim() &&
@@ -51,6 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           logo_initials = ${o.logoInitials}, logo_url = ${o.logoUrl ?? null},
           email = ${o.email}, description = ${o.description},
           website = ${o.website ?? null}, instagram = ${o.instagram ?? null},
+          tiktok = ${o.tiktok ?? null},
           twitter = ${o.twitter ?? null}, facebook = ${o.facebook ?? null},
           payout_account = ${o.payoutAccount}, phone = ${o.phone},
           legal_docs = ${o.legalDocs ?? []},
@@ -67,7 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (o.verification_status === "terverifikasi")
         throw new HttpError(400, "Organisasi sudah terverifikasi.");
       if (!orgRowComplete(o))
-        throw new HttpError(400, "Lengkapi dulu data pendaftaran (dokumen legal, KTP/KTM, rekening, PIC).");
+        throw new HttpError(400, "Lengkapi dulu data pendaftaran (KTP/KTM, rekening, PIC).");
       const tx: any[] = [
         sql`update organizations set verification_status = 'menunggu', verification_note = null, updated_at = now() where id = ${b.orgId}`,
       ];

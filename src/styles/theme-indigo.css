@@ -80,8 +80,9 @@
 }
 
 /* ---------- Topbar: bersih, tanpa border ---------- */
+/* Opaque (samakan dgn area konten) supaya sticky menutup konten saat scroll. */
 .sh-topbar {
-  background: transparent;
+  background: var(--canvas-soft);
   border-bottom: 0;
 }
 .sh-topbar__title {

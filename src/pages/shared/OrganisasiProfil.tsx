@@ -27,8 +27,7 @@ import {
   Mail,
   Globe,
   Instagram,
-  Twitter,
-  Facebook,
+  Music2,
   Phone,
   Lock,
   IdCard,
@@ -190,21 +189,16 @@ export default function OrganisasiProfil() {
               )}
             </div>
 
-            {(org.instagram || org.twitter || org.facebook) && (
+            {(org.instagram || org.tiktok) && (
               <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
                 {org.instagram && (
                   <span className="sh-chip" style={{ cursor: "default" }}>
                     <Instagram size={14} /> {org.instagram}
                   </span>
                 )}
-                {org.twitter && (
+                {org.tiktok && (
                   <span className="sh-chip" style={{ cursor: "default" }}>
-                    <Twitter size={14} /> {org.twitter}
-                  </span>
-                )}
-                {org.facebook && (
-                  <span className="sh-chip" style={{ cursor: "default" }}>
-                    <Facebook size={14} /> {org.facebook}
+                    <Music2 size={14} /> {org.tiktok}
                   </span>
                 )}
               </div>
