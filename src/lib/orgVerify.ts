@@ -1,9 +1,10 @@
 import type { Organization, OrgVerificationStatus } from "./types";
 
 /** Cek kelengkapan data pendaftaran organisasi (syarat "Ajukan verifikasi").
- *  Wajib: KTP/KTM PIC, rekening pencairan, data PIC lengkap. */
+ *  Wajib: company profile, KTP/KTM PIC, rekening pencairan, data PIC lengkap. */
 export function orgDataComplete(org: Organization): { complete: boolean; missing: string[] } {
   const missing: string[] = [];
+  if (!org.comproUrl?.trim()) missing.push("Company profile (compro)");
   if (!org.pic?.idDocUrl?.trim()) missing.push("KTP/KTM penanggung jawab");
   if (!org.payoutAccount?.trim()) missing.push("Rekening pencairan");
   const picOk =

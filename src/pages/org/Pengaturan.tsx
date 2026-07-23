@@ -28,6 +28,7 @@ export default function OrgPengaturan() {
   const org = state.organizations.find((o) => o.id === currentUser?.orgId);
   const fileRef = useRef<HTMLInputElement>(null);
   const logoRef = useRef<HTMLInputElement>(null);
+  const comproRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<Organization | null>(org ?? null);
 
@@ -49,6 +50,20 @@ export default function OrgPengaturan() {
       return;
     }
     setPic({ idDocUrl: file.name });
+    toast.success(`Berkas "${file.name}" dipilih.`);
+  };
+
+  const onPickCompro = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const isPdf =
+      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      toast.failed("Company profile harus berformat PDF.");
+      if (comproRef.current) comproRef.current.value = "";
+      return;
+    }
+    set({ comproUrl: file.name });
     toast.success(`Berkas "${file.name}" dipilih.`);
   };
 
@@ -274,6 +289,66 @@ export default function OrgPengaturan() {
                   />
                 </Field>
               </div>
+            </div>
+          </section>
+
+          {/* ============ Company profile (compro) ============ */}
+          <section className="sh-card">
+            <header className="sh-card__header">
+              <h3>
+                Company profile (compro) <Req />
+              </h3>
+              <span className="sh-muted" style={{ fontSize: 12 }}>
+                PDF · diperlukan untuk verifikasi admin
+              </span>
+            </header>
+            <div className="sh-card__body">
+              <input
+                ref={comproRef}
+                type="file"
+                accept="application/pdf,.pdf"
+                style={{ display: "none" }}
+                onChange={onPickCompro}
+              />
+              {form.comproUrl ? (
+                <div
+                  className="sh-row sh-row--between"
+                  style={{
+                    padding: "14px 16px",
+                    border: "1px solid var(--line)",
+                    borderRadius: "var(--radius-md)",
+                    background: "var(--canvas-soft)",
+                  }}
+                >
+                  <div className="sh-row" style={{ gap: 10, minWidth: 0 }}>
+                    <FileText size={20} style={{ color: "var(--status-failed)", flex: "none" }} />
+                    <span style={{ fontWeight: 600, wordBreak: "break-all" }}>{form.comproUrl}</span>
+                  </div>
+                  <button
+                    className="sh-btn sh-btn--ghost sh-btn--icon"
+                    onClick={() => {
+                      set({ comproUrl: "" });
+                      if (comproRef.current) comproRef.current.value = "";
+                    }}
+                    title="Hapus berkas"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="sh-file-drop"
+                  style={{ width: "100%", cursor: "pointer" }}
+                  onClick={() => comproRef.current?.click()}
+                >
+                  <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
+                  <span>Klik untuk unggah company profile.</span>
+                  <span className="sh-muted" style={{ fontSize: 12 }}>
+                    Wajib diisi · hanya format PDF.
+                  </span>
+                </button>
+              )}
             </div>
           </section>
 

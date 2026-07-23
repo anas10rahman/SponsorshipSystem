@@ -36,6 +36,7 @@ export type Organization = {
   verified: boolean;
   verificationStatus: OrgVerificationStatus;
   verificationNote?: string; // alasan bila ditolak admin
+  comproUrl?: string; // Company profile (PDF) — wajib untuk verifikasi
   legalDocs: string[];
   payoutAccount: string;
   balance: number; // saldo untuk biaya pengajuan

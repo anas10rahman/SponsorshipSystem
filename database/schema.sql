@@ -109,6 +109,7 @@ create table organizations (
   twitter         text,                              -- X (legacy)
   facebook        text,                              -- legacy
   tiktok          text,
+  compro_url      text,                              -- Company profile (PDF) — wajib verifikasi
   -- Penanggung jawab (PIC)
   pic_name        text not null default '',
   pic_phone       text not null default '',          -- no.WA aktif PIC
