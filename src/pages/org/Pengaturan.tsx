@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
+import { RekeningValidator } from "@/components/RekeningValidator";
 import { useStore, useActions } from "@/lib/store";
 import { useToast } from "@/components/Toast";
 import { initials } from "@/lib/format";
@@ -242,12 +243,11 @@ export default function OrgPengaturan() {
                   label="Nomor rekening pencairan"
                   required
                   icon={<CreditCard size={14} />}
-                  hint="Rekening tujuan dana sponsorship (hanya admin & organisasi yang melihat)"
+                  hint="Masukkan nomor lalu klik Validasi untuk cek Bank & nama pemilik"
                 >
-                  <input
+                  <RekeningValidator
                     value={form.payoutAccount}
-                    onChange={(e) => set({ payoutAccount: e.target.value })}
-                    placeholder="Misal: BCA 0123456789 a.n. Yayasan"
+                    onChange={(v) => set({ payoutAccount: v })}
                   />
                 </Field>
                 <div className="sh-field sh-field--wide">
