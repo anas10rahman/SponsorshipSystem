@@ -6,7 +6,7 @@ import { Empty } from "@/components/Empty";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useStore } from "@/lib/store";
-import { formatRupiah, initials, percent } from "@/lib/format";
+import { formatRupiah, initials, percent, waLink } from "@/lib/format";
 import {
   hasPengajuanBetween,
   maskPhone,
@@ -230,7 +230,9 @@ export default function PendanaProfil() {
                 </div>
                 {canSeeContact ? (
                   <a
-                    href={`tel:${funder.pic.phone.replace(/\D/g, "")}`}
+                    href={waLink(funder.pic.phone)}
+                    target="_blank"
+                    rel="noreferrer"
                     className="sh-meta-value"
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >

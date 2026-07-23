@@ -252,25 +252,25 @@ export default function OrgPengaturan() {
             <div className="sh-form-section">
               <h4 style={{ marginBottom: 14 }}>Website & sosial media</h4>
               <div className="sh-form-grid">
-                <Field label="Website" icon={<Globe size={14} />}>
+                <Field label="Website" icon={<Globe size={14} />} hint="Tempel link lengkap (https://…)">
                   <input
                     value={form.website ?? ""}
                     onChange={(e) => set({ website: e.target.value })}
-                    placeholder="organisasi.org"
+                    placeholder="https://organisasi.org"
                   />
                 </Field>
-                <Field label="Instagram" icon={<Instagram size={14} />}>
+                <Field label="Instagram" icon={<Instagram size={14} />} hint="Tempel link, bukan username">
                   <input
                     value={form.instagram ?? ""}
                     onChange={(e) => set({ instagram: e.target.value })}
-                    placeholder="@organisasi"
+                    placeholder="https://instagram.com/organisasi"
                   />
                 </Field>
-                <Field label="TikTok" icon={<Music2 size={14} />}>
+                <Field label="TikTok" icon={<Music2 size={14} />} hint="Tempel link, bukan username">
                   <input
                     value={form.tiktok ?? ""}
                     onChange={(e) => set({ tiktok: e.target.value })}
-                    placeholder="@organisasi"
+                    placeholder="https://tiktok.com/@organisasi"
                   />
                 </Field>
               </div>

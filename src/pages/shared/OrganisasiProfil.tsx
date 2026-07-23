@@ -3,12 +3,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
-import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ContactLine } from "@/components/ContactLine";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
-import { formatRupiah, formatDate } from "@/lib/format";
+import { formatRupiah, formatDate, waLink } from "@/lib/format";
 import {
   hasPengajuanBetween,
   maskPhone,
@@ -19,9 +18,6 @@ import {
 } from "@/lib/pengajuan";
 import {
   ArrowLeft,
-  Wallet,
-  Send,
-  CheckCircle2,
   MapPin,
   FileText,
   Mail,
@@ -184,7 +180,14 @@ export default function OrganisasiProfil() {
                   <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
                     <Globe size={13} /> Website
                   </div>
-                  <div className="sh-meta-value">{org.website}</div>
+                  <a
+                    href={org.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="sh-meta-value"
+                  >
+                    {org.website}
+                  </a>
                 </div>
               )}
             </div>
@@ -192,14 +195,19 @@ export default function OrganisasiProfil() {
             {(org.instagram || org.tiktok) && (
               <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
                 {org.instagram && (
-                  <span className="sh-chip" style={{ cursor: "default" }}>
-                    <Instagram size={14} /> {org.instagram}
-                  </span>
+                  <a
+                    href={org.instagram}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="sh-chip"
+                  >
+                    <Instagram size={14} /> Instagram
+                  </a>
                 )}
                 {org.tiktok && (
-                  <span className="sh-chip" style={{ cursor: "default" }}>
-                    <Music2 size={14} /> {org.tiktok}
-                  </span>
+                  <a href={org.tiktok} target="_blank" rel="noreferrer" className="sh-chip">
+                    <Music2 size={14} /> TikTok
+                  </a>
                 )}
               </div>
             )}
@@ -227,7 +235,9 @@ export default function OrganisasiProfil() {
                 </div>
                 {canSeeContact ? (
                   <a
-                    href={`tel:${org.pic.phone.replace(/\D/g, "")}`}
+                    href={waLink(org.pic.phone)}
+                    target="_blank"
+                    rel="noreferrer"
                     className="sh-meta-value"
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
@@ -256,27 +266,6 @@ export default function OrganisasiProfil() {
             </div>
           </div>
         </section>
-
-        {/* Stats — disembunyikan dari pendana (tak relevan di sisi pendana) */}
-        {!isFunderViewer && (
-          <div className="sh-stat-grid">
-            <StatCard
-              label="Total disetujui (in-cash)"
-              value={formatRupiah(data?.totalApproved ?? 0)}
-              icon={<Wallet size={20} />}
-            />
-            <StatCard
-              label="Pengajuan dikirim"
-              value={data?.sent ?? 0}
-              icon={<Send size={20} />}
-            />
-            <StatCard
-              label="Pengajuan disetujui"
-              value={data?.approvedCount ?? 0}
-              icon={<CheckCircle2 size={20} />}
-            />
-          </div>
-        )}
 
         {/* Sensitive info — admin / self only */}
         {canSeeSensitive && (

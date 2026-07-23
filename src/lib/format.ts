@@ -97,6 +97,19 @@ export function percent(numerator: number, denominator: number): number {
   return Math.min(100, Math.round((numerator / denominator) * 100));
 }
 
+/** No. telepon Indonesia → link wa.me (0812… → 62812…). */
+export function waLink(phone: string): string {
+  let d = String(phone || "").replace(/\D/g, "");
+  if (d.startsWith("0")) d = "62" + d.slice(1);
+  else if (!d.startsWith("62")) d = "62" + d;
+  return `https://wa.me/${d}`;
+}
+
+/** Email → link mailto (membuka aplikasi/Gmail pengguna). */
+export function mailtoLink(email: string): string {
+  return `mailto:${String(email || "").trim()}`;
+}
+
 export function initials(name: string, max = 2): string {
   return name
     .split(/\s+/)

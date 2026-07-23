@@ -1,5 +1,6 @@
 import { Phone, Lock } from "lucide-react";
 import { maskPhone } from "@/lib/pengajuan";
+import { waLink } from "@/lib/format";
 
 type Props = {
   phone: string;
@@ -20,7 +21,9 @@ export function ContactLine({ phone, canSee, hint }: Props) {
         <>
           <Phone size={15} style={{ color: "var(--status-success)" }} />
           <a
-            href={`tel:${phone.replace(/\D/g, "")}`}
+            href={waLink(phone)}
+            target="_blank"
+            rel="noreferrer"
             style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}
           >
             {phone}
