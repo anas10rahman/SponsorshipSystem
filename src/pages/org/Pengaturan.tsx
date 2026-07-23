@@ -32,13 +32,25 @@ export default function OrgPengaturan() {
   const comproRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<Organization | null>(org ?? null);
+  const [errors, setErrors] = useState<Set<string>>(new Set());
 
   if (!org || !form) return null;
 
-  const set = (patch: Partial<Organization>) =>
+  const clearErr = (...keys: string[]) =>
+    setErrors((prev) => {
+      if (!prev.size) return prev;
+      const n = new Set(prev);
+      keys.forEach((k) => n.delete(k));
+      return n;
+    });
+  const set = (patch: Partial<Organization>) => {
     setForm((f) => (f ? { ...f, ...patch } : f));
-  const setPic = (patch: Partial<Organization["pic"]>) =>
+    clearErr(...Object.keys(patch));
+  };
+  const setPic = (patch: Partial<Organization["pic"]>) => {
     setForm((f) => (f ? { ...f, pic: { ...f.pic, ...patch } } : f));
+    clearErr(...Object.keys(patch).map((k) => `pic.${k}`));
+  };
 
   const onPickId = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -90,23 +102,29 @@ export default function OrgPengaturan() {
   };
 
   const save = async () => {
-    const required: Array<[boolean, string]> = [
-      [form.name.trim() !== "", "Nama organisasi"],
-      [form.category.trim() !== "", "Kategori organisasi"],
-      [form.email.trim() !== "", "Email organisasi"],
-      [form.payoutAccount.trim() !== "", "Nomor rekening pencairan"],
-      [form.description.trim() !== "", "Deskripsi organisasi"],
-      [form.pic.name.trim() !== "", "Nama PIC"],
-      [form.pic.phone.trim() !== "", "Nomor WA PIC"],
-      [form.pic.position.trim() !== "", "Jabatan PIC"],
-      [form.pic.email.trim() !== "", "Email PIC"],
-      [form.pic.idDocUrl.trim() !== "", "Upload KTP/KTM (PDF)"],
-    ];
-    const missing = required.find(([ok]) => !ok);
-    if (missing) {
-      toast.failed(`${missing[1]} wajib diisi.`);
-      return;
+    // Kumpulkan field yang belum/ salah diisi → tandai merah (bukan toast).
+    const errs = new Set<string>();
+    if (!form.name.trim()) errs.add("name");
+    if (!form.category.trim()) errs.add("category");
+    if (!form.email.trim()) errs.add("email");
+    if (!form.description.trim()) errs.add("description");
+    if (!form.payoutAccount.trim()) errs.add("payoutAccount");
+    if (!(form.comproUrl ?? "").trim()) errs.add("comproUrl");
+    if (!form.pic.idDocUrl.trim()) errs.add("pic.idDocUrl");
+    if (!form.pic.name.trim()) errs.add("pic.name");
+    if (!form.pic.phone.trim()) errs.add("pic.phone");
+    if (!form.pic.position.trim()) errs.add("pic.position");
+    if (!form.pic.email.trim()) errs.add("pic.email");
+    // Medsos: jika diisi, wajib berupa link (URL) valid.
+    const badUrl = (v?: string) => !!v && v.trim() !== "" && !/^https?:\/\/\S+$/i.test(v.trim());
+    if (badUrl(form.website)) errs.add("website");
+    if (badUrl(form.instagram)) errs.add("instagram");
+    if (badUrl(form.tiktok)) errs.add("tiktok");
+    if (errs.size) {
+      setErrors(errs);
+      return; // border merah muncul di field terkait
     }
+    setErrors(new Set());
     // Sinkronkan no.hp kontak ber-gate + inisial logo dari nama PIC & nama org.
     try {
       await updateOrgProfile({
@@ -210,21 +228,26 @@ export default function OrgPengaturan() {
               </div>
 
               <div className="sh-form-grid">
-                <Field label="Nama organisasi" required>
+                <Field label="Nama organisasi" required invalid={errors.has("name")}>
                   <input
                     value={form.name}
                     onChange={(e) => set({ name: e.target.value })}
                     placeholder="Misal: Yayasan Seni Budaya"
                   />
                 </Field>
-                <Field label="Kategori organisasi" required hint="Bidang gerak organisasi">
+                <Field
+                  label="Kategori organisasi"
+                  required
+                  hint="Bidang gerak organisasi"
+                  invalid={errors.has("category")}
+                >
                   <input
                     value={form.category}
                     onChange={(e) => set({ category: e.target.value })}
                     placeholder="Misal: Seni & Budaya / Edukasi / Olahraga"
                   />
                 </Field>
-                <Field label="Email organisasi" required>
+                <Field label="Email organisasi" required invalid={errors.has("email")}>
                   <input
                     type="email"
                     value={form.email}
@@ -244,13 +267,17 @@ export default function OrgPengaturan() {
                   required
                   icon={<CreditCard size={14} />}
                   hint="Masukkan nomor lalu klik Validasi untuk cek Bank & nama pemilik"
+                  invalid={errors.has("payoutAccount")}
                 >
                   <RekeningValidator
                     value={form.payoutAccount}
                     onChange={(v) => set({ payoutAccount: v })}
+                    invalid={errors.has("payoutAccount")}
                   />
                 </Field>
-                <div className="sh-field sh-field--wide">
+                <div
+                  className={`sh-field sh-field--wide${errors.has("description") ? " sh-field--invalid" : ""}`}
+                >
                   <label className="sh-field__label">
                     Deskripsi organisasi <Req />
                   </label>
@@ -267,21 +294,36 @@ export default function OrgPengaturan() {
             <div className="sh-form-section">
               <h4 style={{ marginBottom: 14 }}>Website & sosial media</h4>
               <div className="sh-form-grid">
-                <Field label="Website" icon={<Globe size={14} />} hint="Tempel link lengkap (https://…)">
+                <Field
+                  label="Website"
+                  icon={<Globe size={14} />}
+                  hint="Tempel link lengkap (https://…)"
+                  invalid={errors.has("website")}
+                >
                   <input
                     value={form.website ?? ""}
                     onChange={(e) => set({ website: e.target.value })}
                     placeholder="https://organisasi.org"
                   />
                 </Field>
-                <Field label="Instagram" icon={<Instagram size={14} />} hint="Tempel link, bukan username">
+                <Field
+                  label="Instagram"
+                  icon={<Instagram size={14} />}
+                  hint="Tempel link, bukan username"
+                  invalid={errors.has("instagram")}
+                >
                   <input
                     value={form.instagram ?? ""}
                     onChange={(e) => set({ instagram: e.target.value })}
                     placeholder="https://instagram.com/organisasi"
                   />
                 </Field>
-                <Field label="TikTok" icon={<Music2 size={14} />} hint="Tempel link, bukan username">
+                <Field
+                  label="TikTok"
+                  icon={<Music2 size={14} />}
+                  hint="Tempel link, bukan username"
+                  invalid={errors.has("tiktok")}
+                >
                   <input
                     value={form.tiktok ?? ""}
                     onChange={(e) => set({ tiktok: e.target.value })}
@@ -339,7 +381,12 @@ export default function OrgPengaturan() {
                 <button
                   type="button"
                   className="sh-file-drop"
-                  style={{ width: "100%", cursor: "pointer" }}
+                  style={{
+                    width: "100%",
+                    cursor: "pointer",
+                    borderColor: errors.has("comproUrl") ? "var(--status-failed)" : undefined,
+                    background: errors.has("comproUrl") ? "rgba(220,38,38,0.05)" : undefined,
+                  }}
                   onClick={() => comproRef.current?.click()}
                 >
                   <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
@@ -362,28 +409,33 @@ export default function OrgPengaturan() {
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <div className="sh-form-grid">
-                <Field label="Nama PIC" required>
+                <Field label="Nama PIC" required invalid={errors.has("pic.name")}>
                   <input
                     value={form.pic.name}
                     onChange={(e) => setPic({ name: e.target.value })}
                     placeholder="Nama lengkap penanggung jawab"
                   />
                 </Field>
-                <Field label="Nomor WA PIC" required>
+                <Field label="Nomor WA PIC" required invalid={errors.has("pic.phone")}>
                   <input
                     value={form.pic.phone}
                     onChange={(e) => setPic({ phone: e.target.value })}
                     placeholder="0812-3456-7890"
                   />
                 </Field>
-                <Field label="Jabatan di organisasi" required>
+                <Field label="Jabatan di organisasi" required invalid={errors.has("pic.position")}>
                   <input
                     value={form.pic.position}
                     onChange={(e) => setPic({ position: e.target.value })}
                     placeholder="Misal: Direktur Program"
                   />
                 </Field>
-                <Field label="Email PIC" required icon={<Mail size={14} />}>
+                <Field
+                  label="Email PIC"
+                  required
+                  icon={<Mail size={14} />}
+                  invalid={errors.has("pic.email")}
+                >
                   <input
                     type="email"
                     value={form.pic.email}
@@ -439,7 +491,12 @@ export default function OrgPengaturan() {
                   <button
                     type="button"
                     className="sh-file-drop"
-                    style={{ width: "100%", cursor: "pointer" }}
+                    style={{
+                      width: "100%",
+                      cursor: "pointer",
+                      borderColor: errors.has("pic.idDocUrl") ? "var(--status-failed)" : undefined,
+                      background: errors.has("pic.idDocUrl") ? "rgba(220,38,38,0.05)" : undefined,
+                    }}
                     onClick={() => fileRef.current?.click()}
                   >
                     <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
@@ -474,22 +531,30 @@ function Field({
   required,
   hint,
   icon,
+  invalid,
   children,
 }: {
   label: string;
   required?: boolean;
   hint?: string;
   icon?: React.ReactNode;
+  invalid?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div className="sh-field">
+    <div className={`sh-field${invalid ? " sh-field--invalid" : ""}`}>
       <label className="sh-field__label sh-row" style={{ gap: 6 }}>
         {icon}
         {label} {required && <Req />}
       </label>
       {children}
-      {hint && <span className="sh-field__hint">{hint}</span>}
+      {invalid ? (
+        <span className="sh-field__hint" style={{ color: "var(--status-failed)" }}>
+          Wajib diisi dengan benar.
+        </span>
+      ) : (
+        hint && <span className="sh-field__hint">{hint}</span>
+      )}
     </div>
   );
 }

@@ -397,6 +397,18 @@
   box-shadow: 0 0 0 3px var(--ring);
 }
 
+/* Validasi: tanda merah di sekitar field yang belum/ salah diisi */
+.sh-field--invalid input,
+.sh-field--invalid select,
+.sh-field--invalid textarea,
+.sh-field--invalid .sh-input {
+  border-color: var(--status-failed);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+.sh-field--invalid .sh-field__label {
+  color: var(--status-failed);
+}
+
 .sh-field textarea {
   min-height: 96px;
   resize: vertical;
