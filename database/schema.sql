@@ -110,12 +110,14 @@ create table organizations (
   facebook        text,                              -- legacy
   tiktok          text,
   compro_url      text,                              -- Company profile (PDF) — wajib verifikasi
+  compro_data     text,                              -- isi compro (data URL) untuk preview (lazy)
   -- Penanggung jawab (PIC)
   pic_name        text not null default '',
   pic_phone       text not null default '',          -- no.WA aktif PIC
   pic_position    text not null default '',
   pic_email       text not null default '',
   pic_id_doc_url  text not null default '',          -- KTP/KTM (PDF) — wajib di UI
+  pic_id_doc_data text,                              -- isi KTP/KTM (data URL) untuk preview (lazy)
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );

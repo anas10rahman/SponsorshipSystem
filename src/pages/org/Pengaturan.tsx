@@ -3,14 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { RekeningValidator } from "@/components/RekeningValidator";
+import { Modal } from "@/components/Modal";
+import { PdfPreview } from "@/components/PdfPreview";
 import { useStore, useActions } from "@/lib/store";
 import { useToast } from "@/components/Toast";
+import { api } from "@/lib/api";
 import { initials } from "@/lib/format";
 import type { Organization } from "@/lib/types";
 import {
   Save,
   UploadCloud,
   FileText,
+  Eye,
   X,
   Instagram,
   Music2,
@@ -33,8 +37,22 @@ export default function OrgPengaturan() {
 
   const [form, setForm] = useState<Organization | null>(org ?? null);
   const [errors, setErrors] = useState<Set<string>>(new Set());
+  // Pratinjau attachment: { title, data|null(loading) }
+  const [preview, setPreview] = useState<{ title: string; data: string | null } | null>(null);
 
   if (!org || !form) return null;
+
+  // Buka pratinjau: pakai data di memori (baru diunggah) atau ambil lazy dari server.
+  const openPreview = async (kind: "compro" | "ktp", title: string) => {
+    const inMem = kind === "compro" ? form.comproData : form.pic.idDocData;
+    if (inMem) {
+      setPreview({ title, data: inMem });
+      return;
+    }
+    setPreview({ title, data: null });
+    const d = await api.orgDoc(org.id, kind).catch(() => null);
+    setPreview({ title, data: d ?? "" });
+  };
 
   const clearErr = (...keys: string[]) =>
     setErrors((prev) => {
@@ -52,32 +70,44 @@ export default function OrgPengaturan() {
     clearErr(...Object.keys(patch).map((k) => `pic.${k}`));
   };
 
+  // Validasi PDF ≤ 2 MB lalu baca sebagai data URL (untuk preview). null bila gagal.
+  const readPdf = (
+    file: File,
+    ref: React.RefObject<HTMLInputElement>,
+    label: string,
+    done: (name: string, data: string) => void,
+  ) => {
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      toast.failed(`${label} harus berformat PDF.`);
+      if (ref.current) ref.current.value = "";
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.failed(`Ukuran ${label} maksimal 2 MB.`);
+      if (ref.current) ref.current.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      done(file.name, String(reader.result));
+      toast.success(`Berkas "${file.name}" dipilih.`);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const onPickId = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const isPdf =
-      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      toast.failed("KTP/KTM harus berformat PDF.");
-      if (fileRef.current) fileRef.current.value = "";
-      return;
-    }
-    setPic({ idDocUrl: file.name });
-    toast.success(`Berkas "${file.name}" dipilih.`);
+    readPdf(file, fileRef, "KTP/KTM", (name, data) => setPic({ idDocUrl: name, idDocData: data }));
   };
 
   const onPickCompro = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const isPdf =
-      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      toast.failed("Company profile harus berformat PDF.");
-      if (comproRef.current) comproRef.current.value = "";
-      return;
-    }
-    set({ comproUrl: file.name });
-    toast.success(`Berkas "${file.name}" dipilih.`);
+    readPdf(file, comproRef, "Company profile", (name, data) =>
+      set({ comproUrl: name, comproData: data }),
+    );
   };
 
   const onPickLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,9 +134,10 @@ export default function OrgPengaturan() {
   const save = async () => {
     // Kumpulkan field yang belum/ salah diisi → tandai merah (bukan toast).
     const errs = new Set<string>();
+    const emailBad = (v: string) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.trim());
     if (!form.name.trim()) errs.add("name");
     if (!form.category.trim()) errs.add("category");
-    if (!form.email.trim()) errs.add("email");
+    if (emailBad(form.email)) errs.add("email"); // wajib & format valid
     if (!form.description.trim()) errs.add("description");
     if (!form.payoutAccount.trim()) errs.add("payoutAccount");
     if (!(form.comproUrl ?? "").trim()) errs.add("comproUrl");
@@ -114,7 +145,7 @@ export default function OrgPengaturan() {
     if (!form.pic.name.trim()) errs.add("pic.name");
     if (!form.pic.phone.trim()) errs.add("pic.phone");
     if (!form.pic.position.trim()) errs.add("pic.position");
-    if (!form.pic.email.trim()) errs.add("pic.email");
+    if (emailBad(form.pic.email)) errs.add("pic.email"); // wajib & format valid
     // Medsos: jika diisi, wajib berupa LINK (bukan username) & sesuai platform.
     const filled = (v?: string) => !!v && v.trim() !== "";
     const isUrl = (v: string) => /^https?:\/\/\S+\.\S+/i.test(v.trim());
@@ -370,16 +401,25 @@ export default function OrgPengaturan() {
                     <FileText size={20} style={{ color: "var(--status-failed)", flex: "none" }} />
                     <span style={{ fontWeight: 600, wordBreak: "break-all" }}>{form.comproUrl}</span>
                   </div>
-                  <button
-                    className="sh-btn sh-btn--ghost sh-btn--icon"
-                    onClick={() => {
-                      set({ comproUrl: "" });
-                      if (comproRef.current) comproRef.current.value = "";
-                    }}
-                    title="Hapus berkas"
-                  >
-                    <X size={16} />
-                  </button>
+                  <div className="sh-row" style={{ gap: 4, flex: "none" }}>
+                    <button
+                      className="sh-btn sh-btn--ghost sh-btn--sm"
+                      onClick={() => openPreview("compro", form.comproUrl!)}
+                    >
+                      <Eye size={14} />
+                      Pratinjau
+                    </button>
+                    <button
+                      className="sh-btn sh-btn--ghost sh-btn--icon"
+                      onClick={() => {
+                        set({ comproUrl: "", comproData: undefined });
+                        if (comproRef.current) comproRef.current.value = "";
+                      }}
+                      title="Hapus berkas"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button
@@ -480,16 +520,25 @@ export default function OrgPengaturan() {
                         </div>
                       </div>
                     </div>
-                    <button
-                      className="sh-btn sh-btn--ghost sh-btn--icon"
-                      onClick={() => {
-                        setPic({ idDocUrl: "" });
-                        if (fileRef.current) fileRef.current.value = "";
-                      }}
-                      title="Hapus berkas"
-                    >
-                      <X size={16} />
-                    </button>
+                    <div className="sh-row" style={{ gap: 4, flex: "none" }}>
+                      <button
+                        className="sh-btn sh-btn--ghost sh-btn--sm"
+                        onClick={() => openPreview("ktp", form.pic.idDocUrl)}
+                      >
+                        <Eye size={14} />
+                        Pratinjau
+                      </button>
+                      <button
+                        className="sh-btn sh-btn--ghost sh-btn--icon"
+                        onClick={() => {
+                          setPic({ idDocUrl: "", idDocData: undefined });
+                          if (fileRef.current) fileRef.current.value = "";
+                        }}
+                        title="Hapus berkas"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <button
@@ -522,6 +571,23 @@ export default function OrgPengaturan() {
           </div>
         </div>
       </div>
+
+      {preview && (
+        <Modal
+          open
+          onClose={() => setPreview(null)}
+          title={preview.title || "Pratinjau dokumen"}
+          width={760}
+        >
+          {preview.data === null ? (
+            <p className="sh-muted">Memuat dokumen…</p>
+          ) : preview.data ? (
+            <PdfPreview dataUrl={preview.data} fileName={preview.title} />
+          ) : (
+            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+          )}
+        </Modal>
+      )}
     </>
   );
 }

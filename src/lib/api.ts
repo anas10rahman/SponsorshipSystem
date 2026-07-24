@@ -80,6 +80,16 @@ export const api = {
   funder: (body: Record<string, unknown>) => post("funder", body),
   notifications: (body: Record<string, unknown>) => post("notifications", body),
 
+  /** Ambil isi (data URL) attachment organisasi: kind = "compro" | "ktp". */
+  async orgDoc(orgId: string, kind: "compro" | "ktp"): Promise<string | null> {
+    const r = await fetch(
+      `${BASE}/org-doc?orgId=${encodeURIComponent(orgId)}&kind=${kind}`,
+    );
+    if (!r.ok) return null;
+    const d = await r.json().catch(() => ({}));
+    return (d as any).data ?? null;
+  },
+
   /** Ambil isi (data URL) satu dokumen pendukung berdasarkan indeks. */
   async pengajuanDoc(id: string, index = 0): Promise<string | null> {
     const r = await fetch(

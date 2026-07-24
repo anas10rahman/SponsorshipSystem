@@ -21,6 +21,7 @@ export type OrgPic = {
   position: string; // jabatan di organisasi
   email: string; // email PIC
   idDocUrl: string; // KTP/KTM (PDF) — wajib
+  idDocData?: string; // isi KTP/KTM (data URL) — hanya saat baru diunggah / diambil lazy
 };
 
 /** Status verifikasi organisasi oleh admin (gate pengajuan). */
@@ -37,6 +38,7 @@ export type Organization = {
   verificationStatus: OrgVerificationStatus;
   verificationNote?: string; // alasan bila ditolak admin
   comproUrl?: string; // Company profile (PDF) — wajib untuk verifikasi
+  comproData?: string; // isi compro (data URL) — hanya saat baru diunggah / diambil lazy
   legalDocs: string[];
   payoutAccount: string;
   balance: number; // saldo untuk biaya pengajuan

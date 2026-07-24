@@ -49,6 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           name = ${o.name}, category = ${o.category}, city = ${o.city},
           logo_initials = ${o.logoInitials}, logo_url = ${o.logoUrl ?? null},
           compro_url = ${o.comproUrl ?? null},
+          compro_data = coalesce(${o.comproData ?? null}, compro_data),
           email = ${o.email}, description = ${o.description},
           website = ${o.website ?? null}, instagram = ${o.instagram ?? null},
           tiktok = ${o.tiktok ?? null},
@@ -57,7 +58,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           legal_docs = ${o.legalDocs ?? []},
           pic_name = ${o.pic.name}, pic_phone = ${o.pic.phone},
           pic_position = ${o.pic.position}, pic_email = ${o.pic.email},
-          pic_id_doc_url = ${o.pic.idDocUrl}
+          pic_id_doc_url = ${o.pic.idDocUrl},
+          pic_id_doc_data = coalesce(${o.pic.idDocData ?? null}, pic_id_doc_data)
         where id = ${o.id}`;
     } else if (b.op === "topup") {
       await sql`update organizations set balance = balance + ${b.amount} where id = ${b.orgId}`;

@@ -5,13 +5,15 @@ import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Modal } from "@/components/Modal";
+import { PdfPreview } from "@/components/PdfPreview";
 import { useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
+import { api } from "@/lib/api";
 import { formatRupiah } from "@/lib/format";
 import { selectedAmount } from "@/lib/pengajuan";
 import { orgVerifyBadge } from "@/lib/orgVerify";
 import type { OrgVerificationStatus } from "@/lib/types";
-import { CheckCircle2, XCircle, FileText, ShieldCheck } from "lucide-react";
+import { CheckCircle2, XCircle, FileText, Eye, ShieldCheck } from "lucide-react";
 
 type Filter = "semua" | "menunggu" | "terverifikasi" | "ditolak" | "belum_diajukan";
 
@@ -33,6 +35,13 @@ export default function AdminOrganisasi() {
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<{ title: string; data: string | null } | null>(null);
+
+  const openPreview = async (orgId: string, kind: "compro" | "ktp", title: string) => {
+    setPreview({ title, data: null });
+    const d = await api.orgDoc(orgId, kind).catch(() => null);
+    setPreview({ title, data: d ?? "" });
+  };
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { semua: state.organizations.length };
@@ -251,7 +260,16 @@ export default function AdminOrganisasi() {
           </div>
 
           <h4 style={{ margin: "14px 0 8px" }}>Dokumen</h4>
-          <DocRow label="KTP/KTM PIC" name={review.pic.idDocUrl} />
+          <DocRow
+            label="Company profile"
+            name={review.comproUrl ?? ""}
+            onPreview={() => openPreview(review.id, "compro", review.comproUrl ?? "Company profile")}
+          />
+          <DocRow
+            label="KTP/KTM PIC"
+            name={review.pic.idDocUrl}
+            onPreview={() => openPreview(review.id, "ktp", review.pic.idDocUrl || "KTP/KTM")}
+          />
 
           {review.verificationStatus === "ditolak" && review.verificationNote && (
             <div className="sh-notice sh-notice--failed" style={{ marginTop: 12 }}>
@@ -272,6 +290,23 @@ export default function AdminOrganisasi() {
           )}
         </Modal>
       )}
+
+      {preview && (
+        <Modal
+          open
+          onClose={() => setPreview(null)}
+          title={preview.title || "Pratinjau dokumen"}
+          width={760}
+        >
+          {preview.data === null ? (
+            <p className="sh-muted">Memuat dokumen…</p>
+          ) : preview.data ? (
+            <PdfPreview dataUrl={preview.data} fileName={preview.title} />
+          ) : (
+            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+          )}
+        </Modal>
+      )}
     </>
   );
 }
@@ -285,26 +320,38 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function DocRow({ label, name }: { label: string; name: string }) {
+function DocRow({
+  label,
+  name,
+  onPreview,
+}: {
+  label: string;
+  name: string;
+  onPreview?: () => void;
+}) {
   return (
     <div
-      className="sh-row"
-      style={{
-        gap: 10,
-        padding: "8px 0",
-        borderBottom: "1px solid var(--line-soft)",
-      }}
+      className="sh-row sh-row--between"
+      style={{ gap: 10, padding: "8px 0", borderBottom: "1px solid var(--line-soft)" }}
     >
-      <div className="sh-meta-label" style={{ width: 120, flex: "none" }}>
-        {label}
-      </div>
-      {name ? (
-        <div className="sh-row" style={{ gap: 8, minWidth: 0 }}>
-          <FileText size={16} style={{ color: "var(--status-failed)", flex: "none" }} />
-          <span style={{ wordBreak: "break-all" }}>{name}</span>
+      <div className="sh-row" style={{ gap: 10, minWidth: 0 }}>
+        <div className="sh-meta-label" style={{ width: 120, flex: "none" }}>
+          {label}
         </div>
-      ) : (
-        <span className="sh-muted">Belum diunggah</span>
+        {name ? (
+          <div className="sh-row" style={{ gap: 8, minWidth: 0 }}>
+            <FileText size={16} style={{ color: "var(--status-failed)", flex: "none" }} />
+            <span style={{ wordBreak: "break-all" }}>{name}</span>
+          </div>
+        ) : (
+          <span className="sh-muted">Belum diunggah</span>
+        )}
+      </div>
+      {name && onPreview && (
+        <button className="sh-btn sh-btn--ghost sh-btn--sm" onClick={onPreview} style={{ flex: "none" }}>
+          <Eye size={14} />
+          Pratinjau
+        </button>
       )}
     </div>
   );
