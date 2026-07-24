@@ -115,11 +115,14 @@ export default function OrgPengaturan() {
     if (!form.pic.phone.trim()) errs.add("pic.phone");
     if (!form.pic.position.trim()) errs.add("pic.position");
     if (!form.pic.email.trim()) errs.add("pic.email");
-    // Medsos: jika diisi, wajib berupa link (URL) valid.
-    const badUrl = (v?: string) => !!v && v.trim() !== "" && !/^https?:\/\/\S+$/i.test(v.trim());
-    if (badUrl(form.website)) errs.add("website");
-    if (badUrl(form.instagram)) errs.add("instagram");
-    if (badUrl(form.tiktok)) errs.add("tiktok");
+    // Medsos: jika diisi, wajib berupa LINK (bukan username) & sesuai platform.
+    const filled = (v?: string) => !!v && v.trim() !== "";
+    const isUrl = (v: string) => /^https?:\/\/\S+\.\S+/i.test(v.trim());
+    if (filled(form.website) && !isUrl(form.website!)) errs.add("website");
+    if (filled(form.instagram) && (!isUrl(form.instagram!) || !/instagram\.com|instagr\.am/i.test(form.instagram!)))
+      errs.add("instagram");
+    if (filled(form.tiktok) && (!isUrl(form.tiktok!) || !/tiktok\.com/i.test(form.tiktok!)))
+      errs.add("tiktok");
     if (errs.size) {
       setErrors(errs);
       return; // border merah muncul di field terkait
@@ -273,6 +276,7 @@ export default function OrgPengaturan() {
                     value={form.payoutAccount}
                     onChange={(v) => set({ payoutAccount: v })}
                     invalid={errors.has("payoutAccount")}
+                    ownerHint={form.name}
                   />
                 </Field>
                 <div

@@ -9,10 +9,12 @@ export function RekeningValidator({
   value,
   onChange,
   invalid,
+  ownerHint,
 }: {
   value: string;
   onChange: (v: string) => void;
   invalid?: boolean; // paksa border merah dari validasi form luar
+  ownerHint?: string; // nama pemilik fallback (nama organisasi) untuk mock
 }) {
   const [number, setNumber] = useState(() => extractNumber(value));
   const [result, setResult] = useState<{ bank: string; owner: string } | null>(null);
@@ -30,7 +32,7 @@ export function RekeningValidator({
     setChecking(true);
     // Simulasikan jeda cek (biar terasa seperti panggilan API).
     setTimeout(() => {
-      const info = validateAccount(digits);
+      const info = validateAccount(digits, ownerHint);
       setChecking(false);
       if (!info) {
         setError("Nomor rekening salah atau tidak terdaftar");

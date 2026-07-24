@@ -12,10 +12,29 @@ const REGISTERED: Record<string, AccountInfo> = {
   "2233445566": { bank: "CIMB Niaga", owner: "Sinergi Nusantara" },
 };
 
-/** Simulasi cek nomor rekening. Kembalikan info bila terdaftar, atau null. */
-export function validateAccount(number: string): AccountInfo | null {
+const BANKS = [
+  "BCA",
+  "Bank Mandiri",
+  "BNI",
+  "BRI",
+  "CIMB Niaga",
+  "BSI",
+  "Bank Permata",
+  "Bank Danamon",
+];
+
+/** Simulasi cek nomor rekening (demo).
+ *  - Nomor contoh terdaftar → info spesifik.
+ *  - Nomor lain dengan format valid (>=6 digit) → dianggap valid; bank
+ *    ditentukan deterministik, pemilik = ownerHint (nama organisasi).
+ *  - Terlalu pendek / kosong → null (dianggap salah).
+ *  Ganti fungsi ini dengan API name-inquiry asli saat produksi. */
+export function validateAccount(number: string, ownerHint?: string): AccountInfo | null {
   const digits = String(number || "").replace(/\D/g, "");
-  return REGISTERED[digits] ?? null;
+  if (digits.length < 6) return null;
+  if (REGISTERED[digits]) return REGISTERED[digits];
+  const sum = [...digits].reduce((s, c) => s + Number(c), 0);
+  return { bank: BANKS[sum % BANKS.length], owner: ownerHint?.trim() || "Pemilik terverifikasi" };
 }
 
 /** Nomor-nomor contoh (untuk keperluan demo). */

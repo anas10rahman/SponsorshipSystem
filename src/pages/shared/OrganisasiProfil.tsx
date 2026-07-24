@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { ContactLine } from "@/components/ContactLine";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
-import { formatRupiah, formatDate, waLink } from "@/lib/format";
+import { formatRupiah, formatDate, waLink, gmailLink } from "@/lib/format";
 import {
   hasPengajuanBetween,
   maskPhone,
@@ -33,7 +33,6 @@ export default function OrganisasiProfil() {
   const { id } = useParams();
   const { state, currentUser } = useStore();
   const navigate = useNavigate();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const orgId = id ?? currentUser?.orgId ?? "";
   const org = state.organizations.find((o) => o.id === orgId);
@@ -45,18 +44,6 @@ export default function OrganisasiProfil() {
   const canSeeContact =
     canSeeSensitive ||
     (isFunderViewer && hasPengajuanBetween(state.pengajuan, orgId, currentUser?.funderId));
-
-  const data = useMemo(() => {
-    if (!org) return null;
-    const all = state.pengajuan.filter((p) => p.orgId === org.id && p.status !== "draf");
-    const approved = all.filter((p) => p.status === "disetujui");
-    const totalApproved = approved.reduce((s, p) => s + selectedAmount(p), 0);
-    // Daftar rinci: admin/self lihat semua; pendana hanya riwayat dengan dirinya.
-    const visible = isFunderViewer
-      ? all.filter((p) => p.funderId === currentUser?.funderId)
-      : all;
-    return { sent: all.length, approvedCount: approved.length, totalApproved, visible };
-  }, [org, state.pengajuan, isFunderViewer, currentUser?.funderId]);
 
   if (!org) {
     return (
@@ -78,7 +65,6 @@ export default function OrganisasiProfil() {
   }
 
   const title = isSelf ? "Profil saya" : "Profil organisasi";
-  const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
 
   return (
     <>
@@ -166,7 +152,12 @@ export default function OrganisasiProfil() {
                   <Mail size={13} /> Email
                 </div>
                 {canSeeContact ? (
-                  <a href={`mailto:${org.email}`} className="sh-meta-value">
+                  <a
+                    href={gmailLink(org.email)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="sh-meta-value"
+                  >
                     {org.email || "—"}
                   </a>
                 ) : (
@@ -254,7 +245,12 @@ export default function OrganisasiProfil() {
                   <Mail size={13} /> Email
                 </div>
                 {canSeeContact ? (
-                  <a href={`mailto:${org.pic.email}`} className="sh-meta-value">
+                  <a
+                    href={gmailLink(org.pic.email)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="sh-meta-value"
+                  >
                     {org.pic.email || "—"}
                   </a>
                 ) : (
@@ -322,67 +318,7 @@ export default function OrganisasiProfil() {
           </section>
         )}
 
-        {/* Riwayat pengajuan */}
-        <section className="sh-card">
-          <header className="sh-card__header">
-            <h2>Riwayat pengajuan</h2>
-            {isFunderViewer && (
-              <span className="sh-muted" style={{ fontSize: 12 }}>
-                Hanya pengajuan ke Anda
-              </span>
-            )}
-          </header>
-          {data && data.visible.length > 0 ? (
-            <div className="sh-table-wrap">
-              <table className="sh-table">
-                <thead>
-                  <tr>
-                    <th>Event</th>
-                    {!isFunderViewer && <th>Pendana</th>}
-                    <th>Paket</th>
-                    <th>Nilai</th>
-                    <th>Status</th>
-                    <th>Tanggal</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.visible.map((p) => {
-                    const funder = state.funders.find((f) => f.id === p.funderId);
-                    const badge = pengajuanBadge(p.status);
-                    return (
-                      <tr key={p.id}>
-                        <td style={{ fontWeight: 600 }}>{p.eventName}</td>
-                        {!isFunderViewer && <td>{funder?.name ?? "—"}</td>}
-                        <td>{packageCountLabel(p)}</td>
-                        <td className="num">{pengajuanAmountLabel(p)}</td>
-                        <td>
-                          <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
-                        </td>
-                        <td className="sh-muted">{formatDate(p.updatedAt)}</td>
-                        <td>
-                          <button
-                            className="sh-btn sh-btn--ghost sh-btn--sm"
-                            onClick={() => setSelectedId(p.id)}
-                          >
-                            Detail
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="sh-card__body">
-              <p className="sh-muted">Belum ada pengajuan.</p>
-            </div>
-          )}
-        </section>
       </div>
-
-      <PengajuanDetail pengajuan={selected} onClose={() => setSelectedId(null)} />
     </>
   );
 }

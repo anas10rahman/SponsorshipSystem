@@ -6,7 +6,7 @@ import { Empty } from "@/components/Empty";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useStore } from "@/lib/store";
-import { formatRupiah, initials, percent, waLink } from "@/lib/format";
+import { formatRupiah, initials, percent, waLink, gmailLink } from "@/lib/format";
 import {
   hasPengajuanBetween,
   maskPhone,
@@ -168,7 +168,12 @@ export default function PendanaProfil() {
                   <Mail size={13} /> Email
                 </div>
                 {canSeeContact ? (
-                  <a href={`mailto:${funder.email}`} className="sh-meta-value">
+                  <a
+                    href={gmailLink(funder.email)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="sh-meta-value"
+                  >
                     {funder.email || "—"}
                   </a>
                 ) : (
@@ -249,7 +254,12 @@ export default function PendanaProfil() {
                   <Mail size={13} /> Email
                 </div>
                 {canSeeContact ? (
-                  <a href={`mailto:${funder.pic.email}`} className="sh-meta-value">
+                  <a
+                    href={gmailLink(funder.pic.email)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="sh-meta-value"
+                  >
                     {funder.pic.email || "—"}
                   </a>
                 ) : (

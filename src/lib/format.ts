@@ -105,9 +105,11 @@ export function waLink(phone: string): string {
   return `https://wa.me/${d}`;
 }
 
-/** Email → link mailto (membuka aplikasi/Gmail pengguna). */
-export function mailtoLink(email: string): string {
-  return `mailto:${String(email || "").trim()}`;
+/** Email → link compose Gmail (buka Gmail web langsung). */
+export function gmailLink(email: string): string {
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+    String(email || "").trim(),
+  )}`;
 }
 
 export function initials(name: string, max = 2): string {
