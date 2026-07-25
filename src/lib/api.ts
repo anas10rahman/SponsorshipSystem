@@ -76,10 +76,11 @@ export const api = {
   },
 
   async forgotPassword(email: string) {
-    const r = await fetch(`${BASE}/forgot-password`, {
+    // Digabung ke /api/login (op) demi tetap di bawah limit fungsi Vercel Hobby.
+    const r = await fetch(`${BASE}/login`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ op: "forgot", email }),
     });
     const data = await r.json().catch(() => ({}));
     // Endpoint sengaja selalu 200 & netral; error jaringan tetap dilempar.
@@ -88,10 +89,10 @@ export const api = {
   },
 
   async resetPassword(email: string, code: string, password: string) {
-    const r = await fetch(`${BASE}/reset-password`, {
+    const r = await fetch(`${BASE}/login`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email, code, password }),
+      body: JSON.stringify({ op: "reset", email, code, password }),
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error((data as any).error || "Gagal reset kata sandi.");
