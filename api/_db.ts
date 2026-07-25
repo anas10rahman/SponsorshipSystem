@@ -96,7 +96,15 @@ export function mapFunder(r: any) {
 export async function assembleState() {
   const [users, orgs, funders, pengajuan, history, audit, notifs] = await Promise.all([
     sql`select * from users order by created_at`,
-    sql`select * from organizations order by name`,
+    // Kolom eksplisit: SENGAJA tanpa compro_data & pic_id_doc_data (base64 s/d 2MB).
+    // Blob itu tak dipakai mapOrg dan diambil lazy via /api/org-doc — kalau ikut
+    // ditarik di sini, tiap mutasi menyeret puluhan MB dari DB lalu dibuang.
+    sql`select id, name, category, city, logo_initials, logo_url, verified,
+               verification_status, verification_note, legal_docs, payout_account,
+               balance, phone, email, description, website, instagram, twitter,
+               facebook, tiktok, compro_url, pic_name, pic_phone, pic_position,
+               pic_email, pic_id_doc_url, created_at, updated_at
+          from organizations order by name`,
     sql`select * from funders order by name`,
     sql`select id, org_id, funder_id, event_name, event_location, event_date, description,
                event_budget, packages, selected_package, proposal_doc_url, extra_note,
