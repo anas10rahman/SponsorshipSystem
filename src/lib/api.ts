@@ -75,6 +75,29 @@ export const api = {
     return data as { ok: true; emailSent: boolean; emailError?: string };
   },
 
+  async forgotPassword(email: string) {
+    const r = await fetch(`${BASE}/forgot-password`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await r.json().catch(() => ({}));
+    // Endpoint sengaja selalu 200 & netral; error jaringan tetap dilempar.
+    if (!r.ok) throw new Error((data as any).error || "Gagal mengirim kode reset.");
+    return data as { ok: true; message: string };
+  },
+
+  async resetPassword(email: string, code: string, password: string) {
+    const r = await fetch(`${BASE}/reset-password`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email, code, password }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error((data as any).error || "Gagal reset kata sandi.");
+    return data as { ok: true };
+  },
+
   pengajuan: (body: Record<string, unknown>) => post("pengajuan", body),
   org: (body: Record<string, unknown>) => post("org", body),
   funder: (body: Record<string, unknown>) => post("funder", body),

@@ -3,7 +3,8 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { BrandMark } from "@/components/BrandMark";
 import { rolePath, useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
-import { Building2, HandCoins, ArrowLeft } from "lucide-react";
+import { Building2, HandCoins, ArrowLeft, Check, X } from "lucide-react";
+import { passwordRules, validatePassword } from "@/lib/password";
 
 type Role = "org" | "funder";
 const FUNDER_TYPES = ["Korporasi", "Individu", "Filantropi", "Perbankan"] as const;
@@ -39,8 +40,9 @@ export default function Register() {
       setError("Lengkapi semua kolom wajib.");
       return;
     }
-    if (form.password.length < 6) {
-      setError("Kata sandi minimal 6 karakter.");
+    const pwErr = validatePassword(form.password);
+    if (pwErr) {
+      setError(pwErr);
       return;
     }
     if (form.password !== form.confirm) {
@@ -217,8 +219,35 @@ export default function Register() {
               autoComplete="new-password"
               value={form.password}
               onChange={(e) => set({ password: e.target.value })}
-              placeholder="Minimal 6 karakter"
+              placeholder="Min. 8 karakter, kombinasi kuat"
             />
+            {form.password.length > 0 && (
+              <ul
+                style={{
+                  listStyle: "none",
+                  margin: "6px 0 0",
+                  padding: 0,
+                  display: "grid",
+                  gap: 4,
+                  fontSize: 13,
+                }}
+              >
+                {passwordRules(form.password).map((rule) => (
+                  <li
+                    key={rule.label}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      color: rule.ok ? "#16a34a" : "#98989f",
+                    }}
+                  >
+                    {rule.ok ? <Check size={14} /> : <X size={14} />}
+                    {rule.label}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <div className="sh-field">
             <label className="sh-field__label">Konfirmasi kata sandi</label>

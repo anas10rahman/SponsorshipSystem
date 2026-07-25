@@ -68,6 +68,11 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Masukkan kata sandi"
           />
+          <div style={{ textAlign: "right", marginTop: 6 }}>
+            <Link to="/forgot" style={{ fontSize: 13, fontWeight: 600 }}>
+              Lupa kata sandi?
+            </Link>
+          </div>
         </div>
 
         {error && <div className="sh-notice sh-notice--failed">{error}</div>}

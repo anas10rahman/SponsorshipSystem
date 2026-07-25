@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { sql, assembleState, readBody } from "./_db.js";
 import { hasEmailProvider, makeOtp, sendVerificationEmail, OTP_TTL_MIN } from "./_email.js";
+import { validatePassword } from "./_password.js";
 
 class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -39,8 +40,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw new HttpError(400, "Nama, email, username, dan kata sandi wajib diisi.");
     if (!/^[a-zA-Z0-9._-]{3,}$/.test(username))
       throw new HttpError(400, "Username minimal 3 karakter (huruf/angka/._-, tanpa spasi).");
-    if (password.length < 6)
-      throw new HttpError(400, "Kata sandi minimal 6 karakter.");
+    const pwErr = validatePassword(password);
+    if (pwErr) throw new HttpError(400, pwErr);
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
       throw new HttpError(400, "Format email tidak valid.");
 

@@ -199,6 +199,30 @@ export function useActions() {
         }
       },
 
+      async forgotPassword(
+        email: string,
+      ): Promise<{ ok: boolean; error?: string; message?: string }> {
+        try {
+          const r = await api.forgotPassword(email.trim());
+          return { ok: true, message: r.message };
+        } catch (e: any) {
+          return { ok: false, error: String(e?.message || "Gagal mengirim kode reset.") };
+        }
+      },
+
+      async resetPassword(
+        email: string,
+        code: string,
+        password: string,
+      ): Promise<{ ok: boolean; error?: string }> {
+        try {
+          await api.resetPassword(email.trim(), code.trim(), password);
+          return { ok: true };
+        } catch (e: any) {
+          return { ok: false, error: String(e?.message || "Gagal reset kata sandi.") };
+        }
+      },
+
       logout() {
         dispatch({ type: "auth/logout" });
       },

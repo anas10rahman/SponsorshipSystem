@@ -79,6 +79,9 @@ create table users (
   email_verified boolean not null default false,
   verify_code    text,                             -- kode OTP di-hash (pgcrypto)
   verify_expires timestamptz,                      -- kadaluarsa kode OTP
+  -- Reset password (OTP): kode di-hash + kadaluarsa, terpisah dari verifikasi email
+  reset_code     text,                             -- kode reset di-hash (pgcrypto)
+  reset_expires  timestamptz,                      -- kadaluarsa kode reset
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -158,6 +161,10 @@ create table funders (
 alter table users
   add constraint users_funder_fk
   foreign key (funder_id) references funders(id) on delete set null;
+
+-- Migrasi idempotent: kolom reset password untuk DB yang sudah berjalan.
+alter table users add column if not exists reset_code    text;
+alter table users add column if not exists reset_expires timestamptz;
 
 -- ============================================================
 -- PROPOSALS

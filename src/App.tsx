@@ -9,6 +9,7 @@ import { BrandMark } from "./components/BrandMark";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Verify from "./pages/Verify";
+import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminOrganisasi from "./pages/admin/Organisasi";
@@ -85,6 +86,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify" element={<Verify />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
 
         {/* === Admin === */}
         <Route
