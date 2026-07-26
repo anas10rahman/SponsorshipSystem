@@ -298,10 +298,10 @@ export default function OrgPengaturan() {
                   />
                 </Field>
                 <Field
-                  label="Nomor rekening pencairan"
+                  label="Rekening pencairan"
                   required
                   icon={<CreditCard size={14} />}
-                  hint="Masukkan nomor lalu klik Validasi untuk cek Bank & nama pemilik"
+                  hint="Pilih bank, ketik nomor dua kali, lalu isi nama pemilik sesuai buku tabungan"
                   invalid={errors.has("payoutAccount")}
                 >
                   <RekeningValidator
