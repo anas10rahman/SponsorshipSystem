@@ -16,6 +16,7 @@ const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
   { value: "perlu_revisi", label: "Diberi feedback" },
   { value: "disetujui", label: "Disetujui" },
   { value: "ditolak", label: "Ditolak" },
+  { value: "kadaluarsa", label: "Kadaluarsa" },
 ];
 
 export default function FunderPengajuanInbox() {
@@ -32,7 +33,7 @@ export default function FunderPengajuanInbox() {
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { semua: inbox.length };
-    for (const s of ["diajukan", "perlu_revisi", "disetujui", "ditolak"] as const) {
+    for (const s of ["diajukan", "perlu_revisi", "disetujui", "ditolak", "kadaluarsa"] as const) {
       c[s] = inbox.filter((p) => p.status === s).length;
     }
     return c;

@@ -18,6 +18,7 @@ const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
   { value: "perlu_revisi", label: "Perlu revisi" },
   { value: "disetujui", label: "Disetujui" },
   { value: "ditolak", label: "Ditolak" },
+  { value: "kadaluarsa", label: "Kadaluarsa" },
 ];
 
 export default function OrgPengajuanList() {
@@ -35,7 +36,7 @@ export default function OrgPengajuanList() {
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { semua: mine.length };
-    for (const s of ["draf", "diajukan", "perlu_revisi", "disetujui", "ditolak"] as const) {
+    for (const s of ["draf", "diajukan", "perlu_revisi", "disetujui", "ditolak", "kadaluarsa"] as const) {
       c[s] = mine.filter((p) => p.status === s).length;
     }
     return c;

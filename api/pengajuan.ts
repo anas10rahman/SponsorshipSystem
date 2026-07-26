@@ -14,6 +14,59 @@ class HttpError extends Error {
   }
 }
 
+/* Batas diam pendana sebelum pengajuan otomatis dibatalkan. */
+const EXPIRE_DAYS = 7;
+
+/* Auto-batal: pengajuan berstatus `diajukan` yang tidak direspons pendana
+   selama EXPIRE_DAYS hari → status `kadaluarsa` + biaya pengajuan dikembalikan
+   PENUH ke saldo organisasi (yang lalai pendana, bukan organisasi).
+   Sengaja hanya menyasar `diajukan`: pada `perlu_revisi` bolanya ada di
+   organisasi, jadi tidak adil membatalkannya.
+   Idempoten — hanya menyentuh baris yang memang sudah lewat tenggat. */
+async function expireStale(): Promise<{ expired: number; ids: string[] }> {
+  const rows = (await sql`
+    select id, org_id, funder_id, event_name
+    from pengajuan
+    where status = 'diajukan'
+      and updated_at < now() - make_interval(days => ${EXPIRE_DAYS})`) as any[];
+
+  const ids: string[] = [];
+  for (const p of rows) {
+    const note =
+      `Pendana tidak merespons dalam ${EXPIRE_DAYS} hari. Pengajuan dibatalkan otomatis; ` +
+      `biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} dikembalikan penuh ke saldo organisasi.`;
+    const tx: any[] = [
+      // Kunci status di WHERE: kalau pendana memutuskan barusan, baris ini tidak tersentuh.
+      sql`update pengajuan set status = 'kadaluarsa', updated_at = now()
+          where id = ${p.id} and status = 'diajukan'`,
+      histQ(p.id, "Kadaluarsa otomatis", "Admin", note),
+      auditQ(null, "pengajuan.kadaluarsa", p.id, { days: EXPIRE_DAYS, refund: SUBMISSION_FEE }),
+      sql`update organizations set balance = balance + ${SUBMISSION_FEE} where id = ${p.org_id}`,
+    ];
+    const oUser = await userIdForOrg(p.org_id);
+    if (oUser)
+      tx.push(
+        notifQ(
+          oUser,
+          "pengajuan.kadaluarsa",
+          `Pengajuan "${p.event_name}" kadaluarsa (pendana tidak merespons ${EXPIRE_DAYS} hari). Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} dikembalikan ke saldo.`,
+        ),
+      );
+    const fUser = await userIdForFunder(p.funder_id);
+    if (fUser)
+      tx.push(
+        notifQ(
+          fUser,
+          "pengajuan.kadaluarsa",
+          `Pengajuan "${p.event_name}" kadaluarsa karena tidak ditinjau dalam ${EXPIRE_DAYS} hari.`,
+        ),
+      );
+    await sql.transaction(tx);
+    ids.push(p.id);
+  }
+  return { expired: ids.length, ids };
+}
+
 /* Normalisasi satu poin detail permintaan. Toleran data lama (string → in_kind).
    Kembalikan null bila poin kosong (in_cash tanpa nominal / in_kind tanpa spec). */
 function normalizeRequest(r: any): any | null {
@@ -128,10 +181,32 @@ async function getPengajuan(id: string): Promise<any> {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Cron Vercel memanggil lewat GET (?op=expire). Ditumpangkan ke fungsi ini
+  // karena kuota Serverless Function (Hobby) sudah terpakai penuh 12/12.
+  const isCron = req.method === "GET" && String((req.query as any)?.op || "") === "expire";
+  if (isCron) {
+    // Vercel mengirim `Authorization: Bearer $CRON_SECRET` bila env itu diset.
+    // Bila belum diset, jalur ini tetap terbuka — aman secara efek karena
+    // operasinya idempoten dan hanya menyentuh baris yang memang lewat tenggat.
+    const secret = process.env.CRON_SECRET;
+    if (secret && req.headers.authorization !== `Bearer ${secret}`)
+      return res.status(401).json({ error: "Unauthorized" });
+    try {
+      return res.status(200).json(await expireStale());
+    } catch (e: any) {
+      return res.status(500).json({ error: String(e?.message || e) });
+    }
+  }
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try {
     const b = readBody(req);
     const op = b.op as string;
+
+    if (op === "expire") {
+      // Jalur manual (mis. tombol admin / uji coba): kembalikan state terbaru.
+      await expireStale();
+      return res.status(200).json(await assembleState());
+    }
 
     if (op === "save") {
       const p = b.pengajuan;

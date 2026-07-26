@@ -81,6 +81,7 @@ const MAP: Record<PengajuanStatus, { label: string; variant: BadgeVariant }> = {
   perlu_revisi: { label: "Perlu revisi", variant: "pending" },
   disetujui: { label: "Disetujui", variant: "success" },
   ditolak: { label: "Ditolak", variant: "failed" },
+  kadaluarsa: { label: "Kadaluarsa", variant: "neutral" },
 };
 
 export function pengajuanBadge(status: PengajuanStatus) {

@@ -157,13 +157,15 @@ export type PengajuanDoc = {
 
 /* Lifecycle pengajuan terarah:
    draf → diajukan → (perlu_revisi → diajukan)* → disetujui | ditolak
+   Jalur otomatis: diajukan → kadaluarsa (pendana diam 7 hari, biaya kembali penuh).
    Persetujuan pendana bersifat FINAL (admin hanya memantau). */
 export type PengajuanStatus =
   | "draf"
   | "diajukan"
   | "perlu_revisi"
   | "disetujui"
-  | "ditolak";
+  | "ditolak"
+  | "kadaluarsa";
 
 export type PengajuanEvent = {
   action: string;

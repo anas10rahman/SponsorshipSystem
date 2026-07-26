@@ -15,6 +15,7 @@ const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
   { value: "perlu_revisi", label: "Perlu revisi" },
   { value: "disetujui", label: "Disetujui" },
   { value: "ditolak", label: "Ditolak" },
+  { value: "kadaluarsa", label: "Kadaluarsa" },
   { value: "draf", label: "Draf" },
 ];
 

@@ -20,9 +20,10 @@ create type transaction_status as enum ('menunggu', 'diproses', 'disalurkan', 'd
 
 -- Pengajuan terarah (org → pendana spesifik).
 -- Lifecycle: draf → diajukan → (perlu_revisi → diajukan)* → disetujui | ditolak.
+-- Jalur otomatis: diajukan → kadaluarsa (pendana diam 7 hari; biaya dikembalikan penuh).
 -- Persetujuan pendana bersifat FINAL (admin hanya memantau).
 create type pengajuan_status as enum (
-  'draf', 'diajukan', 'perlu_revisi', 'disetujui', 'ditolak'
+  'draf', 'diajukan', 'perlu_revisi', 'disetujui', 'ditolak', 'kadaluarsa'
 );
 
 create type audit_action as enum (
@@ -40,7 +41,8 @@ create type audit_action as enum (
   'pengajuan.diajukan',
   'pengajuan.disetujui',
   'pengajuan.ditolak',
-  'pengajuan.revisi'
+  'pengajuan.revisi',
+  'pengajuan.kadaluarsa'
 );
 
 create type audit_entity as enum ('transaksi', 'proposal', 'organisasi', 'pendana', 'ajuan', 'pengajuan');
@@ -55,6 +57,7 @@ create type notification_type as enum (
   'pengajuan.disetujui',
   'pengajuan.ditolak',
   'pengajuan.revisi',
+  'pengajuan.kadaluarsa',
   'verifikasi.diajukan',
   'verifikasi.disetujui',
   'verifikasi.ditolak'
@@ -165,6 +168,11 @@ alter table users
 -- Migrasi idempotent: kolom reset password untuk DB yang sudah berjalan.
 alter table users add column if not exists reset_code    text;
 alter table users add column if not exists reset_expires timestamptz;
+
+-- Migrasi idempotent: status/aksi "kadaluarsa" (auto-batal 7 hari) untuk DB lama.
+alter type pengajuan_status  add value if not exists 'kadaluarsa';
+alter type audit_action      add value if not exists 'pengajuan.kadaluarsa';
+alter type notification_type add value if not exists 'pengajuan.kadaluarsa';
 
 -- ============================================================
 -- PROPOSALS
