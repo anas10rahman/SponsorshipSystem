@@ -1,59 +1,58 @@
 /* ============================================================
-   SponsorHub — "Indigo" theme (client tone)
+   DealMatch — tema brand (biru navy + hijau emerald)
    Re-skin layer di atas kit.css. Sumber: design bundle
-   ui_kits/dashboard/theme-indigo.css. Dipetakan ke kelas .sh-*.
-   Deep navy sidebar · indigo active nav · indigo→violet hero ·
+   Palet: #1E3A8A biru · #10B981 hijau · #F8FAFC kanvas · #0F172A navy · #64748B slate.
+   Sidebar navy gelap · nav aktif biru · hero biru→hijau ·
    white KPI cards dengan accent bawah + value berwarna.
    ============================================================ */
 
 :root {
-  --indigo-500: #4f46e5;
-  --indigo-600: #4338ca;
-  --violet-500: #7c3aed;
-  --c-green: #16a34a;
-  --c-blue: #2e90fa;
-  --c-orange: #f59e0b;
-  --c-ink: #0c1222;
+  --dm-blue: #1e3a8a;
+  --dm-blue-dark: #17306f;
+  --dm-green: #10b981;
+  --dm-blue-soft: #2d52c4;
+  --dm-slate: #64748b;
+  --c-ink: #0f172a;
 
-  /* Re-point brand tokens → indigo (semua komponen ikut) */
-  --brand-50: #ecebfd;
-  --brand-100: #ecebfd;
-  --brand-200: #c7c2fb;
-  --brand-300: #a5a0f5;
-  --brand-400: #6366f1;
-  --brand-500: #4f46e5;
-  --brand-600: #4338ca;
-  --brand-700: #3a32ad;
-  --brand-800: #312a90;
-  --brand-900: #221d63;
+  /* Re-point brand tokens → biru DealMatch (semua komponen ikut) */
+  --brand-50: #e8eefb;
+  --brand-100: #e8eefb;
+  --brand-200: #b7c8ec;
+  --brand-300: #7fa0e4;
+  --brand-400: #2d52c4;
+  --brand-500: #1e3a8a;
+  --brand-600: #17306f;
+  --brand-700: #132555;
+  --brand-800: #0f1d44;
+  --brand-900: #0b1531;
 
-  --canvas-soft: #f6f7fb;
-  --ring: rgba(79, 70, 229, 0.22);
+  --canvas-soft: #f8fafc;
+  --ring: rgba(30, 58, 138, 0.22);
 }
 
-/* Semua peran pakai aksen indigo (tema terpadu, bukan per-role) */
+/* Semua peran pakai aksen biru DealMatch (tema terpadu, bukan per-role) */
 [data-role="admin"],
 [data-role="org"],
 [data-role="funder"] {
-  --role-accent: var(--indigo-500);
-  --role-accent-soft: #ecebfd;
-  --role-accent-strong: var(--indigo-600);
+  --role-accent: var(--dm-blue);
+  --role-accent-soft: #e8eefb;
+  --role-accent-strong: var(--dm-blue-dark);
   --role-on-accent: #fff;
 }
 
-/* ---------- Sidebar: navy slab, indigo active ---------- */
+/* ---------- Sidebar: navy slab, aktif biru ---------- */
 .sh-sidebar {
-  background: linear-gradient(184deg, #0e1530 0%, #0a0f22 100%);
+  background: linear-gradient(184deg, #0f172a 0%, #0b1220 100%);
   border-right: 0;
 }
 .sh-sidebar__brand {
   color: #fff;
 }
 .sh-sidebar__group-label {
-  color: #5b6480;
+  color: #64748b;
 }
 .sh-sidebar__link {
-  color: #aeb6cc;
+  color: #94a3b8;
   border-radius: 11px;
   font-weight: 500;
 }
@@ -62,10 +61,10 @@
   color: #fff;
 }
 .sh-sidebar__link.is-active {
-  background: var(--indigo-500);
+  background: var(--dm-blue);
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.45);
+  box-shadow: 0 6px 16px rgba(30, 58, 138, 0.45);
 }
 .sh-sidebar__footer {
   border-top-color: rgba(255, 255, 255, 0.08);
@@ -73,7 +72,7 @@
 .sh-sidebar__footer .sh-btn--secondary {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.14);
-  color: #e5e9f5;
+  color: #e2e8f0;
 }
 .sh-sidebar__footer .sh-btn--secondary:hover {
   background: rgba(255, 255, 255, 0.12);
@@ -95,7 +94,7 @@
   border-radius: 11px;
 }
 .sh-btn--primary {
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 6px 16px rgba(30, 58, 138, 0.3);
 }
 
 /* ---------- Cards ---------- */
@@ -109,49 +108,49 @@
   border-bottom: 3px solid var(--line-strong);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 1) {
-  border-bottom-color: var(--indigo-500);
+  border-bottom-color: var(--dm-blue);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 1) .sh-stat__value {
-  color: var(--indigo-500);
+  color: var(--dm-blue);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 1) .sh-stat__icon {
-  background: #ecebfd;
-  color: var(--indigo-500);
+  background: #e8eefb;
+  color: var(--dm-blue);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 2) {
-  border-bottom-color: var(--c-green);
+  border-bottom-color: var(--dm-green);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 2) .sh-stat__value {
-  color: var(--c-green);
+  color: var(--dm-green);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 2) .sh-stat__icon {
-  background: #e7f6ec;
-  color: var(--c-green);
+  background: #e6f8f1;
+  color: var(--dm-green);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 3) {
-  border-bottom-color: var(--c-blue);
+  border-bottom-color: var(--dm-blue-soft);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 3) .sh-stat__value {
-  color: var(--c-blue);
+  color: var(--dm-blue-soft);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 3) .sh-stat__icon {
-  background: #e5f1fe;
-  color: var(--c-blue);
+  background: #e8eefb;
+  color: var(--dm-blue-soft);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 4) {
-  border-bottom-color: var(--c-orange);
+  border-bottom-color: var(--dm-slate);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 4) .sh-stat__value {
-  color: var(--c-orange);
+  color: var(--dm-slate);
 }
 .sh-stat-grid > .sh-stat:nth-child(4n + 4) .sh-stat__icon {
-  background: #fef3da;
-  color: var(--c-orange);
+  background: #eef2f6;
+  color: var(--dm-slate);
 }
 
 /* ---------- Table hover ---------- */
 .sh-table tbody tr:hover {
-  background: #f5f4fe;
+  background: #f1f5fb;
 }
 
 /* ============================================================
@@ -164,8 +163,8 @@
   color: #fff;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(108deg, #3a4de8 0%, #5340e6 48%, #7c3aed 100%);
-  box-shadow: 0 16px 34px rgba(79, 70, 229, 0.28);
+  background: linear-gradient(108deg, #1e3a8a 0%, #1e5fa8 48%, #10b981 100%);
+  box-shadow: 0 16px 34px rgba(30, 58, 138, 0.28);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -207,7 +206,7 @@
   background: #fff;
   border-radius: 16px;
   padding: 16px 20px;
-  box-shadow: 0 12px 28px rgba(12, 18, 34, 0.22);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -222,7 +221,7 @@
 }
 .sh-hero__stat-lbl {
   font-size: 12.5px;
-  color: var(--indigo-500);
+  color: var(--dm-blue);
   font-weight: 600;
   margin-top: 2px;
 }
@@ -233,8 +232,8 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: #ecebfd;
-  color: var(--indigo-500);
+  background: #e8eefb;
+  color: var(--dm-blue);
   flex-shrink: 0;
 }
 

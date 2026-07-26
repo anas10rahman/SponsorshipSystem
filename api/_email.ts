@@ -35,19 +35,19 @@ export async function sendVerificationEmail(
   code: string,
 ): Promise<{ ok: boolean; error?: string }> {
   if (!hasEmailProvider()) return { ok: false, error: "no_provider" };
-  const from = process.env.MAIL_FROM || `SponsorHub <${process.env.GMAIL_USER}>`;
+  const from = process.env.MAIL_FROM || `DealMatch <${process.env.GMAIL_USER}>`;
   const html = `
     <div style="font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:480px;margin:auto;padding:24px">
-      <h2 style="margin:0 0 8px">Verifikasi email SponsorHub</h2>
+      <h2 style="margin:0 0 8px">Verifikasi email DealMatch</h2>
       <p style="color:#555;margin:0 0 20px">Masukkan kode berikut untuk menyelesaikan pendaftaran. Kode berlaku ${OTP_TTL_MIN} menit.</p>
       <div style="font-size:32px;font-weight:700;letter-spacing:8px;text-align:center;background:#f2f2f7;border-radius:12px;padding:18px 0;color:#4f46e5">${code}</div>
-      <p style="color:#999;font-size:12px;margin:20px 0 0">Abaikan email ini jika Anda tidak mendaftar di SponsorHub.</p>
+      <p style="color:#999;font-size:12px;margin:20px 0 0">Abaikan email ini jika Anda tidak mendaftar di DealMatch.</p>
     </div>`;
   try {
     await transporter().sendMail({
       from,
       to,
-      subject: `Kode verifikasi SponsorHub: ${code}`,
+      subject: `Kode verifikasi DealMatch: ${code}`,
       html,
     });
     return { ok: true };
@@ -62,10 +62,10 @@ export async function sendResetEmail(
   code: string,
 ): Promise<{ ok: boolean; error?: string }> {
   if (!hasEmailProvider()) return { ok: false, error: "no_provider" };
-  const from = process.env.MAIL_FROM || `SponsorHub <${process.env.GMAIL_USER}>`;
+  const from = process.env.MAIL_FROM || `DealMatch <${process.env.GMAIL_USER}>`;
   const html = `
     <div style="font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:480px;margin:auto;padding:24px">
-      <h2 style="margin:0 0 8px">Reset kata sandi SponsorHub</h2>
+      <h2 style="margin:0 0 8px">Reset kata sandi DealMatch</h2>
       <p style="color:#555;margin:0 0 20px">Masukkan kode berikut untuk mengatur ulang kata sandi Anda. Kode berlaku ${OTP_TTL_MIN} menit.</p>
       <div style="font-size:32px;font-weight:700;letter-spacing:8px;text-align:center;background:#f2f2f7;border-radius:12px;padding:18px 0;color:#4f46e5">${code}</div>
       <p style="color:#999;font-size:12px;margin:20px 0 0">Jika Anda tidak meminta reset kata sandi, abaikan email ini — kata sandi Anda tidak berubah.</p>
@@ -74,7 +74,7 @@ export async function sendResetEmail(
     await transporter().sendMail({
       from,
       to,
-      subject: `Kode reset kata sandi SponsorHub: ${code}`,
+      subject: `Kode reset kata sandi DealMatch: ${code}`,
       html,
     });
     return { ok: true };

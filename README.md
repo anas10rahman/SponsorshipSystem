@@ -1,4 +1,4 @@
-# SponsorHub
+# DealMatch
 
 Platform sponsorship & pendanaan dengan tiga peran (Admin, Organisasi, Pendana) dan pengawasan administratif penuh atas setiap transaksi. Spesifikasi: lihat [`PRDsponsor.md`](./PRDsponsor.md).
 

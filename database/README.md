@@ -1,4 +1,4 @@
-# SponsorHub — Database
+# DealMatch — Database
 
 Schema PostgreSQL sesuai PRD §6 (model: User, Organization, Funder, Proposal, Transaction, Application, AuditLog, Notification).
 

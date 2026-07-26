@@ -67,7 +67,7 @@ export function Sidebar({ role }: { role: Role }) {
   return (
     <aside className="sh-sidebar">
       <div className="sh-sidebar__brand">
-        <BrandMark size={32} />
+        <BrandMark size={32} onDark />
       </div>
 
       <div className="sh-sidebar__group-label">{ROLE_LABEL[role]}</div>

@@ -1,5 +1,5 @@
 /* ============================================================
-   SponsorHub — Tokens (warna, tipografi, spacing, radii, shadow)
+   DealMatch — Tokens (warna, tipografi, spacing, radii, shadow)
    Sumber: PRD §10 + visual refs Stitch.
    Impor pertama, satu-satunya tempat warna/ukuran didefinisikan.
    ============================================================ */
@@ -7,7 +7,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 :root {
-  /* === Brand: biru SponsorHub === */
+  /* === Brand: biru DealMatch #1E3A8A === */
   --brand-50: #eef6fd;
   --brand-100: #d9ecfb;
   --brand-200: #b6d8f6;
@@ -25,27 +25,27 @@
   --navy-300: #8da0b3;
   --navy-500: #475a72;
   --navy-700: #233954;
-  --navy-900: #0c1b2e;
+  --navy-900: #0f172a;
 
   /* === Hijau: aksen Pendana === */
   --green-50: #e7f7ee;
   --green-100: #c7ecd3;
   --green-300: #6dc88c;
-  --green-500: #23a25d;
+  --green-500: #10b981;
   --green-600: #1a8b4d;
   --green-700: #15703f;
 
   /* === Status === */
-  --status-success: #1f9a55;
-  --status-success-soft: #dff7e8;
+  --status-success: #10b981;
+  --status-success-soft: #e6f8f1;
   --status-pending: #d99a14;
   --status-pending-soft: #fff2ce;
   --status-failed: #c92f2f;
   --status-failed-soft: #ffe1e1;
-  --status-info: #1769bd;
-  --status-info-soft: #dceffc;
-  --status-neutral: #5b6b7a;
-  --status-neutral-soft: #eef2f5;
+  --status-info: #1e3a8a;
+  --status-info-soft: #e8eefb;
+  --status-neutral: #64748b;
+  --status-neutral-soft: #eef2f6;
 
   /* === Aksen per peran (alias) === */
   --role-admin: var(--navy-900);

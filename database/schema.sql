@@ -1,5 +1,5 @@
 -- ============================================================
--- SponsorHub — Postgres schema (model PRD §6)
+-- DealMatch — Postgres schema (model PRD §6)
 -- Bahasa: SQL. Komentar: Bahasa Indonesia.
 -- Saat dipakai di Neon / Postgres, jalankan file ini sekali.
 -- ============================================================
