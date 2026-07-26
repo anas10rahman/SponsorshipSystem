@@ -4,21 +4,17 @@ import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { useStore, useActions } from "@/lib/store";
 import { useToast } from "@/components/Toast";
-import { CurrencyInput } from "@/components/CurrencyInput";
 import { GantiPassword } from "@/components/GantiPassword";
 import { initials } from "@/lib/format";
-import type { Funder, FunderType } from "@/lib/types";
 import {
-  Save,
-  X,
-  Instagram,
-  Twitter,
-  Facebook,
-  Globe,
-  ArrowLeft,
-  ImagePlus,
-  Mail,
-} from "lucide-react";
+  normalizeInstagram,
+  normalizeWebsite,
+  validateInstagram,
+  validatePhone,
+  validateWebsite,
+} from "@/lib/contactValidate";
+import type { Funder, FunderType } from "@/lib/types";
+import { Save, X, Instagram, Globe, ArrowLeft, ImagePlus, Mail, Phone } from "lucide-react";
 
 const TYPES: FunderType[] = ["Korporasi", "Individu", "Filantropi", "Perbankan"];
 
@@ -32,6 +28,7 @@ export default function FunderPengaturan() {
 
   const [form, setForm] = useState<Funder | null>(funder ?? null);
   const [focusText, setFocusText] = useState((funder?.focus ?? []).join(", "));
+  const [errors, setErrors] = useState<Set<string>>(new Set());
 
   if (!funder || !form) return null;
 
@@ -65,28 +62,40 @@ export default function FunderPengaturan() {
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    const required: Array<[boolean, string]> = [
-      [form.name.trim() !== "", "Nama pendana"],
-      [form.email.trim() !== "", "Email pendana"],
-      [form.description.trim() !== "", "Deskripsi pendana"],
-      [focus.length > 0, "Fokus pendanaan"],
-      [form.pic.name.trim() !== "", "Nama PIC"],
-      [form.pic.phone.trim() !== "", "Nomor WA PIC"],
-      [form.pic.position.trim() !== "", "Jabatan PIC"],
-      [form.pic.email.trim() !== "", "Email PIC"],
-    ];
-    const missing = required.find(([ok]) => !ok);
-    if (missing) {
-      toast.failed(`${missing[1]} wajib diisi.`);
+
+    // Tandai field bermasalah dengan border merah (bukan toast) — sama seperti
+    // halaman organisasi, supaya jelas bagian mana yang perlu diperbaiki.
+    const errs = new Set<string>();
+    const emailBad = (v: string) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.trim());
+    if (!form.name.trim()) errs.add("name");
+    if (emailBad(form.email)) errs.add("email");
+    if (!form.description.trim()) errs.add("description");
+    if (focus.length === 0) errs.add("focus");
+    if (validatePhone(form.phone)) errs.add("phone");
+    if (validateWebsite(form.website ?? "")) errs.add("website");
+    if (validateInstagram(form.instagram ?? "")) errs.add("instagram");
+    if (!form.pic.name.trim()) errs.add("pic.name");
+    if (validatePhone(form.pic.phone)) errs.add("pic.phone");
+    if (!form.pic.position.trim()) errs.add("pic.position");
+    if (emailBad(form.pic.email)) errs.add("pic.email");
+    if (errs.size) {
+      setErrors(errs);
+      toast.failed("Periksa kembali kolom yang ditandai merah.");
       return;
     }
+    setErrors(new Set());
+
     try {
       await updateFunderProfile({
         ...form,
         focus,
-        phone: form.pic.phone, // sinkron kontak ber-gate dari PIC
+        // Simpan tautan dalam bentuk utuh agar selalu bisa diklik di profil.
+        website: normalizeWebsite(form.website ?? "") || undefined,
+        instagram: normalizeInstagram(form.instagram ?? "") || undefined,
+        twitter: undefined,
+        facebook: undefined,
       });
-      toast.success("Profil pendana tersimpan.");
+      toast.success("Profil mitra sponsor tersimpan.");
       navigate("/funder/profil");
     } catch (e: any) {
       toast.failed(String(e?.message || "Gagal menyimpan profil."));
@@ -95,11 +104,11 @@ export default function FunderPengaturan() {
 
   return (
     <>
-      <Topbar title="Pengaturan akun pendana" />
+      <Topbar title="Pengaturan akun mitra sponsor" />
       <div className="sh-shell__content">
         <PageHead
-          title="Edit profil pendana"
-          subtitle="Lengkapi profil pendana dan penanggung jawab (PIC)."
+          title="Edit profil mitra sponsor"
+          subtitle="Lengkapi profil mitra sponsor dan penanggung jawab (PIC)."
           actions={
             <div className="sh-row" style={{ gap: 8 }}>
               <button
@@ -118,16 +127,16 @@ export default function FunderPengaturan() {
         />
 
         <div style={{ display: "grid", gap: 20, maxWidth: 880 }}>
-          {/* ============ Profil pendana ============ */}
+          {/* ============ Profil mitra sponsor ============ */}
           <section className="sh-card">
             <header className="sh-card__header">
-              <h3>Profil pendana</h3>
+              <h3>Profil mitra sponsor</h3>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               {/* Logo */}
               <div style={{ marginBottom: 18 }}>
                 <label className="sh-field__label" style={{ display: "block", marginBottom: 8 }}>
-                  Logo pendana
+                  Logo mitra sponsor
                 </label>
                 <input
                   ref={logoRef}
@@ -179,7 +188,7 @@ export default function FunderPengaturan() {
               </div>
 
               <div className="sh-form-grid">
-                <Field label="Nama pendana" required>
+                <Field label="Nama mitra sponsor" required invalid={errors.has("name")}>
                   <input
                     value={form.name}
                     onChange={(e) => set({ name: e.target.value })}
@@ -188,7 +197,7 @@ export default function FunderPengaturan() {
                 </Field>
                 <div className="sh-field">
                   <label className="sh-field__label">
-                    Tipe pendana <Req />
+                    Tipe mitra sponsor <Req />
                   </label>
                   <select
                     value={form.type}
@@ -201,15 +210,21 @@ export default function FunderPengaturan() {
                     ))}
                   </select>
                 </div>
-                <Field label="Email pendana" required icon={<Mail size={14} />}>
+                <Field
+                  label="Email mitra sponsor"
+                  required
+                  icon={<Mail size={14} />}
+                  invalid={errors.has("email")}
+                  error={form.email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.trim()) ? "Format email tidak valid." : null}
+                >
                   <input
                     type="email"
                     value={form.email}
                     onChange={(e) => set({ email: e.target.value })}
-                    placeholder="csr@pendana.co.id"
+                    placeholder="csr@mitra.co.id"
                   />
                 </Field>
-                <Field label="Fokus pendanaan" required hint="Pisahkan dengan koma">
+                <Field label="Fokus pendanaan" required hint="Pisahkan dengan koma" invalid={errors.has("focus")}>
                   <input
                     value={focusText}
                     onChange={(e) => setFocusText(e.target.value)}
@@ -217,18 +232,23 @@ export default function FunderPengaturan() {
                   />
                 </Field>
                 <Field
-                  label="Anggaran total"
-                  hint="Kapasitas dana yang Anda sediakan. Hanya Anda yang bisa melihat."
+                  label="No. Telepon / WhatsApp"
+                  required
+                  icon={<Phone size={14} />}
+                  hint="Nomor aktif WhatsApp — jadi tautan chat di profil."
+                  invalid={errors.has("phone")}
+                  error={validatePhone(form.phone)}
                 >
-                  <CurrencyInput
-                    value={form.budgetTotal}
-                    onChange={(n) => set({ budgetTotal: n })}
-                    placeholder="Misal: 500.000.000"
+                  <input
+                    inputMode="tel"
+                    value={form.phone}
+                    onChange={(e) => set({ phone: e.target.value })}
+                    placeholder="0812-3456-7890"
                   />
                 </Field>
-                <div className="sh-field sh-field--wide">
+                <div className={`sh-field sh-field--wide${errors.has("description") ? " sh-field--invalid" : ""}`}>
                   <label className="sh-field__label">
-                    Deskripsi pendana <Req />
+                    Deskripsi mitra sponsor <Req />
                   </label>
                   <textarea
                     rows={4}
@@ -243,39 +263,37 @@ export default function FunderPengaturan() {
             <div className="sh-form-section">
               <h4 style={{ marginBottom: 14 }}>Website & sosial media</h4>
               <div className="sh-form-grid">
-                <Field label="Website" icon={<Globe size={14} />}>
+                <Field
+                  label="Website"
+                  icon={<Globe size={14} />}
+                  hint="Boleh tanpa https:// — dilengkapi otomatis."
+                  invalid={errors.has("website")}
+                  error={validateWebsite(form.website ?? "")}
+                >
                   <input
                     value={form.website ?? ""}
                     onChange={(e) => set({ website: e.target.value })}
-                    placeholder="pendana.co.id"
+                    placeholder="mitra.co.id"
                   />
                 </Field>
-                <Field label="Instagram" icon={<Instagram size={14} />}>
+                <Field
+                  label="Instagram"
+                  icon={<Instagram size={14} />}
+                  hint="Isi username atau tautan — disimpan sebagai tautan."
+                  invalid={errors.has("instagram")}
+                  error={validateInstagram(form.instagram ?? "")}
+                >
                   <input
                     value={form.instagram ?? ""}
                     onChange={(e) => set({ instagram: e.target.value })}
-                    placeholder="@pendana"
-                  />
-                </Field>
-                <Field label="X (Twitter)" icon={<Twitter size={14} />}>
-                  <input
-                    value={form.twitter ?? ""}
-                    onChange={(e) => set({ twitter: e.target.value })}
-                    placeholder="@pendana"
-                  />
-                </Field>
-                <Field label="Facebook" icon={<Facebook size={14} />}>
-                  <input
-                    value={form.facebook ?? ""}
-                    onChange={(e) => set({ facebook: e.target.value })}
-                    placeholder="NamaHalaman"
+                    placeholder="@mitrasponsor"
                   />
                 </Field>
               </div>
             </div>
           </section>
 
-          {/* ============ PIC pendana ============ */}
+          {/* ============ PIC mitra sponsor ============ */}
           <section className="sh-card">
             <header className="sh-card__header">
               <h3>Penanggung jawab (PIC)</h3>
@@ -285,33 +303,44 @@ export default function FunderPengaturan() {
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <div className="sh-form-grid">
-                <Field label="Nama PIC" required>
+                <Field label="Nama PIC" required invalid={errors.has("pic.name")}>
                   <input
                     value={form.pic.name}
                     onChange={(e) => setPic({ name: e.target.value })}
                     placeholder="Nama lengkap penanggung jawab"
                   />
                 </Field>
-                <Field label="Nomor WA PIC" required>
+                <Field
+                  label="Nomor WA PIC"
+                  required
+                  invalid={errors.has("pic.phone")}
+                  error={validatePhone(form.pic.phone)}
+                >
                   <input
                     value={form.pic.phone}
                     onChange={(e) => setPic({ phone: e.target.value })}
                     placeholder="0812-3456-7890"
                   />
                 </Field>
-                <Field label="Jabatan" required>
+                <Field label="Jabatan" required invalid={errors.has("pic.position")}>
                   <input
                     value={form.pic.position}
                     onChange={(e) => setPic({ position: e.target.value })}
                     placeholder="Misal: Manajer CSR"
                   />
                 </Field>
-                <Field label="Email PIC" required icon={<Mail size={14} />}>
+                <Field
+                  label="Email PIC"
+                  required
+                  icon={<Mail size={14} />}
+                  invalid={errors.has("pic.email")}
+                  error={form.pic.email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.pic.email.trim()) ? "Format email tidak valid." : null}
+                >
                   <input
                     type="email"
                     value={form.pic.email}
                     onChange={(e) => setPic({ email: e.target.value })}
-                    placeholder="nama@pendana.co.id"
+                    placeholder="nama@mitra.co.id"
                   />
                 </Field>
               </div>
@@ -341,22 +370,34 @@ function Field({
   required,
   hint,
   icon,
+  invalid,
+  error,
   children,
 }: {
   label: string;
   required?: boolean;
   hint?: string;
   icon?: React.ReactNode;
+  /** Ditandai merah setelah tombol Simpan menemukan isian bermasalah. */
+  invalid?: boolean;
+  /** Pesan spesifik; hanya ditampilkan saat field ditandai merah. */
+  error?: string | null;
   children: React.ReactNode;
 }) {
   return (
-    <div className="sh-field">
+    <div className={`sh-field${invalid ? " sh-field--invalid" : ""}`}>
       <label className="sh-field__label sh-row" style={{ gap: 6 }}>
         {icon}
         {label} {required && <Req />}
       </label>
       {children}
-      {hint && <span className="sh-field__hint">{hint}</span>}
+      {invalid ? (
+        <span className="sh-field__hint" style={{ color: "var(--status-failed)" }}>
+          {error ?? "Wajib diisi dengan benar."}
+        </span>
+      ) : (
+        hint && <span className="sh-field__hint">{hint}</span>
+      )}
     </div>
   );
 }

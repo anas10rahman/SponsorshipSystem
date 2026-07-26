@@ -21,17 +21,17 @@ export default function OrgCariPendana() {
   return (
     <>
       <Topbar
-        title="Cari pendana"
-        search={{ value: query, onChange: setQuery, placeholder: "Cari pendana / fokus…" }}
+        title="Cari mitra sponsor"
+        search={{ value: query, onChange: setQuery, placeholder: "Cari mitra sponsor / fokus…" }}
       />
       <div className="sh-shell__content">
         <PageHead
-          title="Cari pendana"
-          subtitle="Pilih pendana yang sesuai, lalu ajukan proposal sponsorship langsung ke mereka."
+          title="Cari mitra sponsor"
+          subtitle="Pilih mitra sponsor yang sesuai, lalu ajukan proposal sponsorship langsung ke mereka."
         />
 
         {rows.length === 0 ? (
-          <Empty title="Tidak ada pendana yang cocok" />
+          <Empty title="Tidak ada mitra sponsor yang cocok" />
         ) : (
           <div className="sh-proposal-grid">
             {rows.map((f) => {

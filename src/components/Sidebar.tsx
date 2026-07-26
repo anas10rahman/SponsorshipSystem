@@ -25,14 +25,14 @@ const NAV: Record<Role, Item[]> = {
     { to: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { to: "/admin/pengajuan", label: "Pengajuan", icon: <Send size={18} /> },
     { to: "/admin/organisasi", label: "Organisasi", icon: <Building2 size={18} /> },
-    { to: "/admin/pendana", label: "Pendana", icon: <Users size={18} /> },
+    { to: "/admin/pendana", label: "Mitra Sponsor", icon: <Users size={18} /> },
     { to: "/admin/pengguna", label: "Pengguna", icon: <UserCog size={18} /> },
     { to: "/admin/laporan", label: "Laporan", icon: <FileText size={18} /> },
     { to: "/admin/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
   ],
   org: [
     { to: "/org/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
-    { to: "/org/cari", label: "Cari pendana", icon: <Search size={18} /> },
+    { to: "/org/cari", label: "Cari mitra sponsor", icon: <Search size={18} /> },
     { to: "/org/pengajuan", label: "Pengajuan saya", icon: <Send size={18} /> },
     { to: "/org/topup", label: "Top-up saldo", icon: <Wallet size={18} /> },
   ],
@@ -45,7 +45,7 @@ const NAV: Record<Role, Item[]> = {
 const ROLE_LABEL: Record<Role, string> = {
   admin: "Admin",
   org: "Organisasi",
-  funder: "Pendana",
+  funder: "Mitra Sponsor",
 };
 
 export function Sidebar({ role }: { role: Role }) {
@@ -53,7 +53,7 @@ export function Sidebar({ role }: { role: Role }) {
   const { state, currentUser } = useStore();
   const items = NAV[role];
 
-  // Jumlah pengajuan baru yang perlu ditinjau pendana (untuk badge sidebar).
+  // Jumlah pengajuan baru yang perlu ditinjau mitra sponsor (untuk badge sidebar).
   const pendingPengajuan = useMemo(() => {
     if (role !== "funder" || !currentUser?.funderId) return 0;
     return state.pengajuan.filter(

@@ -126,7 +126,7 @@ export default function App() {
           <Route path="/org/pengaturan" element={<OrgPengaturan />} />
         </Route>
 
-        {/* === Pendana === */}
+        {/* === Mitra Sponsor === */}
         <Route
           element={
             <RoleGuard allow="funder">

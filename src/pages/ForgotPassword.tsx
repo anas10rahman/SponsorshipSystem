@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { BrandMark } from "@/components/BrandMark";
 import { rolePath, useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
+import { PasswordInput } from "@/components/PasswordInput";
 import { passwordRules, validatePassword } from "@/lib/password";
 import { Check, X } from "lucide-react";
 
@@ -146,12 +147,10 @@ export default function ForgotPassword() {
             <label className="sh-field__label" htmlFor="new-password">
               Kata sandi baru
             </label>
-            <input
+            <PasswordInput
               id="new-password"
-              type="password"
-              autoComplete="new-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={setPassword}
               placeholder="Kata sandi baru"
             />
           </div>
@@ -188,12 +187,10 @@ export default function ForgotPassword() {
             <label className="sh-field__label" htmlFor="confirm-password">
               Konfirmasi kata sandi baru
             </label>
-            <input
+            <PasswordInput
               id="confirm-password"
-              type="password"
-              autoComplete="new-password"
               value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
+              onChange={setConfirm}
               placeholder="Ulangi kata sandi baru"
             />
           </div>

@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (b.op === "update") {
       const f = b.funder;
       const newTotal = Math.max(0, Number(f.budgetTotal) || 0);
-      // Anggaran total di-set pendana; sisa dihitung ulang = total - yang sudah terpakai
+      // Anggaran total di-set mitra sponsor; sisa dihitung ulang = total - yang sudah terpakai
       // (terpakai = total_lama - sisa_lama). Di-clamp agar patuh constraint.
       await sql`
         update funders set
@@ -23,10 +23,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           pic_position = ${f.pic.position}, pic_email = ${f.pic.email}
         where id = ${f.id}`;
     } else if (b.op === "delete_funder") {
-      // Admin hapus pendana: hapus akun login + transaksi dulu (FK), lalu
-      // pendana (pengajuan & proposal_supporters ikut cascade).
+      // Admin hapus mitra sponsor: hapus akun login + transaksi dulu (FK), lalu
+      // mitra sponsor (pengajuan & proposal_supporters ikut cascade).
       const exists = (await sql`select 1 from funders where id = ${b.funderId} limit 1`) as any[];
-      if (!exists.length) return res.status(404).json({ error: "Pendana tidak ditemukan." });
+      if (!exists.length) return res.status(404).json({ error: "Mitra Sponsor tidak ditemukan." });
       await sql.transaction([
         sql`delete from transactions where funder_id = ${b.funderId}`,
         sql`delete from users where funder_id = ${b.funderId}`,

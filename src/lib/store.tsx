@@ -282,12 +282,12 @@ export function useActions() {
       async deleteOrg(orgId: string) {
         apply(await api.org({ op: "delete_org", orgId, actorId: actorId() }));
       },
-      // Admin: hapus pendana (beserta akun & data terkait).
+      // Admin: hapus mitra sponsor (beserta akun & data terkait).
       async deleteFunder(funderId: string) {
         apply(await api.funder({ op: "delete_funder", funderId, actorId: actorId() }));
       },
 
-      // ---- Pendana ----
+      // ---- Mitra Sponsor ----
       async updateFunderProfile(funder: Funder) {
         apply(await api.funder({ op: "update", funder }));
       },

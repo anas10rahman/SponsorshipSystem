@@ -53,7 +53,7 @@ export default function AdminPengguna() {
     try {
       if (del.kind === "org") await deleteOrg(del.id);
       else await deleteFunder(del.id);
-      toast.success(`${del.kind === "org" ? "Organisasi" : "Pendana"} "${del.name}" dihapus.`);
+      toast.success(`${del.kind === "org" ? "Organisasi" : "Mitra Sponsor"} "${del.name}" dihapus.`);
       setDel(null);
     } catch (e: any) {
       toast.failed(String(e?.message || "Gagal menghapus."));
@@ -71,7 +71,7 @@ export default function AdminPengguna() {
       <div className="sh-shell__content">
         <PageHead
           title="Manajemen pengguna"
-          subtitle="Kelola akun organisasi & pendana. Menghapus akun menghapus seluruh data terkaitnya."
+          subtitle="Kelola akun organisasi & mitra sponsor. Menghapus akun menghapus seluruh data terkaitnya."
         />
 
         <div className="sh-toolbar">
@@ -90,7 +90,7 @@ export default function AdminPengguna() {
             onClick={() => setTab("funder")}
           >
             <HandCoins size={14} />
-            Pendana
+            Mitra Sponsor
             <span className="sh-muted" style={{ fontWeight: 600 }}>
               ({state.funders.length})
             </span>
@@ -149,13 +149,13 @@ export default function AdminPengguna() {
               </div>
             )
           ) : funderRows.length === 0 ? (
-            <Empty title="Tidak ada pendana" description="Belum ada akun pendana." />
+            <Empty title="Tidak ada mitra sponsor" description="Belum ada akun mitra sponsor." />
           ) : (
             <div className="sh-table-wrap">
               <table className="sh-table">
                 <thead>
                   <tr>
-                    <th>Pendana</th>
+                    <th>Mitra Sponsor</th>
                     <th>Username</th>
                     <th>Email</th>
                     <th>Tipe</th>
@@ -177,7 +177,7 @@ export default function AdminPengguna() {
                           <button
                             className="sh-btn sh-btn--ghost sh-btn--icon"
                             onClick={() => setDel({ kind: "funder", id: f.id, name: f.name })}
-                            title="Hapus pendana"
+                            title="Hapus mitra sponsor"
                           >
                             <Trash2 size={14} style={{ color: "var(--status-failed)" }} />
                           </button>
@@ -196,7 +196,7 @@ export default function AdminPengguna() {
         <Modal
           open
           onClose={() => setDel(null)}
-          title={del.kind === "org" ? "Hapus organisasi?" : "Hapus pendana?"}
+          title={del.kind === "org" ? "Hapus organisasi?" : "Hapus mitra sponsor?"}
           width={460}
           footer={
             <>
@@ -211,7 +211,7 @@ export default function AdminPengguna() {
           }
         >
           <p>
-            {del.kind === "org" ? "Organisasi" : "Pendana"} <strong>{del.name}</strong> akan dihapus{" "}
+            {del.kind === "org" ? "Organisasi" : "Mitra Sponsor"} <strong>{del.name}</strong> akan dihapus{" "}
             <strong>permanen</strong> — beserta akun login dan seluruh pengajuan terkaitnya. Tindakan
             ini tidak bisa dibatalkan.
           </p>

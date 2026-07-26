@@ -110,11 +110,11 @@ export default function BuatPengajuan() {
         <Topbar title="Buat pengajuan" />
         <div className="sh-shell__content">
           <Empty
-            title="Pendana belum dipilih"
-            description="Pilih pendana dulu dari halaman Cari pendana."
+            title="Mitra Sponsor belum dipilih"
+            description="Pilih mitra sponsor dulu dari halaman Cari mitra sponsor."
             action={
               <Link to="/org/cari" className="sh-btn sh-btn--primary">
-                Ke Cari pendana
+                Ke Cari mitra sponsor
               </Link>
             }
           />
@@ -143,7 +143,7 @@ export default function BuatPengajuan() {
   const removeRequest = (pi: number, li: number) =>
     setPackage(pi, { requests: packages[pi].requests.filter((_, idx) => idx !== li) });
 
-  // Benefit untuk pendana (poin teks bebas)
+  // Benefit untuk mitra sponsor (poin teks bebas)
   const setBenefit = (pi: number, li: number, value: string) =>
     setPackage(pi, { benefits: packages[pi].benefits.map((v, idx) => (idx === li ? value : v)) });
   const addBenefit = (pi: number) =>
@@ -420,8 +420,8 @@ export default function BuatPengajuan() {
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <h3 className="sh-form-section__title">2. Paket sponsorship</h3>
               <p className="sh-muted" style={{ marginTop: -6, marginBottom: 18 }}>
-                Susun paket yang bisa dipilih pendana. Tiap paket: nama, detail permintaan
-                (in-cash / in-kind), dan benefit untuk pendana.
+                Susun paket yang bisa dipilih mitra sponsor. Tiap paket: nama, detail permintaan
+                (in-cash / in-kind), dan benefit untuk mitra sponsor.
               </p>
 
               <div style={{ display: "grid", gap: 16 }}>
@@ -472,8 +472,8 @@ export default function BuatPengajuan() {
                     />
 
                     <PointEditor
-                      label="Benefit untuk pendana"
-                      hint="Imbalan/keuntungan yang didapat pendana pada paket ini."
+                      label="Benefit untuk mitra sponsor"
+                      hint="Imbalan/keuntungan yang didapat mitra sponsor pada paket ini."
                       placeholder="Misal: Logo di poster kegiatan"
                       values={pk.benefits}
                       onChange={(li, v) => setBenefit(pi, li, v)}
@@ -573,7 +573,7 @@ export default function BuatPengajuan() {
                   rows={3}
                   value={form.extraNote ?? ""}
                   onChange={(e) => set({ extraNote: e.target.value })}
-                  placeholder="Informasi lain yang ingin disampaikan ke pendana."
+                  placeholder="Informasi lain yang ingin disampaikan ke mitra sponsor."
                 />
               </div>
             </div>
@@ -584,7 +584,7 @@ export default function BuatPengajuan() {
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <h3 className="sh-form-section__title">4. Review pengajuan</h3>
               <div className="sh-stack">
-                <ReviewRow label="Pendana tujuan" value={`${funder.name} · ${funder.type}`} />
+                <ReviewRow label="Mitra Sponsor tujuan" value={`${funder.name} · ${funder.type}`} />
                 <ReviewRow label="Nama event" value={form.eventName || "—"} />
                 <ReviewRow label="Lokasi" value={form.eventLocation || "—"} />
                 <ReviewRow label="Tanggal" value={formatEventDate(form.eventDate)} />
@@ -671,7 +671,7 @@ export default function BuatPengajuan() {
               )}
 
               <div className="sh-notice sh-notice--info" style={{ marginTop: 12 }}>
-                Setelah dikirim, pengajuan masuk ke pendana untuk ditinjau. Pendana memilih
+                Setelah dikirim, pengajuan masuk ke mitra sponsor untuk ditinjau. Mitra Sponsor memilih
                 salah satu paket lalu menyetujui, atau menolak/meminta revisi.
               </div>
             </div>
@@ -830,7 +830,7 @@ function RequestEditor({
         )}
       </div>
       <div className="sh-muted" style={{ fontSize: 12, marginBottom: 8 }}>
-        Apa yang diminta organisasi dari pendana. Pilih jenis tiap poin: In-Cash (dana) atau
+        Apa yang diminta organisasi dari mitra sponsor. Pilih jenis tiap poin: In-Cash (dana) atau
         In-Kind (barang/jasa).
       </div>
       <div style={{ display: "grid", gap: 8 }}>
@@ -907,7 +907,7 @@ function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
       )}
       {pkg.benefits.length > 0 && (
         <div>
-          <div className="sh-meta-label">Benefit untuk pendana</div>
+          <div className="sh-meta-label">Benefit untuk mitra sponsor</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.benefits.map((b, i) => (
               <li key={i}>{b}</li>

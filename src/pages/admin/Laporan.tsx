@@ -23,7 +23,7 @@ export default function AdminLaporan() {
   const totalApproved = approved.reduce((s, p) => s + selectedAmount(p), 0);
   const totalPending = pending.reduce((s, p) => s + pkgMax(p), 0);
 
-  // Top pendana by nilai disetujui (paket terpilih)
+  // Top mitra sponsor by nilai disetujui (paket terpilih)
   const topFunders = useMemo(() => {
     const totals = new Map<string, number>();
     for (const p of approved) {
@@ -69,7 +69,7 @@ export default function AdminLaporan() {
           .map((v) => `"${String(v).replaceAll('"', '""')}"`)
           .join(",");
       });
-    const header = "id,event,organisasi,pendana,jumlah_paket,paket_terpilih,nilai,status,dibuat";
+    const header = "id,event,organisasi,mitra sponsor,jumlah_paket,paket_terpilih,nilai,status,dibuat";
     const blob = new Blob([header + "\n" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -85,7 +85,7 @@ export default function AdminLaporan() {
       <div className="sh-shell__content">
         <PageHead
           title="Laporan"
-          subtitle="Ringkasan pendanaan, top pendana, dan top organisasi."
+          subtitle="Ringkasan pendanaan, top mitra sponsor, dan top organisasi."
           actions={
             <button className="sh-btn sh-btn--secondary" onClick={exportCsv}>
               Ekspor CSV
@@ -114,7 +114,7 @@ export default function AdminLaporan() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
           <section className="sh-card">
             <header className="sh-card__header">
-              <h2>Top pendana (nilai disetujui)</h2>
+              <h2>Top mitra sponsor (nilai disetujui)</h2>
             </header>
             {topFunders.every((t) => t.total === 0) ? (
               <Empty title="Belum ada data" />
@@ -123,7 +123,7 @@ export default function AdminLaporan() {
                 <table className="sh-table">
                   <thead>
                     <tr>
-                      <th>Pendana</th>
+                      <th>Mitra Sponsor</th>
                       <th>Total disetujui</th>
                     </tr>
                   </thead>

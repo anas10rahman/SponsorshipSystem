@@ -69,7 +69,7 @@ export default function OrgDashboard() {
             <div className="sh-card__body">
               <p className="sh-muted">
                 Belum ada pengajuan.{" "}
-                <Link to="/org/cari">Cari pendana</Link> untuk memulai.
+                <Link to="/org/cari">Cari mitra sponsor</Link> untuk memulai.
               </p>
             </div>
           ) : (
@@ -78,7 +78,7 @@ export default function OrgDashboard() {
                 <thead>
                   <tr>
                     <th>Event</th>
-                    <th>Pendana</th>
+                    <th>Mitra Sponsor</th>
                     <th>Paket</th>
                     <th>Nilai</th>
                     <th>Status</th>

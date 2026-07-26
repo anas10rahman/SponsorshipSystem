@@ -44,7 +44,7 @@ export function NotificationsMenu() {
         aria-label={`Notifikasi${unread ? ` (${unread} belum dibaca)` : ""}`}
         title={currentUser?.role === "funder" ? "Ke Pengajuan masuk" : "Notifikasi"}
         onClick={() => {
-          // Pendana: bell langsung menuju halaman Pengajuan masuk.
+          // Mitra Sponsor: bell langsung menuju halaman Pengajuan masuk.
           if (currentUser?.role === "funder") {
             navigate("/funder/pengajuan");
             return;

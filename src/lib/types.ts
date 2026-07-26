@@ -57,7 +57,7 @@ export type Organization = {
 
 export type FunderType = "Korporasi" | "Individu" | "Filantropi" | "Perbankan";
 
-/** Penanggung jawab (PIC) pendana. */
+/** Penanggung jawab (PIC) mitra sponsor. */
 export type FunderPic = {
   name: string;
   phone: string; // no.WA aktif PIC
@@ -80,7 +80,7 @@ export type Funder = {
   instagram?: string;
   twitter?: string; // X
   facebook?: string;
-  logoUrl?: string; // logo pendana (data URL/base64), opsional
+  logoUrl?: string; // logo mitra sponsor (data URL/base64), opsional
   // Penanggung jawab
   pic: FunderPic;
 };
@@ -122,7 +122,7 @@ export type Transaction = {
 };
 
 /* ============================================================
-   Pengajuan (directed): Organisasi → Pendana spesifik.
+   Pengajuan (directed): Organisasi → Mitra Sponsor spesifik.
    Berbeda dari Proposal (katalog publik). PRD flow D + ekspansi.
    ============================================================ */
 
@@ -138,13 +138,13 @@ export type SponsorshipRequest = {
   spec: string; // spesifikasi barang — hanya untuk in_kind
 };
 
-/** Satu paket sponsorship yang ditawarkan organisasi ke pendana.
- *  Pendana memilih SATU paket saat menyetujui pengajuan.
+/** Satu paket sponsorship yang ditawarkan organisasi ke mitra sponsor.
+ *  Mitra Sponsor memilih SATU paket saat menyetujui pengajuan.
  *  Nominal paket = jumlah seluruh poin in_cash (turunan, tidak disimpan). */
 export type SponsorshipPackage = {
   name: string; // Nama paket (mis. "Gold")
-  requests: SponsorshipRequest[]; // Detail permintaan ke pendana (per poin, bertipe)
-  benefits: string[]; // Benefit untuk pendana (per poin)
+  requests: SponsorshipRequest[]; // Detail permintaan ke mitra sponsor (per poin, bertipe)
+  benefits: string[]; // Benefit untuk mitra sponsor (per poin)
 };
 
 /** Satu dokumen pendukung (PDF). `data` (data URL base64) hanya ada saat
@@ -157,8 +157,8 @@ export type PengajuanDoc = {
 
 /* Lifecycle pengajuan terarah:
    draf → diajukan → (perlu_revisi → diajukan)* → disetujui | ditolak
-   Jalur otomatis: diajukan → kadaluarsa (pendana diam 7 hari, biaya kembali penuh).
-   Persetujuan pendana bersifat FINAL (admin hanya memantau). */
+   Jalur otomatis: diajukan → kadaluarsa (mitra sponsor diam 7 hari, biaya kembali penuh).
+   Persetujuan mitra sponsor bersifat FINAL (admin hanya memantau). */
 export type PengajuanStatus =
   | "draf"
   | "diajukan"
@@ -186,7 +186,7 @@ export type Pengajuan = {
   eventBudget: number;
   // Detail sponsorship — daftar paket yang ditawarkan
   packages: SponsorshipPackage[];
-  selectedPackage?: number; // index paket yang dipilih pendana saat menyetujui
+  selectedPackage?: number; // index paket yang dipilih mitra sponsor saat menyetujui
   // Dokumen pendukung (bisa lebih dari satu berkas PDF)
   documents: PengajuanDoc[];
   extraNote?: string;
@@ -219,7 +219,7 @@ export type AuditLog = {
   id: string;
   actorId: string;
   action: AuditAction;
-  entity: "transaksi" | "proposal" | "organisasi" | "pendana" | "ajuan" | "pengajuan";
+  entity: "transaksi" | "proposal" | "organisasi" | "mitra sponsor" | "ajuan" | "pengajuan";
   entityId: string;
   meta?: Record<string, unknown>;
   createdAt: string;

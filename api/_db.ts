@@ -219,7 +219,7 @@ export function makePengajuanId() {
 
 /* Alur biaya pengajuan:
    - Saat organisasi mengirim pengajuan: saldo dipotong SUBMISSION_FEE (50rb).
-   - Bila disetujui pendana: seluruh 50rb menjadi biaya admin — tidak
+   - Bila disetujui mitra sponsor: seluruh 50rb menjadi biaya admin — tidak
      dikembalikan (APPROVE_REFUND = 0).
    - Bila ditolak: biaya admin REJECT_ADMIN_FEE (10rb) ditahan, sisanya
      (40rb) dikembalikan ke saldo organisasi. */

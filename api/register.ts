@@ -10,7 +10,7 @@ class HttpError extends Error {
 }
 
 const FUNDER_TYPES = ["Korporasi", "Individu", "Filantropi", "Perbankan"];
-// Anggaran awal pendana baru (bisa disesuaikan lewat profil nanti).
+// Anggaran awal mitra sponsor baru (bisa disesuaikan lewat profil nanti).
 const DEFAULT_FUNDER_BUDGET = 1_000_000_000;
 
 function initialsOf(name: string): string {
@@ -23,7 +23,7 @@ function initialsOf(name: string): string {
   return s || "??";
 }
 
-/* Registrasi mandiri: buat entitas (organisasi/pendana) + akun login. */
+/* Registrasi mandiri: buat entitas (organisasi/mitra sponsor) + akun login. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try {

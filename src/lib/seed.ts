@@ -1,8 +1,8 @@
 /* Seed data — clean slate.
    Menyimpan: 3 akun login demo, profil organisasi milik akun login,
-   dan daftar pendana (funders). Semua data transaksional dikosongkan
+   dan daftar mitra sponsor (funders). Semua data transaksional dikosongkan
    agar bisa diisi data nyata.
-   Sisa anggaran tiap pendana = anggaran total (belum ada komitmen). */
+   Sisa anggaran tiap mitra sponsor = anggaran total (belum ada komitmen). */
 
 import type { AppState } from "./types";
 
@@ -33,8 +33,8 @@ export function createSeedState(): AppState {
       {
         id: "u-funder",
         name: "Budi Santoso",
-        email: "pendana@sponsorhub.test",
-        username: "pendana",
+        email: "mitra sponsor@sponsorhub.test",
+        username: "mitra sponsor",
         password: "Akundemo12345",
         role: "funder",
         funderId: "fund-1",
@@ -43,8 +43,8 @@ export function createSeedState(): AppState {
       {
         id: "u-funder-2",
         name: "Sari Wijaya",
-        email: "pendana2@sponsorhub.test",
-        username: "pendana2",
+        email: "mitra sponsor2@sponsorhub.test",
+        username: "mitra sponsor2",
         password: "Akundemo12345",
         role: "funder",
         funderId: "fund-2",
@@ -53,8 +53,8 @@ export function createSeedState(): AppState {
       {
         id: "u-funder-3",
         name: "Andi Pratama",
-        email: "pendana3@sponsorhub.test",
-        username: "pendana3",
+        email: "mitra sponsor3@sponsorhub.test",
+        username: "mitra sponsor3",
         password: "Akundemo12345",
         role: "funder",
         funderId: "fund-3",
@@ -93,7 +93,7 @@ export function createSeedState(): AppState {
       },
     ],
 
-    // Daftar pendana — dipertahankan.
+    // Daftar mitra sponsor — dipertahankan.
     funders: [
       {
         id: "fund-1",

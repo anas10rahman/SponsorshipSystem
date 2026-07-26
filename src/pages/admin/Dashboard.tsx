@@ -63,7 +63,7 @@ export default function AdminDashboard() {
                 <tr>
                   <th>Event</th>
                   <th>Organisasi</th>
-                  <th>Pendana</th>
+                  <th>Mitra Sponsor</th>
                   <th>Nilai</th>
                   <th>Status</th>
                   <th>Tanggal</th>

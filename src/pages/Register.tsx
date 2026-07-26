@@ -4,6 +4,7 @@ import { BrandMark } from "@/components/BrandMark";
 import { rolePath, useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
 import { Building2, HandCoins, ArrowLeft, Check, X } from "lucide-react";
+import { PasswordInput } from "@/components/PasswordInput";
 import { passwordRules, validatePassword } from "@/lib/password";
 
 type Role = "org" | "funder";
@@ -99,12 +100,12 @@ export default function Register() {
             <RoleOption
               icon={<Building2 size={22} />}
               title="Organisasi"
-              desc="Ajukan pendanaan sponsorship ke pendana."
+              desc="Ajukan pendanaan sponsorship ke mitra sponsor."
               onClick={() => setRole("org")}
             />
             <RoleOption
               icon={<HandCoins size={22} />}
-              title="Pendana / Sponsor"
+              title="Mitra Sponsor"
               desc="Tinjau & danai pengajuan dari organisasi."
               onClick={() => setRole("funder")}
             />
@@ -122,7 +123,7 @@ export default function Register() {
   }
 
   // --- Langkah 2: form ---
-  const roleLabel = role === "org" ? "Organisasi" : "Pendana / Sponsor";
+  const roleLabel = role === "org" ? "Organisasi" : "Mitra Sponsor";
   return (
     <main className="sh-login">
       <form className="sh-login__card" onSubmit={onSubmit}>
@@ -145,7 +146,7 @@ export default function Register() {
 
         <div className="sh-field">
           <label className="sh-field__label">
-            {role === "org" ? "Nama organisasi" : "Nama pendana"}
+            {role === "org" ? "Nama organisasi" : "Nama mitra sponsor"}
           </label>
           <input
             autoFocus
@@ -176,7 +177,7 @@ export default function Register() {
           </div>
         ) : (
           <div className="sh-field">
-            <label className="sh-field__label">Jenis pendana</label>
+            <label className="sh-field__label">Jenis mitra sponsor</label>
             <select
               value={form.type}
               onChange={(e) => set({ type: e.target.value as (typeof FUNDER_TYPES)[number] })}
@@ -214,11 +215,9 @@ export default function Register() {
         <div className="sh-form-grid">
           <div className="sh-field">
             <label className="sh-field__label">Kata sandi</label>
-            <input
-              type="password"
-              autoComplete="new-password"
+            <PasswordInput
               value={form.password}
-              onChange={(e) => set({ password: e.target.value })}
+              onChange={(v) => set({ password: v })}
               placeholder="Min. 8 karakter, kombinasi kuat"
             />
             {form.password.length > 0 && (
@@ -251,11 +250,9 @@ export default function Register() {
           </div>
           <div className="sh-field">
             <label className="sh-field__label">Konfirmasi kata sandi</label>
-            <input
-              type="password"
-              autoComplete="new-password"
+            <PasswordInput
               value={form.confirm}
-              onChange={(e) => set({ confirm: e.target.value })}
+              onChange={(v) => set({ confirm: v })}
               placeholder="Ulangi kata sandi"
             />
           </div>

@@ -21,24 +21,24 @@ export default function AdminPendana() {
   return (
     <>
       <Topbar
-        title="Direktori pendana"
-        search={{ value: search, onChange: setSearch, placeholder: "Cari pendana / fokus…" }}
+        title="Direktori mitra sponsor"
+        search={{ value: search, onChange: setSearch, placeholder: "Cari mitra sponsor / fokus…" }}
       />
       <div className="sh-shell__content">
         <PageHead
-          title="Direktori pendana"
-          subtitle="Pantau kapasitas anggaran & komitmen tiap pendana."
+          title="Direktori mitra sponsor"
+          subtitle="Pantau kapasitas anggaran & komitmen tiap mitra sponsor."
         />
 
         <section className="sh-card">
           {rows.length === 0 ? (
-            <Empty title="Tidak ada pendana" />
+            <Empty title="Tidak ada mitra sponsor" />
           ) : (
             <div className="sh-table-wrap">
               <table className="sh-table">
                 <thead>
                   <tr>
-                    <th>Pendana</th>
+                    <th>Mitra Sponsor</th>
                     <th>Tipe</th>
                     <th>Fokus</th>
                     <th>Anggaran total</th>

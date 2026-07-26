@@ -2,6 +2,7 @@ import { useState } from "react";
 import { KeyRound, Check, X } from "lucide-react";
 import { useActions } from "@/lib/store";
 import { useToast } from "@/components/Toast";
+import { PasswordInput } from "@/components/PasswordInput";
 import { passwordRules, validatePassword } from "@/lib/password";
 
 /* Kartu "Ganti kata sandi" untuk halaman Pengaturan (org/pendana/admin).
@@ -66,12 +67,11 @@ export function GantiPassword() {
             <label className="sh-field__label" htmlFor="current-password">
               Kata sandi saat ini
             </label>
-            <input
+            <PasswordInput
               id="current-password"
-              type="password"
               autoComplete="current-password"
               value={current}
-              onChange={(e) => setCurrent(e.target.value)}
+              onChange={setCurrent}
               placeholder="Kata sandi saat ini"
             />
           </div>
@@ -80,12 +80,10 @@ export function GantiPassword() {
             <label className="sh-field__label" htmlFor="change-new-password">
               Kata sandi baru
             </label>
-            <input
+            <PasswordInput
               id="change-new-password"
-              type="password"
-              autoComplete="new-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={setPassword}
               placeholder="Kata sandi baru"
             />
             {password.length > 0 && (
@@ -121,12 +119,10 @@ export function GantiPassword() {
             <label className="sh-field__label" htmlFor="change-confirm-password">
               Konfirmasi kata sandi baru
             </label>
-            <input
+            <PasswordInput
               id="change-confirm-password"
-              type="password"
-              autoComplete="new-password"
               value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
+              onChange={setConfirm}
               placeholder="Ulangi kata sandi baru"
             />
           </div>

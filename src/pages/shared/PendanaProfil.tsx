@@ -6,7 +6,7 @@ import { Empty } from "@/components/Empty";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useStore } from "@/lib/store";
-import { formatRupiah, initials, percent, waLink, gmailLink } from "@/lib/format";
+import { formatRupiah, initials, waLink, gmailLink } from "@/lib/format";
 import {
   hasPengajuanBetween,
   maskPhone,
@@ -16,6 +16,11 @@ import {
 } from "@/lib/pengajuan";
 import { ContactLine } from "@/components/ContactLine";
 import {
+  instagramHandle,
+  normalizeInstagram,
+  normalizeWebsite,
+} from "@/lib/contactValidate";
+import {
   ArrowLeft,
   Send,
   CheckCircle2,
@@ -24,8 +29,6 @@ import {
   Mail,
   Globe,
   Instagram,
-  Twitter,
-  Facebook,
   Phone,
   Lock,
 } from "lucide-react";
@@ -51,7 +54,7 @@ export default function PendanaProfil() {
     return { approved, totalDisbursed, orgsFunded: orgs.size };
   }, [funder, state.pengajuan]);
 
-  // Kontak terbuka untuk: diri sendiri, admin, atau org yang sudah mengajukan ke pendana ini.
+  // Kontak terbuka untuk: diri sendiri, admin, atau org yang sudah mengajukan ke mitra sponsor ini.
   const canSeeContact =
     isSelf ||
     currentUser?.role === "admin" ||
@@ -60,10 +63,10 @@ export default function PendanaProfil() {
   if (!funder) {
     return (
       <>
-        <Topbar title="Profil pendana" />
+        <Topbar title="Profil mitra sponsor" />
         <div className="sh-shell__content">
           <Empty
-            title="Pendana tidak ditemukan"
+            title="Mitra Sponsor tidak ditemukan"
             action={
               <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
                 <ArrowLeft size={16} />
@@ -76,9 +79,7 @@ export default function PendanaProfil() {
     );
   }
 
-  const used = funder.budgetTotal - funder.budgetRemaining;
-  const usedPct = percent(used, funder.budgetTotal);
-  const title = isSelf ? "Profil saya" : "Profil pendana";
+  const title = isSelf ? "Profil saya" : "Profil mitra sponsor";
 
   return (
     <>
@@ -86,7 +87,7 @@ export default function PendanaProfil() {
       <div className="sh-shell__content">
         <PageHead
           title={title}
-          subtitle="Informasi pendana dan rekam jejak pendanaan."
+          subtitle="Informasi mitra sponsor dan rekam jejak pendanaan."
           actions={
             <div className="sh-row" style={{ gap: 8 }}>
               <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
@@ -134,7 +135,7 @@ export default function PendanaProfil() {
                 <ContactLine
                   phone={funder.phone}
                   canSee={canSeeContact}
-                  hint="Nomor tampil setelah Anda mengajukan ke pendana ini."
+                  hint="Nomor tampil setelah Anda mengajukan ke mitra sponsor ini."
                 />
               </div>
               {isOrgViewer && (
@@ -150,10 +151,10 @@ export default function PendanaProfil() {
           </div>
         </section>
 
-        {/* Tentang pendana */}
+        {/* Tentang mitra sponsor */}
         <section className="sh-card" style={{ marginBottom: 20 }}>
           <header className="sh-card__header">
-            <h3>Tentang pendana</h3>
+            <h3>Tentang mitra sponsor</h3>
           </header>
           <div className="sh-card__body sh-stack">
             {funder.description ? (
@@ -187,28 +188,28 @@ export default function PendanaProfil() {
                   <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
                     <Globe size={13} /> Website
                   </div>
-                  <div className="sh-meta-value">{funder.website}</div>
+                  <a
+                    href={normalizeWebsite(funder.website)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="sh-meta-value"
+                  >
+                    {funder.website.replace(/^https?:\/\//i, "")}
+                  </a>
                 </div>
               )}
             </div>
 
-            {(funder.instagram || funder.twitter || funder.facebook) && (
+            {funder.instagram && (
               <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
-                {funder.instagram && (
-                  <span className="sh-chip" style={{ cursor: "default" }}>
-                    <Instagram size={14} /> {funder.instagram}
-                  </span>
-                )}
-                {funder.twitter && (
-                  <span className="sh-chip" style={{ cursor: "default" }}>
-                    <Twitter size={14} /> {funder.twitter}
-                  </span>
-                )}
-                {funder.facebook && (
-                  <span className="sh-chip" style={{ cursor: "default" }}>
-                    <Facebook size={14} /> {funder.facebook}
-                  </span>
-                )}
+                <a
+                  className="sh-chip"
+                  href={normalizeInstagram(funder.instagram)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Instagram size={14} /> @{instagramHandle(funder.instagram)}
+                </a>
               </div>
             )}
           </div>
@@ -272,7 +273,7 @@ export default function PendanaProfil() {
           </div>
         </section>
 
-        {/* Stats — informasi dana pendana disembunyikan dari sisi organisasi */}
+        {/* Stats — informasi dana mitra sponsor disembunyikan dari sisi organisasi */}
         <div className="sh-stat-grid">
           <StatCard
             label="Pengajuan disetujui"
@@ -293,7 +294,7 @@ export default function PendanaProfil() {
           />
         </div>
 
-        {/* Rekam jejak & kapasitas anggaran — privat: hanya pendana sendiri */}
+        {/* Rekam jejak & kapasitas anggaran — privat: hanya mitra sponsor sendiri */}
         {isSelf && (
         <div className="sh-detail-layout">
           {/* Rekam jejak */}
@@ -336,33 +337,6 @@ export default function PendanaProfil() {
             )}
           </section>
 
-          {/* Kapasitas anggaran — privat: hanya pendana sendiri yang bisa melihat */}
-          {isSelf && (
-            <aside className="sh-card">
-              <header className="sh-card__header">
-                <h3>Kapasitas anggaran</h3>
-              </header>
-              <div className="sh-card__body sh-stack">
-                <div>
-                  <div className="sh-meta-label">Anggaran total</div>
-                  <div className="sh-meta-value num">{formatRupiah(funder.budgetTotal)}</div>
-                </div>
-                <div>
-                  <div className="sh-progress">
-                    <div className="sh-progress__bar" style={{ width: `${usedPct}%` }} />
-                  </div>
-                  <div className="sh-progress__meta">
-                    <span>{formatRupiah(used)} terpakai</span>
-                    <span>{usedPct}%</span>
-                  </div>
-                </div>
-                <div>
-                  <div className="sh-meta-label">Sisa anggaran</div>
-                  <div className="sh-meta-value num">{formatRupiah(funder.budgetRemaining)}</div>
-                </div>
-              </div>
-            </aside>
-          )}
         </div>
         )}
       </div>

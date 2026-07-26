@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Navigate, Link } from "react-router-dom";
 import { BrandMark } from "@/components/BrandMark";
+import { PasswordInput } from "@/components/PasswordInput";
 import { rolePath, useActions, useStore } from "@/lib/store";
 
 export default function Login() {
@@ -60,12 +61,11 @@ export default function Login() {
           <label className="sh-field__label" htmlFor="password">
             Kata sandi
           </label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             placeholder="Masukkan kata sandi"
           />
           <div style={{ textAlign: "right", marginTop: 6 }}>
@@ -97,7 +97,7 @@ export default function Login() {
         <div className="sh-login__demo" style={{ textAlign: "center" }}>
           Belum punya akun?{" "}
           <Link to="/register" style={{ fontWeight: 700 }}>
-            Daftar sebagai organisasi / pendana
+            Daftar sebagai organisasi / mitra sponsor
           </Link>
         </div>
       </form>

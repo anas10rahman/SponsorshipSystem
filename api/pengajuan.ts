@@ -14,12 +14,12 @@ class HttpError extends Error {
   }
 }
 
-/* Batas diam pendana sebelum pengajuan otomatis dibatalkan. */
+/* Batas diam mitra sponsor sebelum pengajuan otomatis dibatalkan. */
 const EXPIRE_DAYS = 7;
 
-/* Auto-batal: pengajuan berstatus `diajukan` yang tidak direspons pendana
+/* Auto-batal: pengajuan berstatus `diajukan` yang tidak direspons mitra sponsor
    selama EXPIRE_DAYS hari → status `kadaluarsa` + biaya pengajuan dikembalikan
-   PENUH ke saldo organisasi (yang lalai pendana, bukan organisasi).
+   PENUH ke saldo organisasi (yang lalai mitra sponsor, bukan organisasi).
    Sengaja hanya menyasar `diajukan`: pada `perlu_revisi` bolanya ada di
    organisasi, jadi tidak adil membatalkannya.
    Idempoten — hanya menyentuh baris yang memang sudah lewat tenggat. */
@@ -33,10 +33,10 @@ async function expireStale(): Promise<{ expired: number; ids: string[] }> {
   const ids: string[] = [];
   for (const p of rows) {
     const note =
-      `Pendana tidak merespons dalam ${EXPIRE_DAYS} hari. Pengajuan dibatalkan otomatis; ` +
+      `Mitra Sponsor tidak merespons dalam ${EXPIRE_DAYS} hari. Pengajuan dibatalkan otomatis; ` +
       `biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} dikembalikan penuh ke saldo organisasi.`;
     const tx: any[] = [
-      // Kunci status di WHERE: kalau pendana memutuskan barusan, baris ini tidak tersentuh.
+      // Kunci status di WHERE: kalau mitra sponsor memutuskan barusan, baris ini tidak tersentuh.
       sql`update pengajuan set status = 'kadaluarsa', updated_at = now()
           where id = ${p.id} and status = 'diajukan'`,
       histQ(p.id, "Kadaluarsa otomatis", "Admin", note),
@@ -49,7 +49,7 @@ async function expireStale(): Promise<{ expired: number; ids: string[] }> {
         notifQ(
           oUser,
           "pengajuan.kadaluarsa",
-          `Pengajuan "${p.event_name}" kadaluarsa (pendana tidak merespons ${EXPIRE_DAYS} hari). Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} dikembalikan ke saldo.`,
+          `Pengajuan "${p.event_name}" kadaluarsa (mitra sponsor tidak merespons ${EXPIRE_DAYS} hari). Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} dikembalikan ke saldo.`,
         ),
       );
     const fUser = await userIdForFunder(p.funder_id);
@@ -228,10 +228,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (Number(bal[0]?.balance ?? 0) < SUBMISSION_FEE)
           throw new HttpError(400, `Saldo tidak cukup untuk biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")}.`);
       }
-      const action = existing[0]?.status === "perlu_revisi" ? "Diajukan ulang" : "Diajukan ke pendana";
+      const action = existing[0]?.status === "perlu_revisi" ? "Diajukan ulang" : "Diajukan ke mitra sponsor";
       const note = isFirst
-        ? `Pengajuan dikirim ke pendana. Biaya pengajuan ${SUBMISSION_FEE.toLocaleString("id-ID")} dipotong dari saldo.`
-        : "Pengajuan dikirim ke pendana untuk ditinjau.";
+        ? `Pengajuan dikirim ke mitra sponsor. Biaya pengajuan ${SUBMISSION_FEE.toLocaleString("id-ID")} dipotong dari saldo.`
+        : "Pengajuan dikirim ke mitra sponsor untuk ditinjau.";
       const docs = await resolveDocuments(p.id, p.documents);
       const tx: any[] = [upsertPengajuan(p, "diajukan", null, docs), histQ(p.id, action, "Organisasi", note)];
       if (isFirst) tx.push(sql`update organizations set balance = greatest(0, balance - ${SUBMISSION_FEE}) where id = ${p.orgId}`);
@@ -253,35 +253,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sql`update pengajuan set status = 'disetujui', selected_package = ${idx}, updated_at = now() where id = ${b.id}`,
         histQ(
           b.id,
-          "Disetujui pendana",
+          "Disetujui mitra sponsor",
           "Pendana",
-          `Pendana menyetujui paket "${chosen?.name ?? ""}". Kesepakatan final. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin (tidak dikembalikan).`,
+          `Mitra Sponsor menyetujui paket "${chosen?.name ?? ""}". Kesepakatan final. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin (tidak dikembalikan).`,
         ),
         auditQ(b.actorId, "pengajuan.disetujui", b.id, { amount, package: chosen?.name ?? "", adminFee: SUBMISSION_FEE, refund: 0 }),
       ];
       if (amount > 0)
         tx.push(sql`update funders set budget_remaining = greatest(0, budget_remaining - ${amount}) where id = ${p.funder_id}`);
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Pengajuan "${p.event_name}" disetujui pendana. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin.`));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Pengajuan "${p.event_name}" disetujui mitra sponsor. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin.`));
       await sql.transaction(tx);
     } else if (op === "reject") {
       const p = await getPengajuan(b.id);
       if (p.status === "disetujui" || p.status === "ditolak")
         throw new HttpError(400, "Pengajuan sudah diputuskan.");
-      const note = (b.note || "").trim() || "Pendana menolak pengajuan.";
+      const note = (b.note || "").trim() || "Mitra Sponsor menolak pengajuan.";
       const tx: any[] = [
         sql`update pengajuan set status = 'ditolak', updated_at = now() where id = ${b.id}`,
-        histQ(b.id, "Ditolak pendana", "Pendana", `${note} Biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")} ditahan; Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo organisasi.`),
+        histQ(b.id, "Ditolak mitra sponsor", "Pendana", `${note} Biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")} ditahan; Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo organisasi.`),
         auditQ(b.actorId, "pengajuan.ditolak", b.id, { adminFee: REJECT_ADMIN_FEE, refund: REJECT_REFUND }),
         // Tolak → kembalikan sisa biaya (dikurangi biaya admin) ke saldo organisasi.
         sql`update organizations set balance = balance + ${REJECT_REFUND} where id = ${p.org_id}`,
       ];
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Pengajuan "${p.event_name}" ditolak pendana. Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo (biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")}).`));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Pengajuan "${p.event_name}" ditolak mitra sponsor. Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo (biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")}).`));
       await sql.transaction(tx);
     } else if (op === "feedback") {
       const p = await getPengajuan(b.id);
-      const note = (b.note || "").trim() || "Pendana meminta revisi.";
+      const note = (b.note || "").trim() || "Mitra Sponsor meminta revisi.";
       const tx: any[] = [
         sql`update pengajuan set status = 'perlu_revisi', revision_note = ${note}, updated_at = now() where id = ${b.id}`,
         histQ(b.id, "Diminta revisi", "Pendana", note),

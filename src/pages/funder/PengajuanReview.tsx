@@ -46,7 +46,7 @@ export default function FunderPengajuanReview() {
   );
   const funder = state.funders.find((f) => f.id === pengajuan?.funderId);
 
-  // Pengajuan tidak ada atau bukan milik pendana ini → kembali ke inbox.
+  // Pengajuan tidak ada atau bukan milik mitra sponsor ini → kembali ke inbox.
   if (!pengajuan || pengajuan.funderId !== funderId) {
     return <Navigate to="/funder/pengajuan" replace />;
   }
@@ -143,7 +143,7 @@ export default function FunderPengajuanReview() {
                 }}
               >
                 <Field label="Organisasi">{org?.name ?? "—"}</Field>
-                <Field label="Pendana tujuan">{funder?.name ?? "—"}</Field>
+                <Field label="Mitra Sponsor tujuan">{funder?.name ?? "—"}</Field>
                 <Field label="Lokasi">{pengajuan.eventLocation || "—"}</Field>
                 <Field label="Tanggal">{formatEventDate(pengajuan.eventDate)}</Field>
                 <Field label="Total anggaran">{formatRupiah(pengajuan.eventBudget)}</Field>
@@ -391,7 +391,7 @@ function PackageCard({
       )}
       {pkg.benefits.length > 0 && (
         <div>
-          <div className="sh-meta-label">Benefit untuk pendana</div>
+          <div className="sh-meta-label">Benefit untuk mitra sponsor</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.benefits.map((b, i) => (
               <li key={i}>{b}</li>

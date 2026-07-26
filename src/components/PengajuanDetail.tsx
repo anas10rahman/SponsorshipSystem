@@ -5,11 +5,11 @@ import { PdfPreview } from "./PdfPreview";
 import { useStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import { formatDateTime, formatEventDate, formatRupiah } from "@/lib/format";
-import { pengajuanBadge, packageAmount, requestLabel } from "@/lib/pengajuan";
+import { pengajuanBadge, packageAmount, requestLabel , actorLabel} from "@/lib/pengajuan";
 import type { Pengajuan, SponsorshipPackage } from "@/lib/types";
 import { CheckCircle2, XCircle, MessageSquareWarning, Wallet, FileText, Eye } from "lucide-react";
 
-/** Aksi tinjauan pendana. Bila diisi, paket jadi bisa dipilih (radio)
+/** Aksi tinjauan mitra sponsor. Bila diisi, paket jadi bisa dipilih (radio)
  *  dan footer menampilkan tombol Setujui Pendanaan. */
 export type PengajuanReview = {
   onApprove: (packageIndex: number) => void;
@@ -68,7 +68,7 @@ function PengajuanDetailInner({
   const badge = pengajuanBadge(pengajuan.status);
   const packages = pengajuan.packages ?? [];
 
-  // Mode pilih paket aktif hanya saat pendana boleh meninjau.
+  // Mode pilih paket aktif hanya saat mitra sponsor boleh meninjau.
   const selectable = !!review;
   const chosenIdx = selectable ? selectedPkg : pengajuan.selectedPackage ?? null;
   const chosen = chosenIdx != null ? packages[chosenIdx] : undefined;
@@ -115,7 +115,7 @@ function PengajuanDetailInner({
 
       {pengajuan.status === "perlu_revisi" && pengajuan.revisionNote && (
         <div className="sh-notice">
-          <strong>Feedback dari pendana:</strong> {pengajuan.revisionNote}
+          <strong>Feedback dari mitra sponsor:</strong> {pengajuan.revisionNote}
         </div>
       )}
 
@@ -130,7 +130,7 @@ function PengajuanDetailInner({
         }}
       >
         <Field label="Organisasi">{org?.name ?? "—"}</Field>
-        <Field label="Pendana tujuan">{funder?.name ?? "—"}</Field>
+        <Field label="Mitra Sponsor tujuan">{funder?.name ?? "—"}</Field>
         <Field label="Lokasi">{pengajuan.eventLocation || "—"}</Field>
         <Field label="Tanggal">{formatEventDate(pengajuan.eventDate)}</Field>
         <Field label="Total anggaran">{formatRupiah(pengajuan.eventBudget)}</Field>
@@ -233,7 +233,7 @@ function PengajuanDetailInner({
           {pengajuan.history.map((h, i) => (
             <div key={i} className="sh-timeline__item">
               <div className="sh-timeline__action">{h.action}</div>
-              <div className="sh-timeline__actor">oleh {h.actor}</div>
+              <div className="sh-timeline__actor">oleh {actorLabel(h.actor)}</div>
               <div className="sh-timeline__time">{formatDateTime(h.at)}</div>
               {h.note && <div className="sh-timeline__note">{h.note}</div>}
             </div>
@@ -319,7 +319,7 @@ function PackageCard({
           )}
           <strong>{pkg.name || `Paket ${index + 1}`}</strong>
           {approvedChoice && (
-            <StatusBadge kind="custom" label="Dipilih pendana" variant="success" />
+            <StatusBadge kind="custom" label="Dipilih mitra sponsor" variant="success" />
           )}
         </div>
       </div>
@@ -335,7 +335,7 @@ function PackageCard({
       )}
       {pkg.benefits.length > 0 && (
         <div>
-          <div className="sh-meta-label">Benefit untuk pendana</div>
+          <div className="sh-meta-label">Benefit untuk mitra sponsor</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.benefits.map((b, i) => (
               <li key={i}>{b}</li>

@@ -30,13 +30,13 @@ export function Hero() {
     const org = state.organizations.find((o) => o.id === currentUser.orgId);
     greeting = `Halo, ${org?.name ?? "Organisasi"}! 👋`;
     subtitle =
-      "Top-up saldo dulu, lalu susun pengajuan yang menarik dan ajukan ke pendana yang tepat.";
+      "Top-up saldo dulu, lalu susun pengajuan yang menarik dan ajukan ke mitra sponsor yang tepat.";
     value = formatRupiahShort(org?.balance ?? 0);
     label = "Saldo";
   } else {
     const funder = state.funders.find((f) => f.id === currentUser.funderId);
     const total = approvedCashTo((_o, funderId) => funderId === currentUser.funderId);
-    greeting = `Halo, ${funder?.name ?? "Pendana"}! 👋`;
+    greeting = `Halo, ${funder?.name ?? "Mitra Sponsor"}! 👋`;
     subtitle =
       "Banyak pengajuan menunggu dukunganmu. Tinjau dan bantu wujudkan program mereka.";
     value = formatRupiahShort(total);

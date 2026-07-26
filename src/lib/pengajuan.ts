@@ -23,7 +23,7 @@ export function requestLabel(r: SponsorshipRequest | string): string {
   return r?.spec || "";
 }
 
-/** Nominal final = nominal paket yang dipilih pendana. 0 bila belum ada yang dipilih. */
+/** Nominal final = nominal paket yang dipilih mitra sponsor. 0 bila belum ada yang dipilih. */
 export function selectedAmount(p: Pengajuan): number {
   if (p.selectedPackage == null) return 0;
   const pkg = p.packages[p.selectedPackage];
@@ -52,7 +52,7 @@ export function packageCountLabel(p: Pengajuan): string {
 }
 
 /** Kontak (no.hp) lawan baru terbuka setelah ada pengajuan terkirim
- *  (status apa pun selain draf) di antara org & pendana tersebut. */
+ *  (status apa pun selain draf) di antara org & mitra sponsor tersebut. */
 export function hasPengajuanBetween(
   pengajuan: Pengajuan[],
   orgId: string | undefined,
@@ -83,6 +83,12 @@ const MAP: Record<PengajuanStatus, { label: string; variant: BadgeVariant }> = {
   ditolak: { label: "Ditolak", variant: "failed" },
   kadaluarsa: { label: "Kadaluarsa", variant: "neutral" },
 };
+
+/** Nilai `actor` tersimpan di DB memakai istilah lama ("Mitra Sponsor").
+ *  Petakan saat ditampilkan agar riwayat lama tetap terbaca dengan istilah baru. */
+export function actorLabel(actor: string): string {
+  return actor === "Pendana" ? "Mitra Sponsor" : actor;
+}
 
 export function pengajuanBadge(status: PengajuanStatus) {
   return MAP[status];

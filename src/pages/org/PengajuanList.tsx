@@ -50,10 +50,10 @@ export default function OrgPengajuanList() {
       <div className="sh-shell__content">
         <PageHead
           title="Pengajuan saya"
-          subtitle="Pengajuan sponsorship terarah ke pendana — lanjutkan draf, pantau status, dan revisi."
+          subtitle="Pengajuan sponsorship terarah ke mitra sponsor — lanjutkan draf, pantau status, dan revisi."
           actions={
             <Link to="/org/cari" className="sh-btn sh-btn--primary">
-              Ajukan ke pendana
+              Ajukan ke mitra sponsor
             </Link>
           }
         />
@@ -76,10 +76,10 @@ export default function OrgPengajuanList() {
         {rows.length === 0 ? (
           <Empty
             title="Belum ada pengajuan"
-            description="Mulai dengan memilih pendana di halaman Cari pendana."
+            description="Mulai dengan memilih mitra sponsor di halaman Cari mitra sponsor."
             action={
               <Link to="/org/cari" className="sh-btn sh-btn--primary">
-                Ke Cari pendana
+                Ke Cari mitra sponsor
               </Link>
             }
           />
@@ -91,7 +91,7 @@ export default function OrgPengajuanList() {
                   <tr>
                     <th>ID</th>
                     <th>Event</th>
-                    <th>Pendana</th>
+                    <th>Mitra Sponsor</th>
                     <th>Paket</th>
                     <th>Nominal</th>
                     <th>Status</th>

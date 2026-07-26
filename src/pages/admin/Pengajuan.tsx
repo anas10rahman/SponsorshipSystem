@@ -45,12 +45,12 @@ export default function AdminPengajuan() {
     <>
       <Topbar
         title="Pengajuan terarah"
-        search={{ value: search, onChange: setSearch, placeholder: "Cari event, org, pendana…" }}
+        search={{ value: search, onChange: setSearch, placeholder: "Cari event, org, mitra sponsor…" }}
       />
       <div className="sh-shell__content">
         <PageHead
           title="Pengajuan terarah"
-          subtitle="Pemantauan pengajuan langsung organisasi → pendana. Read-only; persetujuan dilakukan pendana."
+          subtitle="Pemantauan pengajuan langsung organisasi → mitra sponsor. Read-only; persetujuan dilakukan mitra sponsor."
         />
 
         <div className="sh-toolbar">
@@ -76,7 +76,7 @@ export default function AdminPengajuan() {
                     <th>ID</th>
                     <th>Event</th>
                     <th>Organisasi</th>
-                    <th>Pendana</th>
+                    <th>Mitra Sponsor</th>
                     <th>Paket</th>
                     <th>Nominal</th>
                     <th>Status</th>
