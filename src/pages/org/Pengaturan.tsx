@@ -5,6 +5,7 @@ import { PageHead } from "@/components/PageHead";
 import { RekeningValidator } from "@/components/RekeningValidator";
 import { Modal } from "@/components/Modal";
 import { PdfPreview } from "@/components/PdfPreview";
+import { GantiPassword } from "@/components/GantiPassword";
 import { useStore, useActions } from "@/lib/store";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
@@ -569,6 +570,8 @@ export default function OrgPengaturan() {
               Simpan profil
             </button>
           </div>
+
+          <GantiPassword />
         </div>
       </div>
 

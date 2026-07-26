@@ -5,6 +5,7 @@ import { PageHead } from "@/components/PageHead";
 import { useStore, useActions } from "@/lib/store";
 import { useToast } from "@/components/Toast";
 import { CurrencyInput } from "@/components/CurrencyInput";
+import { GantiPassword } from "@/components/GantiPassword";
 import { initials } from "@/lib/format";
 import type { Funder, FunderType } from "@/lib/types";
 import {
@@ -323,6 +324,8 @@ export default function FunderPengaturan() {
               Simpan profil
             </button>
           </div>
+
+          <GantiPassword />
         </div>
       </div>
     </>

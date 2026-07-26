@@ -88,6 +88,17 @@ export const api = {
     return data as { ok: true; message: string };
   },
 
+  async changePassword(userId: string, currentPassword: string, password: string) {
+    const r = await fetch(`${BASE}/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ op: "change", userId, currentPassword, password }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error((data as any).error || "Gagal mengganti kata sandi.");
+    return data as { ok: true };
+  },
+
   async resetPassword(email: string, code: string, password: string) {
     const r = await fetch(`${BASE}/login`, {
       method: "POST",

@@ -210,6 +210,20 @@ export function useActions() {
         }
       },
 
+      async changePassword(
+        currentPassword: string,
+        password: string,
+      ): Promise<{ ok: boolean; error?: string }> {
+        const uid = actorId();
+        if (!uid) return { ok: false, error: "Sesi tidak valid. Silakan masuk ulang." };
+        try {
+          await api.changePassword(uid, currentPassword, password);
+          return { ok: true };
+        } catch (e: any) {
+          return { ok: false, error: String(e?.message || "Gagal mengganti kata sandi.") };
+        }
+      },
+
       async resetPassword(
         email: string,
         code: string,

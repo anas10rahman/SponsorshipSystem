@@ -1,6 +1,7 @@
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { useStore } from "@/lib/store";
+import { GantiPassword } from "@/components/GantiPassword";
 import { Users, ShieldCheck } from "lucide-react";
 
 export default function AdminPengaturan() {
@@ -74,6 +75,7 @@ export default function AdminPengaturan() {
             </div>
           </section>
 
+          <GantiPassword />
         </div>
       </div>
     </>
