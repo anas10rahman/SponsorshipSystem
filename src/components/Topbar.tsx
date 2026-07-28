@@ -11,11 +11,13 @@ const PROFILE_PATH: Record<string, string> = {
 };
 
 type Props = {
-  title: string;
+  /** Kosongkan bila halaman sudah punya judul sendiri (PageHead),
+   *  supaya judul tidak tampil dua kali. */
+  title?: string;
   search?: { value: string; onChange: (v: string) => void; placeholder?: string };
 };
 
-export function Topbar({ title, search }: Props) {
+export function Topbar({ title = "", search }: Props) {
   const { state, currentUser } = useStore();
   const navigate = useNavigate();
 

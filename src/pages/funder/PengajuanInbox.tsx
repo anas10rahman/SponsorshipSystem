@@ -144,7 +144,7 @@ export default function FunderPengajuanInbox() {
 
   return (
     <>
-      <Topbar title="Pengajuan Sponsorship" />
+      <Topbar />
       <div className="sh-shell__content">
         <PageHead
           title="Pengajuan Sponsorship"

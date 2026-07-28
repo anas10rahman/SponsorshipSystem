@@ -15,7 +15,6 @@ import {
   UserCog,
   LifeBuoy,
   ArrowUpRight,
-  User,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { BrandMark } from "./BrandMark";
@@ -44,7 +43,6 @@ const NAV: Record<Role, Item[]> = {
     { to: "/funder/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { to: "/funder/pengajuan", label: "Pengajuan Sponsorship", icon: <Inbox size={18} /> },
     { to: "/funder/portofolio", label: "Portofolio Kolaborasi", icon: <Briefcase size={18} /> },
-    { to: "/funder/profil", label: "Profil Brand", icon: <User size={18} /> },
   ],
 };
 

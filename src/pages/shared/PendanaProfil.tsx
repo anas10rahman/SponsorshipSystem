@@ -10,8 +10,6 @@ import { formatRupiah, initials, waLink, gmailLink } from "@/lib/format";
 import {
   hasPengajuanBetween,
   maskPhone,
-  pengajuanAmountLabel,
-  packageCountLabel,
   selectedAmount,
 } from "@/lib/pengajuan";
 import { ContactLine } from "@/components/ContactLine";
@@ -63,7 +61,7 @@ export default function PendanaProfil() {
   if (!funder) {
     return (
       <>
-        <Topbar title="Profil mitra sponsor" />
+        <Topbar />
         <div className="sh-shell__content">
           <Empty
             title="Mitra Sponsor tidak ditemukan"
@@ -83,11 +81,11 @@ export default function PendanaProfil() {
 
   return (
     <>
-      <Topbar title={title} />
+      <Topbar />
       <div className="sh-shell__content">
         <PageHead
           title={title}
-          subtitle="Informasi mitra sponsor dan rekam jejak pendanaan."
+          subtitle="Informasi profil mitra sponsor."
           actions={
             <div className="sh-row" style={{ gap: 8 }}>
               <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
@@ -273,7 +271,10 @@ export default function PendanaProfil() {
           </div>
         </section>
 
-        {/* Stats — informasi dana mitra sponsor disembunyikan dari sisi organisasi */}
+        {/* Stats — hanya untuk pihak lain yang menilai brand ini. Di profil
+            sendiri angka ini mubazir: sudah ada di Dashboard & Portofolio.
+            Nominal dana tetap disembunyikan dari sisi organisasi. */}
+        {!isSelf && (
         <div className="sh-stat-grid">
           <StatCard
             label="Pengajuan disetujui"
@@ -293,52 +294,8 @@ export default function PendanaProfil() {
             icon={<Building2 size={20} />}
           />
         </div>
-
-        {/* Rekam jejak & kapasitas anggaran — privat: hanya mitra sponsor sendiri */}
-        {isSelf && (
-        <div className="sh-detail-layout">
-          {/* Rekam jejak */}
-          <section className="sh-card">
-            <header className="sh-card__header">
-              <h2>Rekam jejak pendanaan</h2>
-            </header>
-            {stats && stats.approved.length > 0 ? (
-              <div className="sh-table-wrap">
-                <table className="sh-table">
-                  <thead>
-                    <tr>
-                      <th>Event</th>
-                      <th>Organisasi</th>
-                      <th>Paket</th>
-                      {!isOrgViewer && <th>Nilai</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {stats.approved.map((p) => {
-                      const org = state.organizations.find((o) => o.id === p.orgId);
-                      return (
-                        <tr key={p.id}>
-                          <td style={{ fontWeight: 600 }}>{p.eventName}</td>
-                          <td>{org?.name ?? "—"}</td>
-                          <td>{packageCountLabel(p)}</td>
-                          {!isOrgViewer && (
-                            <td className="num">{pengajuanAmountLabel(p)}</td>
-                          )}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="sh-card__body">
-                <p className="sh-muted">Belum ada pendanaan yang disetujui.</p>
-              </div>
-            )}
-          </section>
-
-        </div>
         )}
+
       </div>
     </>
   );

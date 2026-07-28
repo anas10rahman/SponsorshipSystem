@@ -19,11 +19,9 @@ import {
   CalendarClock,
 } from "lucide-react";
 
-const DATE_RANGES: Array<{ value: string; label: string; days: number | null }> = [
-  { value: "all", label: "Semua tanggal", days: null },
-  { value: "30", label: "30 hari terakhir", days: 30 },
-  { value: "90", label: "90 hari terakhir", days: 90 },
-  { value: "365", label: "1 tahun terakhir", days: 365 },
+const MONTHS = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
 ];
 
 const PER_PAGE = [8, 16, 24];
@@ -32,7 +30,8 @@ export default function FunderPortofolio() {
   const { state, currentUser } = useStore();
   const funderId = currentUser?.funderId ?? "";
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [range, setRange] = useState("all");
+  const [month, setMonth] = useState("all"); // "all" | "0".."11"
+  const [year, setYear] = useState("all");
   const [category, setCategory] = useState("all");
   const [perPage, setPerPage] = useState(PER_PAGE[0]);
   const [page, setPage] = useState(1);
@@ -58,28 +57,34 @@ export default function FunderPortofolio() {
     return [...set].sort((a, b) => a.localeCompare(b, "id"));
   }, [approved, orgById]);
 
+  const years = useMemo(() => {
+    const set = new Set<number>();
+    for (const p of approved) set.add(new Date(p.createdAt).getFullYear());
+    return [...set].sort((a, b) => b - a);
+  }, [approved]);
+
   const rows = useMemo(() => {
-    const days = DATE_RANGES.find((r) => r.value === range)?.days ?? null;
-    const since = days ? Date.now() - days * 86400_000 : null;
     return approved.filter((p) => {
       if (category !== "all" && (orgById.get(p.orgId)?.category ?? "") !== category) return false;
-      if (since && new Date(p.createdAt).getTime() < since) return false;
+      const d = new Date(p.createdAt);
+      if (month !== "all" && d.getMonth() !== Number(month)) return false;
+      if (year !== "all" && d.getFullYear() !== Number(year)) return false;
       return true;
     });
-  }, [approved, range, category, orgById]);
+  }, [approved, month, year, category, orgById]);
 
-  useEffect(() => setPage(1), [range, category, perPage]);
+  useEffect(() => setPage(1), [month, year, category, perPage]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
   const current = Math.min(page, totalPages);
   const pageRows = rows.slice((current - 1) * perPage, (current - 1) * perPage + perPage);
 
   const selected = state.pengajuan.find((p) => p.id === selectedId) ?? null;
-  const filtered = range !== "all" || category !== "all";
+  const filtered = month !== "all" || year !== "all" || category !== "all";
 
   return (
     <>
-      <Topbar title="Portofolio Kolaborasi" />
+      <Topbar />
       <div className="sh-shell__content">
         <PageHead
           title="Portofolio Kolaborasi"
@@ -88,12 +93,24 @@ export default function FunderPortofolio() {
 
         <section className="sh-card" style={{ marginBottom: 20 }}>
           <div className="dm-toolbar" style={{ borderBottom: 0 }}>
-            <div className="sh-field" style={{ margin: 0, minWidth: 200 }}>
-              <label className="sh-field__label">Tanggal Pengajuan</label>
-              <select value={range} onChange={(e) => setRange(e.target.value)}>
-                {DATE_RANGES.map((r) => (
-                  <option key={r.value} value={r.value}>
-                    {r.label}
+            <div className="sh-field" style={{ margin: 0, minWidth: 160 }}>
+              <label className="sh-field__label">Bulan Pengajuan</label>
+              <select value={month} onChange={(e) => setMonth(e.target.value)}>
+                <option value="all">Semua bulan</option>
+                {MONTHS.map((m, i) => (
+                  <option key={m} value={String(i)}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="sh-field" style={{ margin: 0, minWidth: 140 }}>
+              <label className="sh-field__label">Tahun Pengajuan</label>
+              <select value={year} onChange={(e) => setYear(e.target.value)}>
+                <option value="all">Semua tahun</option>
+                {years.map((y) => (
+                  <option key={y} value={String(y)}>
+                    {y}
                   </option>
                 ))}
               </select>
@@ -113,7 +130,8 @@ export default function FunderPortofolio() {
             <button
               className="sh-btn sh-btn--secondary"
               onClick={() => {
-                setRange("all");
+                setMonth("all");
+                setYear("all");
                 setCategory("all");
               }}
               disabled={!filtered}
@@ -130,7 +148,7 @@ export default function FunderPortofolio() {
             description={
               approved.length === 0
                 ? "Pengajuan yang Anda setujui akan muncul di sini sebagai portofolio."
-                : "Coba ubah filter tanggal atau kategori."
+                : "Coba ubah filter bulan, tahun, atau kategori."
             }
             action={
               approved.length === 0 ? (
