@@ -12,7 +12,6 @@ import {
   maskPhone,
   selectedAmount,
 } from "@/lib/pengajuan";
-import { ContactLine } from "@/components/ContactLine";
 import {
   instagramHandle,
   normalizeInstagram,
@@ -20,15 +19,17 @@ import {
 } from "@/lib/contactValidate";
 import {
   ArrowLeft,
-  Send,
-  CheckCircle2,
   Building2,
-  HandCoins,
-  Mail,
+  CheckCircle2,
   Globe,
+  HandCoins,
   Instagram,
-  Phone,
   Lock,
+  Mail,
+  MessageCircle,
+  Phone,
+  Send,
+  UserRound,
 } from "lucide-react";
 
 export default function PendanaProfil() {
@@ -101,41 +102,23 @@ export default function PendanaProfil() {
           }
         />
 
-        {/* Header */}
-        <section className="sh-card" style={{ marginBottom: 20 }}>
-          <div className="sh-card__body">
-            <div className="sh-row" style={{ gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
-              {funder.logoUrl ? (
-                <img
-                  src={funder.logoUrl}
-                  alt={funder.name}
-                  className="sh-org-logo"
-                  style={{ width: 64, height: 64, objectFit: "cover", padding: 0, flexShrink: 0 }}
-                />
-              ) : (
-                <span
-                  className="sh-org-logo"
-                  style={{ width: 64, height: 64, fontSize: 22, flexShrink: 0 }}
-                >
-                  {initials(funder.name)}
-                </span>
-              )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h2 style={{ marginBottom: 8 }}>{funder.name}</h2>
-                <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
-                  <StatusBadge kind="custom" label={funder.type} variant="info" />
-                  {funder.focus.map((f) => (
-                    <span key={f} className="sh-chip" style={{ cursor: "default" }}>
-                      {f}
-                    </span>
-                  ))}
-                </div>
-                <ContactLine
-                  phone={funder.phone}
-                  canSee={canSeeContact}
-                  hint="Nomor tampil setelah Anda mengajukan ke mitra sponsor ini."
-                />
-              </div>
+        {/* Identitas mitra sponsor: logo besar, nama, chip tipe & fokus,
+            deskripsi, lalu baris kontak yang bisa langsung diklik. */}
+        <section className="sh-card dm-prof" style={{ marginBottom: 20 }}>
+          <div className="dm-prof__logo">
+            {funder.logoUrl ? (
+              <img src={funder.logoUrl} alt={funder.name} />
+            ) : (
+              <span>{initials(funder.name)}</span>
+            )}
+          </div>
+
+          <div className="dm-prof__main">
+            <div
+              className="sh-row"
+              style={{ gap: 12, flexWrap: "wrap", justifyContent: "space-between" }}
+            >
+              <h2 className="dm-prof__name">{funder.name}</h2>
               {isOrgViewer && (
                 <Link
                   to={`/org/pengajuan/baru?funder=${funder.id}`}
@@ -146,125 +129,131 @@ export default function PendanaProfil() {
                 </Link>
               )}
             </div>
-          </div>
-        </section>
 
-        {/* Tentang mitra sponsor */}
-        <section className="sh-card" style={{ marginBottom: 20 }}>
-          <header className="sh-card__header">
-            <h3>Tentang mitra sponsor</h3>
-          </header>
-          <div className="sh-card__body sh-stack">
-            {funder.description ? (
-              <p>{funder.description}</p>
-            ) : (
-              <p className="sh-muted">Belum ada deskripsi.</p>
-            )}
-
-            <div className="sh-row" style={{ gap: 32, flexWrap: "wrap" }}>
-              <div>
-                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                  <Mail size={13} /> Email
-                </div>
-                {canSeeContact ? (
-                  <a
-                    href={gmailLink(funder.email)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="sh-meta-value"
-                  >
-                    {funder.email || "—"}
-                  </a>
-                ) : (
-                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
-                    <Lock size={13} /> Terbuka setelah pengajuan
-                  </div>
-                )}
-              </div>
-              {funder.website && (
-                <div>
-                  <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                    <Globe size={13} /> Website
-                  </div>
-                  <a
-                    href={normalizeWebsite(funder.website)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="sh-meta-value"
-                  >
-                    {funder.website.replace(/^https?:\/\//i, "")}
-                  </a>
-                </div>
-              )}
+            <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
+              <StatusBadge kind="custom" label={funder.type} variant="info" />
+              {funder.focus.map((f) => (
+                <span key={f} className="sh-chip" style={{ cursor: "default" }}>
+                  {f}
+                </span>
+              ))}
             </div>
 
-            {funder.instagram && (
-              <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <p className="dm-prof__desc">
+              {funder.description || "Belum ada deskripsi."}
+            </p>
+
+            <div className="dm-prof__contacts">
+              {canSeeContact ? (
                 <a
-                  className="sh-chip"
+                  className="dm-contact"
+                  href={gmailLink(funder.email)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Mail size={17} />
+                  {funder.email || "—"}
+                </a>
+              ) : (
+                <span className="dm-contact dm-contact--locked">
+                  <Lock size={16} />
+                  Email terbuka setelah pengajuan
+                </span>
+              )}
+
+              {funder.phone &&
+                (canSeeContact ? (
+                  <a
+                    className="dm-contact dm-contact--wa"
+                    href={waLink(funder.phone)}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    <MessageCircle size={17} />
+                    {funder.phone}
+                  </a>
+                ) : (
+                  <span className="dm-contact dm-contact--locked">
+                    <Lock size={16} />
+                    {maskPhone(funder.phone)}
+                  </span>
+                ))}
+
+              {funder.website && (
+                <a
+                  className="dm-contact"
+                  href={normalizeWebsite(funder.website)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Globe size={17} />
+                  {funder.website.replace(/^https?:\/\//i, "")}
+                </a>
+              )}
+
+              {funder.instagram && (
+                <a
+                  className="dm-contact"
                   href={normalizeInstagram(funder.instagram)}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <Instagram size={14} /> @{instagramHandle(funder.instagram)}
+                  <Instagram size={17} />
+                  @{instagramHandle(funder.instagram)}
                 </a>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </section>
 
         {/* Penanggung jawab (PIC) */}
-        <section className="sh-card" style={{ marginBottom: 20 }}>
-          <header className="sh-card__header">
-            <h3>Penanggung jawab (PIC)</h3>
-          </header>
-          <div className="sh-card__body">
-            <div className="sh-row" style={{ gap: 32, flexWrap: "wrap" }}>
-              <div>
-                <div className="sh-meta-label">Nama</div>
-                <div className="sh-meta-value">{funder.pic.name || "—"}</div>
-              </div>
-              <div>
-                <div className="sh-meta-label">Jabatan</div>
-                <div className="sh-meta-value">{funder.pic.position || "—"}</div>
-              </div>
-              <div>
-                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                  <Phone size={13} /> Nomor WA
-                </div>
+        <section className="sh-card dm-pic" style={{ marginBottom: 20 }}>
+          <div className="dm-pic__head">
+            <span className="dm-pic__head-icon">
+              <UserRound size={20} />
+            </span>
+            <h3>Penanggung Jawab (PIC)</h3>
+          </div>
+          <div className="dm-pic__body">
+            {/* Sistem belum menyimpan foto PIC — dipakai inisial nama. */}
+            <span className="dm-pic__avatar">{initials(funder.pic.name || "?")}</span>
+            <div style={{ minWidth: 0 }}>
+              <h4 className="dm-pic__name">{funder.pic.name || "—"}</h4>
+              <div className="dm-pic__role">{funder.pic.position || "Jabatan belum diisi"}</div>
+              <div className="dm-pic__lines">
                 {canSeeContact ? (
                   <a
+                    className="dm-contact dm-contact--wa"
                     href={waLink(funder.pic.phone)}
                     target="_blank"
                     rel="noreferrer"
-                    className="sh-meta-value"
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
+                    <Phone size={16} />
                     {funder.pic.phone || "—"}
                   </a>
                 ) : (
-                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
-                    <Lock size={13} /> {maskPhone(funder.pic.phone)}
-                  </div>
+                  <span className="dm-contact dm-contact--locked">
+                    <Lock size={16} />
+                    {maskPhone(funder.pic.phone)}
+                  </span>
                 )}
-              </div>
-              <div>
-                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                  <Mail size={13} /> Email
-                </div>
                 {canSeeContact ? (
                   <a
+                    className="dm-contact"
                     href={gmailLink(funder.pic.email)}
                     target="_blank"
                     rel="noreferrer"
-                    className="sh-meta-value"
                   >
+                    <Mail size={16} />
                     {funder.pic.email || "—"}
                   </a>
                 ) : (
-                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
-                    <Lock size={13} /> Terbuka setelah pengajuan
-                  </div>
+                  <span className="dm-contact dm-contact--locked">
+                    <Lock size={16} />
+                    Email terbuka setelah pengajuan
+                  </span>
                 )}
               </div>
             </div>

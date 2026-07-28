@@ -363,3 +363,191 @@
     margin: 0;
   }
 }
+
+/* ============================================================
+   Profil mitra sponsor — tata letak kartu identitas & PIC
+   ============================================================ */
+
+.dm-prof {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  padding: 26px;
+  overflow: hidden;
+}
+/* Ornamen titik-titik samar di sudut kanan (dekoratif, tidak membawa makna). */
+.dm-prof::after,
+.dm-pic::after {
+  content: "";
+  position: absolute;
+  right: 22px;
+  top: 26px;
+  width: 150px;
+  height: 108px;
+  background-image: radial-gradient(var(--brand-200) 1.6px, transparent 1.6px);
+  background-size: 15px 15px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.dm-prof__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 168px;
+  height: 168px;
+  flex: none;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  box-sizing: border-box;
+}
+.dm-prof__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.dm-prof__logo span {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--dm-blue);
+  letter-spacing: -0.02em;
+}
+
+.dm-prof__main {
+  flex: 1;
+  min-width: 260px;
+  position: relative;
+  z-index: 1;
+}
+.dm-prof__name {
+  margin: 0 0 12px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--c-ink);
+  line-height: 1.15;
+}
+.dm-prof__desc {
+  margin: 14px 0 0;
+  max-width: 620px;
+  color: var(--ink-500);
+  line-height: 1.6;
+  font-size: 14.5px;
+}
+
+/* Baris kontak: ikon + tautan, dipisah jarak lega seperti referensi. */
+.dm-prof__contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 30px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.dm-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dm-blue);
+}
+.dm-contact svg {
+  flex: none;
+}
+.dm-contact--locked {
+  color: var(--ink-500);
+  font-weight: 500;
+}
+.dm-contact--wa {
+  color: var(--status-success);
+}
+
+/* ---------- Kartu PIC ---------- */
+.dm-pic {
+  position: relative;
+  overflow: hidden;
+}
+.dm-pic__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 26px;
+  border-bottom: 1px solid var(--line);
+}
+.dm-pic__head-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: var(--brand-50);
+  color: var(--dm-blue);
+  flex: none;
+}
+.dm-pic__head h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.dm-pic__body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  padding: 24px 26px;
+  position: relative;
+  z-index: 1;
+}
+.dm-pic__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--brand-50);
+  color: var(--dm-blue);
+  font-size: 30px;
+  font-weight: 800;
+}
+.dm-pic__name {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--c-ink);
+}
+.dm-pic__role {
+  color: var(--dm-blue);
+  font-weight: 600;
+  font-size: 14.5px;
+  margin-bottom: 12px;
+}
+.dm-pic__lines {
+  display: grid;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .dm-prof,
+  .dm-pic__body {
+    padding: 20px;
+  }
+  .dm-prof__logo {
+    width: 120px;
+    height: 120px;
+  }
+  .dm-prof__name {
+    font-size: 26px;
+  }
+  .dm-prof::after,
+  .dm-pic::after {
+    display: none;
+  }
+}
