@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Verify from "./pages/Verify";
 import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
+import Placeholder from "./pages/Placeholder";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminOrganisasi from "./pages/admin/Organisasi";
 import AdminPendana from "./pages/admin/Pendana";
@@ -26,6 +27,7 @@ import OrgPengajuanList from "./pages/org/PengajuanList";
 import BuatPengajuan from "./pages/org/BuatPengajuan";
 import OrgTopUp from "./pages/org/TopUp";
 import OrgPengaturan from "./pages/org/Pengaturan";
+import FunderDashboard from "./pages/funder/Dashboard";
 import FunderPengajuanInbox from "./pages/funder/PengajuanInbox";
 import FunderPengajuanReview from "./pages/funder/PengajuanReview";
 import FunderPortofolio from "./pages/funder/Portofolio";
@@ -134,12 +136,22 @@ export default function App() {
             </RoleGuard>
           }
         >
+          <Route path="/funder/dashboard" element={<FunderDashboard />} />
           <Route path="/funder/pengajuan" element={<FunderPengajuanInbox />} />
           <Route path="/funder/pengajuan/:id" element={<FunderPengajuanReview />} />
           <Route path="/funder/organisasi/:id" element={<OrganisasiProfil />} />
           <Route path="/funder/profil" element={<PendanaProfil />} />
           <Route path="/funder/portofolio" element={<FunderPortofolio />} />
           <Route path="/funder/pengaturan" element={<FunderPengaturan />} />
+          {/* Halaman legal masih kerangka — isinya menunggu naskah resmi. */}
+          <Route
+            path="/funder/kebijakan-privasi"
+            element={<Placeholder title="Kebijakan Privasi" />}
+          />
+          <Route
+            path="/funder/syarat-ketentuan"
+            element={<Placeholder title="Syarat & Ketentuan" />}
+          />
         </Route>
 
         <Route path="*" element={<NotFound />} />

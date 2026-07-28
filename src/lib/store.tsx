@@ -304,5 +304,5 @@ export function useActions() {
 export const rolePath: Record<Role, string> = {
   admin: "/admin/dashboard",
   org: "/org/dashboard",
-  funder: "/funder/pengajuan",
+  funder: "/funder/dashboard",
 };

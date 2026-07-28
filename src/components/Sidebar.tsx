@@ -13,10 +13,14 @@ import {
   Inbox,
   Wallet,
   UserCog,
+  LifeBuoy,
+  ArrowUpRight,
+  User,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { BrandMark } from "./BrandMark";
 import { useActions, useStore } from "@/lib/store";
+import { useSupportEmail } from "./AppFooter";
 
 type Item = { to: string; label: string; icon: React.ReactNode };
 
@@ -37,8 +41,10 @@ const NAV: Record<Role, Item[]> = {
     { to: "/org/topup", label: "Top-up saldo", icon: <Wallet size={18} /> },
   ],
   funder: [
-    { to: "/funder/pengajuan", label: "Pengajuan masuk", icon: <Inbox size={18} /> },
-    { to: "/funder/portofolio", label: "Portofolio", icon: <Briefcase size={18} /> },
+    { to: "/funder/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
+    { to: "/funder/pengajuan", label: "Pengajuan Sponsorship", icon: <Inbox size={18} /> },
+    { to: "/funder/portofolio", label: "Portofolio Kolaborasi", icon: <Briefcase size={18} /> },
+    { to: "/funder/profil", label: "Profil Brand", icon: <User size={18} /> },
   ],
 };
 
@@ -51,6 +57,7 @@ const ROLE_LABEL: Record<Role, string> = {
 export function Sidebar({ role }: { role: Role }) {
   const { logout } = useActions();
   const { state, currentUser } = useStore();
+  const support = useSupportEmail();
   const items = NAV[role];
 
   // Jumlah pengajuan baru yang perlu ditinjau mitra sponsor (untuk badge sidebar).
@@ -107,6 +114,26 @@ export function Sidebar({ role }: { role: Role }) {
           </NavLink>
         ))}
       </nav>
+
+      {role === "funder" && support && (
+        <div className="dm-help">
+          <div className="dm-help__title">
+            <LifeBuoy size={16} />
+            Butuh bantuan?
+          </div>
+          <p className="dm-help__text">
+            Hubungi tim DealMatch kapan pun Anda membutuhkan bantuan.
+          </p>
+          <a
+            className="sh-btn sh-btn--secondary sh-btn--sm"
+            style={{ width: "100%", justifyContent: "center" }}
+            href={`mailto:${support}`}
+          >
+            Hubungi Kami
+            <ArrowUpRight size={14} />
+          </a>
+        </div>
+      )}
 
       {currentUser && (
         <div className="sh-sidebar__footer">

@@ -1,0 +1,365 @@
+/* ============================================================
+   DealMatch — komponen tampilan Mitra Sponsor
+   Kartu statistik berwarna, toolbar filter, paginasi, grid
+   portofolio, footer, dan kartu bantuan di sidebar.
+   Memakai palet brand: #1E3A8A · #10B981 · #F8FAFC · #0F172A · #64748B
+   ============================================================ */
+
+/* ---------- Sapaan dashboard ---------- */
+.dm-greet {
+  margin: 0 0 22px;
+}
+.dm-greet h2 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--c-ink);
+}
+.dm-greet p {
+  margin: 0;
+  color: var(--ink-500);
+  font-size: 14.5px;
+}
+
+/* ---------- Kartu statistik (grid 5 kolom yang luwes) ---------- */
+.dm-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.dm-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--tile-line, var(--line));
+  background: var(--tile-bg, #fff);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.dm-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+}
+.dm-tile__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--tile-icon-bg, #e8eefb);
+  color: var(--tile-ink, #1e3a8a);
+}
+.dm-tile__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+.dm-tile__value {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--tile-ink, #1e3a8a);
+  font-variant-numeric: tabular-nums;
+}
+.dm-tile__hint {
+  font-size: 12.5px;
+  color: var(--ink-500);
+}
+.dm-tile__go {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--tile-icon-bg, #e8eefb);
+  color: var(--tile-ink, #1e3a8a);
+}
+
+/* Varian warna per status — selaras dengan warna badge di seluruh aplikasi. */
+.dm-tile--blue {
+  --tile-bg: #f5f8ff;
+  --tile-line: #dde6f8;
+  --tile-icon-bg: #e2eafc;
+  --tile-ink: #1e3a8a;
+}
+.dm-tile--amber {
+  --tile-bg: #fffaf0;
+  --tile-line: #fbedd2;
+  --tile-icon-bg: #fdf0d5;
+  --tile-ink: #b8790d;
+}
+.dm-tile--green {
+  --tile-bg: #f2fbf7;
+  --tile-line: #d3f0e3;
+  --tile-icon-bg: #dcf5ea;
+  --tile-ink: #0e9f6e;
+}
+.dm-tile--red {
+  --tile-bg: #fff5f5;
+  --tile-line: #f8dcdc;
+  --tile-icon-bg: #fbe3e3;
+  --tile-ink: #c92f2f;
+}
+.dm-tile--slate {
+  --tile-bg: #f7f9fc;
+  --tile-line: #e2e8f0;
+  --tile-icon-bg: #e8edf3;
+  --tile-ink: #64748b;
+}
+
+/* ---------- Toolbar filter (pencarian + dropdown + aksi) ---------- */
+.dm-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.dm-toolbar__search {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 200px;
+}
+.dm-toolbar__search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-300);
+  pointer-events: none;
+}
+.dm-toolbar__search input {
+  width: 100%;
+  padding-left: 36px;
+}
+.dm-toolbar__spacer {
+  flex: 1 1 auto;
+}
+
+/* ---------- Paginasi ---------- */
+.dm-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--ink-500);
+}
+.dm-pager__pages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto;
+}
+.dm-pager__btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink-700);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.dm-pager__btn:hover:not(:disabled) {
+  background: var(--canvas-soft);
+}
+.dm-pager__btn.is-active {
+  background: var(--dm-blue);
+  border-color: var(--dm-blue);
+  color: #fff;
+}
+.dm-pager__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.dm-pager select {
+  width: auto;
+  min-width: 72px;
+}
+
+/* ---------- Grid portofolio ---------- */
+.dm-pgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+.dm-pcard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+.dm-pcard__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  /* Header gelap: aplikasi tidak menyimpan foto event, jadi dipakai gradien
+     brand + logo/inisial organisasi sebagai penanda visual. */
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  color: #fff;
+  min-height: 84px;
+}
+.dm-pcard__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--dm-blue);
+  font-weight: 800;
+  font-size: 14px;
+  flex: none;
+  overflow: hidden;
+}
+.dm-pcard__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dm-pcard__title {
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+.dm-pcard__org {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 3px;
+}
+.dm-pcard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  flex: 1;
+}
+.dm-pcard__meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--ink-700);
+}
+.dm-pcard__meta svg {
+  color: var(--ink-300);
+  flex: none;
+}
+.dm-pcard__benefits {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 5px;
+}
+.dm-pcard__benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--ink-700);
+}
+.dm-pcard__benefits svg {
+  color: var(--status-success);
+  flex: none;
+  margin-top: 2px;
+}
+.dm-pcard__foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--ink-500);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* ---------- Kartu bantuan di sidebar ---------- */
+.dm-help {
+  margin: auto 12px 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.dm-help__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.dm-help__text {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #94a3b8;
+  margin: 0 0 12px;
+}
+
+/* ---------- Footer aplikasi ---------- */
+.dm-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding: 18px 0 4px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--ink-500);
+}
+.dm-footer__links {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.dm-footer__links a {
+  color: var(--ink-500);
+}
+.dm-footer__links a:hover {
+  color: var(--dm-blue);
+}
+.dm-footer__dot {
+  color: var(--ink-300);
+}
+
+@media (max-width: 720px) {
+  .dm-footer__links {
+    margin-left: 0;
+  }
+  .dm-pager__pages {
+    margin: 0;
+  }
+}
