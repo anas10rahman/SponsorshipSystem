@@ -8,12 +8,14 @@ export function CurrencyInput({
   placeholder,
   className,
   style,
+  disabled,
 }: {
   value: number;
   onChange: (n: number) => void;
   placeholder?: string;
   className?: string;
   style?: React.CSSProperties;
+  disabled?: boolean;
 }) {
   return (
     <div style={{ position: "relative", display: "flex", alignItems: "center", ...style }}>
@@ -33,6 +35,7 @@ export function CurrencyInput({
         style={{ width: "100%", paddingLeft: 34 }}
         inputMode="numeric"
         value={formatThousands(value)}
+        disabled={disabled}
         onChange={(e) => onChange(parseDigits(e.target.value))}
         placeholder={placeholder}
       />

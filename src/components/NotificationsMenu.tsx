@@ -22,6 +22,30 @@ export function NotificationsMenu() {
 
   const unread = items.filter((n) => !n.read).length;
 
+  /* Tujuan klik notifikasi. `link` dari server dipakai bila ada; kalau tidak,
+     tujuan diturunkan dari tipe notifikasi + peran pengguna, supaya tidak ada
+     notifikasi yang mentok tanpa arah. */
+  const destinationOf = (n: { type: string; link?: string }): string => {
+    if (n.link) return n.link;
+    const role = currentUser?.role;
+    if (n.type.startsWith("verifikasi.")) {
+      return role === "admin" ? "/admin/organisasi" : "/org/profil";
+    }
+    if (n.type.startsWith("pengajuan.")) {
+      if (role === "funder") return "/funder/pengajuan";
+      if (role === "admin") return "/admin/pengajuan";
+      return "/org/pengajuan";
+    }
+    if (n.type.startsWith("transaksi.") || n.type.startsWith("proposal.")) {
+      if (role === "admin") return "/admin/dashboard";
+      return role === "funder" ? "/funder/portofolio" : "/org/dashboard";
+    }
+    // Fallback: dashboard sesuai peran — selalu ada tujuan.
+    if (role === "admin") return "/admin/dashboard";
+    if (role === "funder") return "/funder/dashboard";
+    return "/org/dashboard";
+  };
+
   useEffect(() => {
     if (!open) return;
     const onClick = (e: MouseEvent) => {
@@ -42,15 +66,8 @@ export function NotificationsMenu() {
       <button
         className="sh-btn sh-btn--ghost sh-btn--icon"
         aria-label={`Notifikasi${unread ? ` (${unread} belum dibaca)` : ""}`}
-        title={currentUser?.role === "funder" ? "Ke Pengajuan masuk" : "Notifikasi"}
-        onClick={() => {
-          // Mitra Sponsor: bell langsung menuju halaman Pengajuan masuk.
-          if (currentUser?.role === "funder") {
-            navigate("/funder/pengajuan");
-            return;
-          }
-          setOpen((v) => !v);
-        }}
+        title="Notifikasi"
+        onClick={() => setOpen((v) => !v)}
         style={{ position: "relative" }}
       >
         <Bell size={18} />
@@ -145,6 +162,8 @@ export function NotificationsMenu() {
                     }}
                     onClick={() => {
                       if (!n.read) markNotificationRead(n.id);
+                      setOpen(false);
+                      navigate(destinationOf(n));
                     }}
                   >
                     <div style={{ fontSize: 14, color: "var(--ink-900)" }}>

@@ -281,14 +281,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await sql.transaction(tx);
     } else if (op === "feedback") {
       const p = await getPengajuan(b.id);
+      const packages = Array.isArray(p.packages) ? p.packages : [];
+      // Paket yang diminta direvisi wajib ditunjuk, agar organisasi tahu
+      // persis bagian mana yang harus diperbaiki.
+      const idx = Number(b.selectedPackage);
+      if (!Number.isInteger(idx) || idx < 0 || idx >= packages.length)
+        throw new HttpError(400, "Pilih paket yang ingin direvisi dulu.");
+      const pkgName = packages[idx]?.name ?? "";
       const note = (b.note || "").trim() || "Mitra Sponsor meminta revisi.";
       const tx: any[] = [
-        sql`update pengajuan set status = 'perlu_revisi', revision_note = ${note}, updated_at = now() where id = ${b.id}`,
-        histQ(b.id, "Diminta revisi", "Pendana", note),
-        auditQ(b.actorId, "pengajuan.revisi", b.id),
+        sql`update pengajuan set status = 'perlu_revisi', revision_note = ${note},
+              selected_package = ${idx}, updated_at = now() where id = ${b.id}`,
+        histQ(b.id, `Diminta revisi — paket "${pkgName}"`, "Pendana", note),
+        auditQ(b.actorId, "pengajuan.revisi", b.id, { package: pkgName, selectedPackage: idx }),
       ];
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.revisi", `Pengajuan "${p.event_name}" perlu direvisi.`));
+      if (oUser)
+        tx.push(
+          notifQ(
+            oUser,
+            "pengajuan.revisi",
+            `Pengajuan "${p.event_name}" perlu direvisi pada paket "${pkgName}".`,
+          ),
+        );
       await sql.transaction(tx);
     } else {
       return res.status(400).json({ error: "op tidak dikenal" });

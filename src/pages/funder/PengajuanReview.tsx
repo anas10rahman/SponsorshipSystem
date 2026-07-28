@@ -9,7 +9,7 @@ import { useActions, useStore } from "@/lib/store";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
 import { formatEventDate, formatRupiah } from "@/lib/format";
-import { pengajuanBadge, requestLabel } from "@/lib/pengajuan";
+import { packageAmount, pengajuanBadge, requestLabel } from "@/lib/pengajuan";
 import type { SponsorshipPackage } from "@/lib/types";
 import {
   ArrowLeft,
@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   XCircle,
   MessageSquareWarning,
+  Package as PackageIcon,
 } from "lucide-react";
 
 export default function FunderPengajuanReview() {
@@ -55,6 +56,8 @@ export default function FunderPengajuanReview() {
   const packages = pengajuan.packages ?? [];
   const documents = pengajuan.documents ?? [];
   const canReview = pengajuan.status === "diajukan" || pengajuan.status === "perlu_revisi";
+  // Paket yang sedang dipilih — tampil di dialog minta revisi.
+  const revisedPkg = selectedPkg != null ? pengajuan.packages[selectedPkg] : undefined;
   const chosenIdx = canReview ? selectedPkg : pengajuan.selectedPackage ?? null;
 
   const openPreview = (index: number, name: string) => {
@@ -87,7 +90,12 @@ export default function FunderPengajuanReview() {
     setBusy(true);
     try {
       if (action === "revisi") {
-        await requestRevisionPengajuan(pengajuan.id, note.trim());
+        if (selectedPkg == null) {
+          toast.failed("Pilih paket yang ingin direvisi dulu.");
+          setBusy(false);
+          return;
+        }
+        await requestRevisionPengajuan(pengajuan.id, note.trim(), selectedPkg);
         toast.info(`Feedback dikirim untuk "${pengajuan.eventName}".`);
       } else {
         await rejectPengajuan(pengajuan.id, note.trim());
@@ -241,7 +249,13 @@ export default function FunderPengajuanReview() {
                 setNote("");
                 setAction("revisi");
               }}
-              disabled={busy}
+              disabled={selectedPkg == null || busy}
+              title={
+                selectedPkg == null
+                  ? "Pilih dulu paket yang ingin direvisi"
+                  : "Minta revisi pada paket terpilih"
+              }
+              style={selectedPkg == null ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
             >
               <MessageSquareWarning size={16} />
               Minta Revisi
@@ -308,6 +322,60 @@ export default function FunderPengajuanReview() {
           </>
         }
       >
+        {action === "revisi" && revisedPkg && (
+          <div
+            style={{
+              border: "1px solid var(--line)",
+              borderRadius: "var(--radius-md)",
+              background: "var(--canvas-soft)",
+              padding: 14,
+              marginBottom: 14,
+            }}
+          >
+            <div className="sh-row" style={{ gap: 8, marginBottom: 10 }}>
+              <PackageIcon size={16} style={{ color: "var(--brand-500)" }} />
+              <strong>Paket yang direvisi: {revisedPkg.name}</strong>
+            </div>
+
+            <div className="sh-row" style={{ gap: 24, flexWrap: "wrap", marginBottom: 10 }}>
+              <div>
+                <div className="sh-meta-label">Organisasi</div>
+                <div className="sh-meta-value">{org?.name ?? "—"}</div>
+              </div>
+              <div>
+                <div className="sh-meta-label">Event</div>
+                <div className="sh-meta-value">{pengajuan.eventName}</div>
+              </div>
+              <div>
+                <div className="sh-meta-label">Nilai paket</div>
+                <div className="sh-meta-value num">{formatRupiah(packageAmount(revisedPkg))}</div>
+              </div>
+            </div>
+
+            <div className="sh-meta-label" style={{ marginBottom: 4 }}>
+              Detail permintaan
+            </div>
+            <ul style={{ margin: "0 0 10px", paddingLeft: 18, fontSize: 13 }}>
+              {revisedPkg.requests.length ? (
+                revisedPkg.requests.map((r, i) => <li key={i}>{requestLabel(r)}</li>)
+              ) : (
+                <li className="sh-muted">—</li>
+              )}
+            </ul>
+
+            <div className="sh-meta-label" style={{ marginBottom: 4 }}>
+              Benefit untuk mitra sponsor
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13 }}>
+              {revisedPkg.benefits.length ? (
+                revisedPkg.benefits.map((b, i) => <li key={i}>{b}</li>)
+              ) : (
+                <li className="sh-muted">—</li>
+              )}
+            </ul>
+          </div>
+        )}
+
         <div className="sh-field">
           <label className="sh-field__label">
             {action === "revisi" ? "Feedback untuk organisasi" : "Alasan penolakan"}

@@ -29,6 +29,8 @@ import {
   Eye,
   X,
   Package as PackageIcon,
+  AlertCircle,
+  Lock,
 } from "lucide-react";
 
 const STEPS = ["Informasi umum", "Paket sponsorship", "Dokumen", "Review"] as const;
@@ -62,6 +64,7 @@ export default function BuatPengajuan() {
   const preselectedFunder = params.get("funder") ?? editing?.funderId ?? "";
 
   const [step, setStep] = useState(0);
+  const [errors, setErrors] = useState<Set<string>>(new Set());
   const [previewDoc, setPreviewDoc] = useState<PengajuanDoc | null>(null);
   const [form, setForm] = useState<Pengajuan>(() => {
     if (editing)
@@ -94,6 +97,19 @@ export default function BuatPengajuan() {
       updatedAt: nowIso(),
     };
   });
+
+  // Tanggal hari ini dalam zona waktu lokal (bukan UTC) agar batas "tidak
+  // boleh mundur" sesuai kalender pengguna.
+  const todayIso = useMemo(() => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 10);
+  }, []);
+
+  // Mode revisi: mitra sponsor sudah menilai, yang boleh diubah hanya paket.
+  const isRevision = form.status === "perlu_revisi";
+  // Saat revisi, hanya paket sponsorship yang boleh diubah.
+  const locked = isRevision;
 
   const funder = state.funders.find((f) => f.id === form.funderId);
   const org = state.organizations.find((o) => o.id === orgId);
@@ -195,11 +211,21 @@ export default function BuatPengajuan() {
   const removeDoc = (index: number) =>
     set({ documents: (form.documents ?? []).filter((_, i) => i !== index) });
 
-  // Bersihkan paket: buang paket tanpa nama & poin kosong; rapikan tiap poin per tipe.
-  const normalize = (f: Pengajuan): Pengajuan => ({
+  /* Bersihkan paket sebelum disimpan.
+     - `lenient` (dipakai saat menyimpan draf): paket dipertahankan selama ada
+       isinya (nama ATAU permintaan ATAU benefit), supaya pekerjaan setengah
+       jadi tidak hilang diam-diam.
+     - ketat (saat mengirim): hanya paket bernama yang disimpan. */
+  const normalize = (f: Pengajuan, lenient = false): Pengajuan => ({
     ...f,
     packages: f.packages
-      .filter((pk) => pk.name.trim() !== "")
+      .filter((pk) =>
+        lenient
+          ? pk.name.trim() !== "" ||
+            pk.requests.some(requestFilled) ||
+            pk.benefits.some((b) => b.trim() !== "")
+          : pk.name.trim() !== "",
+      )
       .map((pk) => ({
         name: pk.name.trim(),
         requests: pk.requests
@@ -214,34 +240,71 @@ export default function BuatPengajuan() {
     updatedAt: nowIso(),
   });
 
-  // ---- Validation per step ----
-  // Paket valid: punya nama & minimal satu poin detail permintaan terisi.
-  const validPackages = packages.filter(
-    (pk) => pk.name.trim() !== "" && pk.requests.some(requestFilled),
-  );
-  const stepValid = (s: number): boolean => {
+  // ---- Validasi per langkah ----
+  // Kunci error memakai penamaan field agar bisa dipetakan ke input di layar.
+  // Paket dianggap lengkap bila: bernama, ada minimal satu detail permintaan
+  // terisi, DAN minimal satu benefit untuk mitra sponsor.
+  const packageComplete = (pk: SponsorshipPackage) =>
+    pk.name.trim() !== "" &&
+    pk.requests.some(requestFilled) &&
+    pk.benefits.some((b) => b.trim() !== "");
+
+  const validPackages = packages.filter(packageComplete);
+
+  const collectErrors = (s: number): Set<string> => {
+    const e = new Set<string>();
     if (s === 0) {
-      return (
-        form.eventName.trim() !== "" &&
-        form.eventLocation.trim() !== "" &&
-        form.description.trim() !== "" &&
-        form.eventBudget > 0
-      );
+      if (!form.eventName.trim()) e.add("eventName");
+      if (!form.eventLocation.trim()) e.add("eventLocation");
+      if (!form.description.trim()) e.add("description");
+      if (!(form.eventBudget > 0)) e.add("eventBudget");
+      // Tanggal event opsional, tetapi bila diisi tidak boleh mundur.
+      if (form.eventDate && form.eventDate < todayIso) e.add("eventDate");
     }
     if (s === 1) {
-      // Minimal 1 paket dengan nama + nominal.
-      return validPackages.length > 0;
+      packages.forEach((pk, i) => {
+        const empty =
+          pk.name.trim() === "" &&
+          !pk.requests.some(requestFilled) &&
+          !pk.benefits.some((b) => b.trim() !== "");
+        // Paket yang benar-benar kosong diabaikan bila masih ada paket lain
+        // yang terisi — pengguna mungkin sekadar menyisakan baris kosong.
+        if (empty && packages.length > 1) return;
+        if (!pk.name.trim()) e.add(`pkg.${i}.name`);
+        if (!pk.requests.some(requestFilled)) e.add(`pkg.${i}.requests`);
+        if (!pk.benefits.some((b) => b.trim() !== "")) e.add(`pkg.${i}.benefits`);
+      });
+      if (validPackages.length === 0) e.add("packages");
     }
     if (s === 2) {
-      // Minimal satu berkas pendukung (PDF) wajib diunggah.
-      return (form.documents ?? []).length > 0;
+      if ((form.documents ?? []).length === 0) e.add("documents");
     }
-    return true;
+    return e;
   };
 
+  const stepValid = (s: number): boolean => collectErrors(s).size === 0;
+  const err = (key: string) => errors.has(key);
+  /* Hapus tanda merah begitu pengguna memperbaiki isian terkait. */
+  const clearErr = (...keys: string[]) =>
+    setErrors((prev) => {
+      if (!keys.some((k) => prev.has(k))) return prev;
+      const next = new Set(prev);
+      keys.forEach((k) => next.delete(k));
+      return next;
+    });
+
   const persistDraft = async () => {
+    // Draf disimpan longgar; yang penting isian pengguna tidak hilang.
+    const draft = normalize({ ...form }, true);
+    // Aturan basis data: selain status draf, pengajuan wajib punya minimal satu
+    // paket. Tanpa penjagaan ini permintaan gagal dengan galat 500.
+    if (draft.status !== "draf" && draft.packages.length === 0) {
+      setErrors(new Set(["packages"]));
+      setStep(1);
+      return;
+    }
     try {
-      await savePengajuan(normalize({ ...form, status: form.status === "draf" ? "draf" : form.status }));
+      await savePengajuan(draft);
       toast.success("Pengajuan disimpan sebagai draf.");
       navigate("/org/pengajuan");
     } catch (e: any) {
@@ -255,21 +318,16 @@ export default function BuatPengajuan() {
       navigate("/org/dashboard");
       return;
     }
-    if (!stepValid(0)) {
-      toast.failed("Masih ada kolom wajib yang kosong.");
-      setStep(0);
-      return;
+    // Cari langkah pertama yang bermasalah, tandai field-nya, lalu buka langkah itu.
+    for (const s of [0, 1, 2]) {
+      const e = collectErrors(s);
+      if (e.size) {
+        setErrors(e);
+        setStep(s);
+        return;
+      }
     }
-    if (!stepValid(1)) {
-      toast.failed("Isi minimal satu paket dengan nama & satu detail permintaan.");
-      setStep(1);
-      return;
-    }
-    if (!stepValid(2)) {
-      toast.failed("Unggah berkas proposal (PDF) dulu — wajib diisi.");
-      setStep(2);
-      return;
-    }
+    setErrors(new Set());
     if (feeDue > 0 && !balanceOk) {
       toast.failed(
         `Saldo tidak cukup untuk biaya pengajuan ${formatRupiah(SUBMISSION_FEE)}. Silakan top-up dulu.`,
@@ -287,16 +345,12 @@ export default function BuatPengajuan() {
   };
 
   const next = () => {
-    if (!stepValid(step)) {
-      toast.failed(
-        step === 2
-          ? "Unggah berkas proposal (PDF) dulu — wajib diisi."
-          : step === 1
-            ? "Isi minimal satu paket dengan nama & satu detail permintaan."
-            : "Lengkapi kolom wajib di langkah ini dulu.",
-      );
+    const e = collectErrors(step);
+    if (e.size) {
+      setErrors(e);
       return;
     }
+    setErrors(new Set());
     setStep((s) => Math.min(STEPS.length - 1, s + 1));
   };
   const prev = () => setStep((s) => Math.max(0, s - 1));
@@ -365,51 +419,89 @@ export default function BuatPengajuan() {
           })}
         </div>
 
+        {isRevision && (
+          <div className="sh-notice sh-notice--info" style={{ marginBottom: 16 }}>
+            <strong>Mode revisi.</strong> Mitra sponsor sudah meninjau pengajuan ini, jadi yang
+            dapat diubah hanya <strong>Paket sponsorship</strong> (detail permintaan & benefit).
+            Informasi umum dan dokumen dikunci agar isi yang sudah ditinjau tetap sama.
+          </div>
+        )}
+
         <section className="sh-card">
           {/* STEP 0 — Informasi umum */}
           {step === 0 && (
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <h3 className="sh-form-section__title">1. Informasi umum event</h3>
               <div className="sh-form-grid">
-                <div className="sh-field sh-field--wide">
+                <div className={`sh-field sh-field--wide${err("eventName") ? " sh-field--invalid" : ""}`}>
                   <label className="sh-field__label">Nama event</label>
                   <input
                     value={form.eventName}
-                    onChange={(e) => set({ eventName: e.target.value })}
+                    disabled={locked}
+                    onChange={(e) => {
+                      set({ eventName: e.target.value });
+                      clearErr("eventName");
+                    }}
                     placeholder="Misal: Konser Amal Akhir Tahun"
                   />
+                  <FieldError show={err("eventName")}>Nama event wajib diisi.</FieldError>
                 </div>
-                <div className="sh-field">
+                <div className={`sh-field${err("eventLocation") ? " sh-field--invalid" : ""}`}>
                   <label className="sh-field__label">Lokasi event</label>
                   <input
                     value={form.eventLocation}
-                    onChange={(e) => set({ eventLocation: e.target.value })}
+                    disabled={locked}
+                    onChange={(e) => {
+                      set({ eventLocation: e.target.value });
+                      clearErr("eventLocation");
+                    }}
                     placeholder="Misal: Balai Sarbini, Jakarta"
                   />
+                  <FieldError show={err("eventLocation")}>Lokasi event wajib diisi.</FieldError>
                 </div>
-                <div className="sh-field">
+                <div className={`sh-field${err("eventDate") ? " sh-field--invalid" : ""}`}>
                   <label className="sh-field__label">Tanggal event</label>
                   <input
                     type="date"
                     value={form.eventDate}
-                    onChange={(e) => set({ eventDate: e.target.value })}
+                    disabled={locked}
+                    min={todayIso}
+                    onChange={(e) => {
+                      set({ eventDate: e.target.value });
+                      clearErr("eventDate");
+                    }}
                   />
+                  <FieldError show={err("eventDate")}>
+                    Tanggal event tidak boleh sebelum hari ini.
+                  </FieldError>
                 </div>
-                <div className="sh-field sh-field--wide">
+                <div className={`sh-field sh-field--wide${err("description") ? " sh-field--invalid" : ""}`}>
                   <label className="sh-field__label">Deskripsi lengkap event</label>
                   <textarea
                     value={form.description}
-                    onChange={(e) => set({ description: e.target.value })}
+                    disabled={locked}
+                    onChange={(e) => {
+                      set({ description: e.target.value });
+                      clearErr("description");
+                    }}
                     placeholder="Ceritakan tujuan, cakupan, dan target audiens event."
                   />
+                  <FieldError show={err("description")}>Deskripsi event wajib diisi.</FieldError>
                 </div>
-                <div className="sh-field">
+                <div className={`sh-field${err("eventBudget") ? " sh-field--invalid" : ""}`}>
                   <label className="sh-field__label">Total anggaran event (Rp)</label>
                   <CurrencyInput
                     value={form.eventBudget}
-                    onChange={(n) => set({ eventBudget: n })}
+                    disabled={locked}
+                    onChange={(n) => {
+                      set({ eventBudget: n });
+                      clearErr("eventBudget");
+                    }}
                     placeholder="Misal: 300.000.000"
                   />
+                  <FieldError show={err("eventBudget")}>
+                    Total anggaran wajib diisi dan lebih dari 0.
+                  </FieldError>
                 </div>
               </div>
             </div>
@@ -450,13 +542,20 @@ export default function BuatPengajuan() {
                       </button>
                     </div>
 
-                    <div className="sh-field" style={{ marginBottom: 8, maxWidth: 320 }}>
+                    <div
+                      className={`sh-field${err(`pkg.${pi}.name`) ? " sh-field--invalid" : ""}`}
+                      style={{ marginBottom: 8, maxWidth: 320 }}
+                    >
                       <label className="sh-field__label">Nama paket</label>
                       <input
                         value={pk.name}
-                        onChange={(e) => setPackage(pi, { name: e.target.value })}
+                        onChange={(e) => {
+                          setPackage(pi, { name: e.target.value });
+                          clearErr(`pkg.${pi}.name`, "packages");
+                        }}
                         placeholder="Misal: Gold"
                       />
+                      <FieldError show={err(`pkg.${pi}.name`)}>Nama paket wajib diisi.</FieldError>
                     </div>
 
                     <RequestEditor
@@ -470,19 +569,33 @@ export default function BuatPengajuan() {
                       onAdd={() => addRequest(pi)}
                       onRemove={(li) => removeRequest(pi, li)}
                     />
+                    <FieldError show={err(`pkg.${pi}.requests`)}>
+                      Isi minimal satu detail permintaan (nominal in-cash atau spesifikasi in-kind).
+                    </FieldError>
 
                     <PointEditor
                       label="Benefit untuk mitra sponsor"
                       hint="Imbalan/keuntungan yang didapat mitra sponsor pada paket ini."
                       placeholder="Misal: Logo di poster kegiatan"
                       values={pk.benefits}
-                      onChange={(li, v) => setBenefit(pi, li, v)}
+                      invalid={err(`pkg.${pi}.benefits`)}
+                      onChange={(li, v) => {
+                        setBenefit(pi, li, v);
+                        clearErr(`pkg.${pi}.benefits`, "packages");
+                      }}
                       onAdd={() => addBenefit(pi)}
                       onRemove={(li) => removeBenefit(pi, li)}
                     />
+                    <FieldError show={err(`pkg.${pi}.benefits`)}>
+                      Isi minimal satu benefit untuk mitra sponsor.
+                    </FieldError>
                   </div>
                 ))}
               </div>
+
+              <FieldError show={err("packages")}>
+                Minimal satu paket harus lengkap: nama, detail permintaan, dan benefit.
+              </FieldError>
 
               <button
                 className="sh-btn sh-btn--secondary sh-btn--sm"
@@ -505,6 +618,15 @@ export default function BuatPengajuan() {
               <div className="sh-field__label" style={{ marginBottom: 8 }}>
                 Berkas pendukung (PDF) — wajib, bisa lebih dari satu
               </div>
+              {locked && (
+                <div className="sh-row" style={{ gap: 6, marginBottom: 10, color: "var(--ink-500)", fontSize: 13 }}>
+                  <Lock size={14} style={{ flex: "none" }} />
+                  Dokumen dikunci selama revisi.
+                </div>
+              )}
+              <FieldError show={err("documents")}>
+                Unggah minimal satu berkas proposal (PDF).
+              </FieldError>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -541,6 +663,7 @@ export default function BuatPengajuan() {
                         </button>
                         <button
                           className="sh-btn sh-btn--ghost sh-btn--icon"
+                          disabled={locked}
                           onClick={() => removeDoc(i)}
                           title="Hapus berkas"
                         >
@@ -554,7 +677,13 @@ export default function BuatPengajuan() {
               <button
                 type="button"
                 className="sh-file-drop"
-                style={{ marginBottom: 16, width: "100%", cursor: "pointer" }}
+                disabled={locked}
+                style={{
+                  marginBottom: 16,
+                  width: "100%",
+                  cursor: locked ? "not-allowed" : "pointer",
+                  opacity: locked ? 0.55 : 1,
+                }}
                 onClick={() => fileInputRef.current?.click()}
               >
                 <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
@@ -572,6 +701,7 @@ export default function BuatPengajuan() {
                 <textarea
                   rows={3}
                   value={form.extraNote ?? ""}
+                  disabled={locked}
                   onChange={(e) => set({ extraNote: e.target.value })}
                   placeholder="Informasi lain yang ingin disampaikan ke mitra sponsor."
                 />
@@ -732,11 +862,27 @@ export default function BuatPengajuan() {
   );
 }
 
+/** Pesan galat di bawah field — menggantikan toast di pojok layar agar
+ *  pengguna langsung tahu bagian mana yang perlu diperbaiki. */
+function FieldError({ show, children }: { show: boolean; children: React.ReactNode }) {
+  if (!show) return null;
+  return (
+    <div
+      className="sh-row"
+      style={{ gap: 6, marginTop: 6, color: "var(--status-failed)", fontSize: 13 }}
+    >
+      <AlertCircle size={14} style={{ flex: "none" }} />
+      <span>{children}</span>
+    </div>
+  );
+}
+
 function PointEditor({
   label,
   hint,
   placeholder,
   values,
+  invalid,
   onChange,
   onAdd,
   onRemove,
@@ -745,6 +891,7 @@ function PointEditor({
   hint?: string;
   placeholder: string;
   values: string[];
+  invalid?: boolean;
   onChange: (i: number, v: string) => void;
   onAdd: () => void;
   onRemove: (i: number) => void;
@@ -759,7 +906,7 @@ function PointEditor({
           {hint}
         </div>
       )}
-      <div style={{ display: "grid", gap: 8 }}>
+      <div style={{ display: "grid", gap: 8 }} className={invalid ? "sh-field--invalid" : undefined}>
         {values.map((v, i) => (
           <div key={i} className="sh-row" style={{ gap: 8 }}>
             <span

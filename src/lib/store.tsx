@@ -254,8 +254,16 @@ export function useActions() {
       async rejectPengajuan(id: string, note: string) {
         apply(await api.pengajuan({ op: "reject", id, note, actorId: actorId() }));
       },
-      async requestRevisionPengajuan(id: string, note: string) {
-        apply(await api.pengajuan({ op: "feedback", id, note, actorId: actorId() }));
+      async requestRevisionPengajuan(id: string, note: string, selectedPackage: number) {
+        apply(
+          await api.pengajuan({
+            op: "feedback",
+            id,
+            note,
+            selectedPackage,
+            actorId: actorId(),
+          }),
+        );
       },
 
       // ---- Organisasi ----
