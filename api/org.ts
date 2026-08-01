@@ -60,7 +60,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           pic_name = ${o.pic.name}, pic_phone = ${o.pic.phone},
           pic_position = ${o.pic.position}, pic_email = ${o.pic.email},
           pic_id_doc_url = ${o.pic.idDocUrl},
-          pic_id_doc_data = coalesce(${o.pic.idDocData ?? null}, pic_id_doc_data)
+          pic_id_doc_data = coalesce(${o.pic.idDocData ?? null}, pic_id_doc_data),
+          pic_photo = ${o.pic.photo ?? null}
         where id = ${o.id}`;
     } else if (b.op === "topup") {
       await sql`update organizations set balance = balance + ${b.amount} where id = ${b.orgId}`;

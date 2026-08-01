@@ -14,7 +14,17 @@ import {
   validateWebsite,
 } from "@/lib/contactValidate";
 import type { Funder, FunderType } from "@/lib/types";
-import { Save, X, Instagram, Globe, ArrowLeft, ImagePlus, Mail, Phone } from "lucide-react";
+import {
+  Save,
+  X,
+  Instagram,
+  Globe,
+  ArrowLeft,
+  ImagePlus,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
 
 const TYPES: FunderType[] = ["Korporasi", "Individu", "Filantropi", "Perbankan"];
 
@@ -228,6 +238,17 @@ export default function FunderPengaturan() {
                     value={focusText}
                     onChange={(e) => setFocusText(e.target.value)}
                     placeholder="Teknologi, Edukasi, Olahraga"
+                  />
+                </Field>
+                <Field
+                  label="Alamat kantor"
+                  icon={<MapPin size={14} />}
+                  hint="Alamat yang tampil di profil publik."
+                >
+                  <input
+                    value={form.address}
+                    onChange={(e) => set({ address: e.target.value })}
+                    placeholder="Misal: Jl. Sudirman No. 1, Jakarta Selatan"
                   />
                 </Field>
                 <Field

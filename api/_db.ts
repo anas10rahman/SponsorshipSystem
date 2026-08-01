@@ -63,6 +63,7 @@ export function mapOrg(r: any) {
       position: r.pic_position ?? "",
       email: r.pic_email ?? "",
       idDocUrl: r.pic_id_doc_url ?? "",
+      photo: r.pic_photo ?? undefined,
     },
   };
 }
@@ -83,6 +84,7 @@ export function mapFunder(r: any) {
     twitter: r.twitter ?? undefined,
     facebook: r.facebook ?? undefined,
     logoUrl: r.logo_url ?? undefined,
+    address: r.address ?? "",
     pic: {
       name: r.pic_name ?? "",
       phone: r.pic_phone ?? "",
@@ -103,7 +105,7 @@ export async function assembleState() {
                verification_status, verification_note, legal_docs, payout_account,
                balance, phone, email, description, website, instagram, twitter,
                facebook, tiktok, compro_url, pic_name, pic_phone, pic_position,
-               pic_email, pic_id_doc_url, created_at, updated_at
+               pic_email, pic_id_doc_url, pic_photo, created_at, updated_at
           from organizations order by name`,
     sql`select * from funders order by name`,
     sql`select id, org_id, funder_id, event_name, event_location, event_date, description,

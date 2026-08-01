@@ -110,6 +110,7 @@ export function createSeedState(): AppState {
         instagram: "@sinergi.nusantara",
         twitter: "@sinerginusantara",
         facebook: "SinergiNusantara",
+        address: "Jakarta, Indonesia",
         pic: {
           name: "Budi Santoso",
           phone: "0815-1111-2222",
@@ -130,6 +131,7 @@ export function createSeedState(): AppState {
           "Yayasan filantropi yang mendukung program pendidikan dan kesehatan masyarakat prasejahtera.",
         website: "yayasancahaya.org",
         instagram: "@yayasancahaya",
+        address: "Jakarta, Indonesia",
         pic: {
           name: "Sari Wijaya",
           phone: "0816-3333-4444",
@@ -152,6 +154,7 @@ export function createSeedState(): AppState {
         instagram: "@bankdaya",
         twitter: "@bankdaya",
         facebook: "BankDaya",
+        address: "Jakarta, Indonesia",
         pic: {
           name: "Andi Pratama",
           phone: "0817-5555-6666",

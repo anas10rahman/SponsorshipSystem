@@ -17,6 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           website = ${f.website ?? null}, instagram = ${f.instagram ?? null},
           twitter = ${f.twitter ?? null}, facebook = ${f.facebook ?? null},
           logo_url = ${f.logoUrl ?? null}, phone = ${f.phone},
+          address = ${f.address ?? ""},
           budget_total = ${newTotal},
           budget_remaining = least(${newTotal}, greatest(0, ${newTotal} - (budget_total - budget_remaining))),
           pic_name = ${f.pic.name}, pic_phone = ${f.pic.phone},

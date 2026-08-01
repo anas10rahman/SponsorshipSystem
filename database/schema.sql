@@ -124,6 +124,7 @@ create table organizations (
   pic_email       text not null default '',
   pic_id_doc_url  text not null default '',          -- KTP/KTM (PDF) — wajib di UI
   pic_id_doc_data text,                              -- isi KTP/KTM (data URL) untuk preview (lazy)
+  pic_photo       text,                              -- foto PIC (data URL), opsional
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -156,6 +157,7 @@ create table funders (
   pic_phone         text not null default '',        -- no.WA aktif PIC
   pic_position      text not null default '',
   pic_email         text not null default '',
+  address           text not null default '',        -- alamat kantor mitra sponsor
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now(),
   constraint funders_budget_consistency check (budget_remaining <= budget_total)
@@ -168,6 +170,10 @@ alter table users
 -- Migrasi idempotent: kolom reset password untuk DB yang sudah berjalan.
 alter table users add column if not exists reset_code    text;
 alter table users add column if not exists reset_expires timestamptz;
+
+-- Migrasi idempotent: foto PIC organisasi & alamat kantor mitra sponsor.
+alter table organizations add column if not exists pic_photo text;
+alter table funders       add column if not exists address   text not null default '';
 
 -- Migrasi idempotent: status/aksi "kadaluarsa" (auto-batal 7 hari) untuk DB lama.
 alter type pengajuan_status  add value if not exists 'kadaluarsa';

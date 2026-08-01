@@ -21,6 +21,8 @@ export type OrgPic = {
   position: string; // jabatan di organisasi
   email: string; // email PIC
   idDocUrl: string; // KTP/KTM (PDF) — wajib
+  /** Foto PIC (data URL), opsional. */
+  photo?: string;
   idDocData?: string; // isi KTP/KTM (data URL) — hanya saat baru diunggah / diambil lazy
 };
 
@@ -81,6 +83,8 @@ export type Funder = {
   twitter?: string; // X
   facebook?: string;
   logoUrl?: string; // logo mitra sponsor (data URL/base64), opsional
+  /** Alamat kantor mitra sponsor. */
+  address: string;
   // Penanggung jawab
   pic: FunderPic;
 };

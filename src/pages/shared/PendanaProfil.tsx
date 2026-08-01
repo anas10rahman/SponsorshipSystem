@@ -27,6 +27,7 @@ import {
   Lock,
   Mail,
   MessageCircle,
+  MapPin,
   Phone,
   Send,
   UserRound,
@@ -54,6 +55,10 @@ export default function PendanaProfil() {
   }, [funder, state.pengajuan]);
 
   // Kontak terbuka untuk: diri sendiri, admin, atau org yang sudah mengajukan ke mitra sponsor ini.
+  /* PIC mitra sponsor bersifat internal: hanya admin dan mitra sponsor itu
+     sendiri yang boleh melihatnya. Organisasi cukup memakai kontak umum. */
+  const canSeePic = isSelf || currentUser?.role === "admin";
+
   const canSeeContact =
     isSelf ||
     currentUser?.role === "admin" ||
@@ -180,6 +185,13 @@ export default function PendanaProfil() {
                   </span>
                 ))}
 
+              {funder.address && (
+                <span className="dm-contact" style={{ color: "var(--ink-700)", fontWeight: 500 }}>
+                  <MapPin size={17} style={{ color: "var(--ink-300)" }} />
+                  {funder.address}
+                </span>
+              )}
+
               {funder.website && (
                 <a
                   className="dm-contact"
@@ -207,7 +219,8 @@ export default function PendanaProfil() {
           </div>
         </section>
 
-        {/* Penanggung jawab (PIC) */}
+        {/* Penanggung jawab (PIC) — internal, tidak tampil ke organisasi. */}
+        {canSeePic && (
         <section className="sh-card dm-pic" style={{ marginBottom: 20 }}>
           <div className="dm-pic__head">
             <span className="dm-pic__head-icon">
@@ -259,6 +272,7 @@ export default function PendanaProfil() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Stats — hanya untuk pihak lain yang menilai brand ini. Di profil
             sendiri angka ini mubazir: sudah ada di Dashboard & Portofolio.

@@ -613,3 +613,45 @@ select:disabled,
   color: var(--status-pending, #d99a14);
   margin-top: 1px;
 }
+
+/* Berkas & rekening internal di dalam kartu identitas organisasi. */
+.dm-prof__internal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 40px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line);
+}
+
+/* Avatar PIC bisa berupa foto unggahan. */
+.dm-pic__avatar {
+  overflow: hidden;
+}
+.dm-pic__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Pratinjau foto PIC di form pengaturan. */
+.dm-photo-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background: var(--brand-50);
+  color: var(--dm-blue);
+  font-size: 22px;
+  font-weight: 800;
+  overflow: hidden;
+  flex: none;
+}
+.dm-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

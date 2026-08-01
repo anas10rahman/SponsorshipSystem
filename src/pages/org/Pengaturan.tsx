@@ -34,6 +34,7 @@ export default function OrgPengaturan() {
   const org = state.organizations.find((o) => o.id === currentUser?.orgId);
   const fileRef = useRef<HTMLInputElement>(null);
   const logoRef = useRef<HTMLInputElement>(null);
+  const picPhotoRef = useRef<HTMLInputElement>(null);
   const comproRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<Organization | null>(org ?? null);
@@ -109,6 +110,28 @@ export default function OrgPengaturan() {
     readPdf(file, comproRef, "Company profile", (name, data) =>
       set({ comproUrl: name, comproData: data }),
     );
+  };
+
+  /* Foto PIC: gambar saja, maks 2 MB — disimpan sebagai data URL seperti logo. */
+  const onPickPicPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const reset = () => {
+      if (picPhotoRef.current) picPhotoRef.current.value = "";
+    };
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.failed("Foto PIC harus berupa gambar (PNG/JPG).");
+      reset();
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.failed("Ukuran foto PIC maksimal 2 MB.");
+      reset();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setPic({ photo: String(reader.result) });
+    reader.readAsDataURL(file);
   };
 
   const onPickLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -453,6 +476,55 @@ export default function OrgPengaturan() {
               </span>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
+              {/* Foto PIC — opsional, tampil sebagai avatar di profil. */}
+              <div style={{ marginBottom: 18 }}>
+                <label className="sh-field__label" style={{ display: "block", marginBottom: 8 }}>
+                  Foto PIC
+                </label>
+                <input
+                  ref={picPhotoRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={onPickPicPhoto}
+                />
+                <div className="sh-row" style={{ gap: 14, alignItems: "center" }}>
+                  <span className="dm-photo-preview">
+                    {form.pic.photo ? (
+                      <img src={form.pic.photo} alt="Foto PIC" />
+                    ) : (
+                      initials(form.pic.name || "?")
+                    )}
+                  </span>
+                  <div className="sh-row" style={{ gap: 8 }}>
+                    <button
+                      type="button"
+                      className="sh-btn sh-btn--secondary sh-btn--sm"
+                      onClick={() => picPhotoRef.current?.click()}
+                    >
+                      <ImagePlus size={14} />
+                      {form.pic.photo ? "Ganti foto" : "Unggah foto"}
+                    </button>
+                    {form.pic.photo && (
+                      <button
+                        type="button"
+                        className="sh-btn sh-btn--ghost sh-btn--sm"
+                        onClick={() => {
+                          setPic({ photo: undefined });
+                          if (picPhotoRef.current) picPhotoRef.current.value = "";
+                        }}
+                      >
+                        <X size={14} />
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <span className="sh-field__hint">
+                  PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama PIC.
+                </span>
+              </div>
+
               <div className="sh-form-grid">
                 <Field label="Nama PIC" required invalid={errors.has("pic.name")}>
                   <input

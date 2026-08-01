@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { ContactLine } from "@/components/ContactLine";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
-import { formatRupiah, formatDate, waLink, gmailLink } from "@/lib/format";
+import { formatDate, initials, waLink, gmailLink } from "@/lib/format";
 import {
   hasPengajuanBetween,
   maskPhone,
@@ -27,6 +27,9 @@ import {
   Phone,
   Lock,
   IdCard,
+  MessageCircle,
+  Landmark,
+  UserRound,
 } from "lucide-react";
 
 export default function OrganisasiProfil() {
@@ -88,235 +91,206 @@ export default function OrganisasiProfil() {
           }
         />
 
-        {/* Header */}
-        <section className="sh-card" style={{ marginBottom: 20 }}>
-          <div className="sh-card__body">
-            <div className="sh-row" style={{ gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
-              {org.logoUrl ? (
-                <img
-                  src={org.logoUrl}
-                  alt={org.name}
-                  className="sh-org-logo"
-                  style={{ width: 64, height: 64, objectFit: "cover", padding: 0, flexShrink: 0 }}
-                />
+        {/* Identitas organisasi — logo besar, nama, chip, deskripsi, kontak. */}
+        <section className="sh-card dm-prof" style={{ marginBottom: 20 }}>
+          <div className="dm-prof__logo">
+            {org.logoUrl ? (
+              <img src={org.logoUrl} alt={org.name} />
+            ) : (
+              <span>{org.logoInitials}</span>
+            )}
+          </div>
+
+          <div className="dm-prof__main">
+            <div className="sh-row" style={{ gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+              <h2 className="dm-prof__name" style={{ margin: 0 }}>
+                {org.name}
+              </h2>
+              {org.verified ? (
+                <StatusBadge kind="custom" label="Terverifikasi" variant="success" />
               ) : (
-                <span
-                  className="sh-org-logo"
-                  style={{ width: 64, height: 64, fontSize: 22, flexShrink: 0 }}
-                >
-                  {org.logoInitials}
+                <StatusBadge kind="custom" label="Belum terverifikasi" variant="pending" />
+              )}
+            </div>
+
+            <div className="sh-row" style={{ gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+              <span className="sh-chip" style={{ cursor: "default" }}>
+                {org.category}
+              </span>
+              <span className="sh-chip" style={{ cursor: "default" }}>
+                <MapPin size={14} /> {org.city}
+              </span>
+            </div>
+
+            <p className="dm-prof__desc">{org.description || "Belum ada deskripsi."}</p>
+
+            <div className="dm-prof__contacts">
+              {canSeeContact ? (
+                <a className="dm-contact" href={gmailLink(org.email)} target="_blank" rel="noreferrer">
+                  <Mail size={17} />
+                  {org.email || "—"}
+                </a>
+              ) : (
+                <span className="dm-contact dm-contact--locked">
+                  <Lock size={16} />
+                  Email terbuka setelah pengajuan
                 </span>
               )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="sh-row" style={{ gap: 10, flexWrap: "wrap" }}>
-                  <h2>{org.name}</h2>
-                  {org.verified ? (
-                    <StatusBadge kind="custom" label="Terverifikasi" variant="success" />
-                  ) : (
-                    <StatusBadge kind="custom" label="Belum terverifikasi" variant="pending" />
-                  )}
-                </div>
-                <div className="sh-row" style={{ gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-                  <span className="sh-chip" style={{ cursor: "default" }}>
-                    {org.category}
-                  </span>
-                  <span className="sh-muted sh-row" style={{ gap: 4 }}>
-                    <MapPin size={14} /> {org.city}
-                  </span>
-                </div>
-                <ContactLine
-                  phone={org.phone}
-                  canSee={canSeeContact}
-                  hint="Nomor tampil setelah organisasi mengajukan ke Anda."
-                />
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Tentang organisasi */}
-        <section className="sh-card" style={{ marginBottom: 20 }}>
-          <header className="sh-card__header">
-            <h3>Tentang organisasi</h3>
-          </header>
-          <div className="sh-card__body sh-stack">
-            {org.description ? (
-              <p>{org.description}</p>
-            ) : (
-              <p className="sh-muted">Belum ada deskripsi.</p>
-            )}
-
-            <div className="sh-row" style={{ gap: 32, flexWrap: "wrap" }}>
-              <div>
-                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                  <Mail size={13} /> Email
-                </div>
-                {canSeeContact ? (
+              {org.phone &&
+                (canSeeContact ? (
                   <a
-                    href={gmailLink(org.email)}
+                    className="dm-contact dm-contact--wa"
+                    href={waLink(org.phone)}
                     target="_blank"
                     rel="noreferrer"
-                    className="sh-meta-value"
+                    style={{ fontVariantNumeric: "tabular-nums" }}
                   >
-                    {org.email || "—"}
+                    <MessageCircle size={17} />
+                    {org.phone}
                   </a>
                 ) : (
-                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
-                    <Lock size={13} /> Terbuka setelah pengajuan
-                  </div>
-                )}
-              </div>
+                  <span className="dm-contact dm-contact--locked">
+                    <Lock size={16} />
+                    {maskPhone(org.phone)}
+                  </span>
+                ))}
+
               {org.website && (
-                <div>
-                  <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                    <Globe size={13} /> Website
-                  </div>
-                  <a
-                    href={org.website}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="sh-meta-value"
-                  >
-                    {org.website}
-                  </a>
-                </div>
+                <a className="dm-contact" href={org.website} target="_blank" rel="noreferrer">
+                  <Globe size={17} />
+                  {org.website.replace(/^https?:\/\//i, "")}
+                </a>
+              )}
+              {org.instagram && (
+                <a className="dm-contact" href={org.instagram} target="_blank" rel="noreferrer">
+                  <Instagram size={17} />
+                  Instagram
+                </a>
+              )}
+              {org.tiktok && (
+                <a className="dm-contact" href={org.tiktok} target="_blank" rel="noreferrer">
+                  <Music2 size={17} />
+                  TikTok
+                </a>
               )}
             </div>
 
-            {(org.instagram || org.tiktok) && (
-              <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
-                {org.instagram && (
-                  <a
-                    href={org.instagram}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="sh-chip"
-                  >
-                    <Instagram size={14} /> Instagram
-                  </a>
-                )}
-                {org.tiktok && (
-                  <a href={org.tiktok} target="_blank" rel="noreferrer" className="sh-chip">
-                    <Music2 size={14} /> TikTok
-                  </a>
-                )}
+            {/* Berkas & rekening organisasi — hanya organisasi sendiri & admin. */}
+            {canSeeSensitive && (
+              <div className="dm-prof__internal">
+                <div>
+                  <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                    <Landmark size={13} /> Rekening pencairan
+                  </div>
+                  <div className="sh-meta-value">{org.payoutAccount || "—"}</div>
+                </div>
+                <div>
+                  <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                    <FileText size={13} /> Dokumen legal organisasi
+                  </div>
+                  {org.legalDocs.length > 0 ? (
+                    <div className="sh-row" style={{ gap: 8, flexWrap: "wrap", marginTop: 6 }}>
+                      {org.legalDocs.map((d) => (
+                        <span
+                          key={d}
+                          className="sh-btn sh-btn--ghost sh-btn--sm"
+                          style={{ cursor: "default" }}
+                        >
+                          <FileText size={14} />
+                          {d}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="sh-muted" style={{ margin: "4px 0 0" }}>
+                      Belum ada dokumen.
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </div>
         </section>
 
         {/* Penanggung jawab (PIC) */}
-        <section className="sh-card" style={{ marginBottom: 20 }}>
-          <header className="sh-card__header">
-            <h3>Penanggung jawab (PIC)</h3>
-          </header>
-          <div className="sh-card__body">
-            <div className="sh-row" style={{ gap: 32, flexWrap: "wrap" }}>
-              <div>
-                <div className="sh-meta-label">Nama</div>
-                <div className="sh-meta-value">{org.pic.name || "—"}</div>
-              </div>
-              <div>
-                <div className="sh-meta-label">Jabatan</div>
-                <div className="sh-meta-value">{org.pic.position || "—"}</div>
-              </div>
-              <div>
-                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                  <Phone size={13} /> Nomor WA
-                </div>
+        <section className="sh-card dm-pic" style={{ marginBottom: 20 }}>
+          <div className="dm-pic__head">
+            <span className="dm-pic__head-icon">
+              <UserRound size={20} />
+            </span>
+            <h3>Penanggung Jawab (PIC)</h3>
+          </div>
+          <div className="dm-pic__body">
+            <span className="dm-pic__avatar">
+              {org.pic.photo ? (
+                <img src={org.pic.photo} alt={org.pic.name} />
+              ) : (
+                initials(org.pic.name || "?")
+              )}
+            </span>
+            <div style={{ minWidth: 0 }}>
+              <h4 className="dm-pic__name">{org.pic.name || "—"}</h4>
+              <div className="dm-pic__role">{org.pic.position || "Jabatan belum diisi"}</div>
+              <div className="dm-pic__lines">
                 {canSeeContact ? (
                   <a
+                    className="dm-contact dm-contact--wa"
                     href={waLink(org.pic.phone)}
                     target="_blank"
                     rel="noreferrer"
-                    className="sh-meta-value"
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
+                    <Phone size={16} />
                     {org.pic.phone || "—"}
                   </a>
                 ) : (
-                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
-                    <Lock size={13} /> {maskPhone(org.pic.phone)}
-                  </div>
+                  <span className="dm-contact dm-contact--locked">
+                    <Lock size={16} />
+                    {maskPhone(org.pic.phone)}
+                  </span>
                 )}
-              </div>
-              <div>
-                <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                  <Mail size={13} /> Email
-                </div>
                 {canSeeContact ? (
                   <a
+                    className="dm-contact"
                     href={gmailLink(org.pic.email)}
                     target="_blank"
                     rel="noreferrer"
-                    className="sh-meta-value"
                   >
+                    <Mail size={16} />
                     {org.pic.email || "—"}
                   </a>
                 ) : (
-                  <div className="sh-meta-value sh-row" style={{ gap: 6, color: "var(--ink-500)" }}>
-                    <Lock size={13} /> Terbuka setelah pengajuan
+                  <span className="dm-contact dm-contact--locked">
+                    <Lock size={16} />
+                    Email terbuka setelah pengajuan
+                  </span>
+                )}
+                {/* KTP/KTM menempel pada PIC — hanya organisasi sendiri & admin. */}
+                {canSeeSensitive && (
+                  <div style={{ marginTop: 4 }}>
+                    <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
+                      <IdCard size={13} /> KTP/KTM penanggung jawab
+                    </div>
+                    {org.pic.idDocUrl ? (
+                      <span
+                        className="sh-btn sh-btn--ghost sh-btn--sm"
+                        style={{ cursor: "default", marginTop: 4 }}
+                      >
+                        <IdCard size={14} />
+                        {org.pic.idDocUrl}
+                      </span>
+                    ) : (
+                      <p className="sh-muted" style={{ margin: "4px 0 0" }}>
+                        Belum diunggah.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
             </div>
           </div>
         </section>
-
-        {/* Sensitive info — admin / self only */}
-        {canSeeSensitive && (
-          <section className="sh-card" style={{ marginBottom: 20 }}>
-            <header className="sh-card__header">
-              <h3>Informasi internal</h3>
-              <span className="sh-muted" style={{ fontSize: 12 }}>
-                Hanya terlihat oleh organisasi & admin
-              </span>
-            </header>
-            <div className="sh-card__body sh-stack">
-              <div className="sh-row" style={{ gap: 32, flexWrap: "wrap" }}>
-                <div>
-                  <div className="sh-meta-label">Rekening pencairan</div>
-                  <div className="sh-meta-value">{org.payoutAccount}</div>
-                </div>
-                {isSelf && (
-                  <div>
-                    <div className="sh-meta-label">Saldo</div>
-                    <div className="sh-meta-value num">{formatRupiah(org.balance)}</div>
-                  </div>
-                )}
-              </div>
-              <div>
-                <div className="sh-meta-label">KTP/KTM penanggung jawab</div>
-                {org.pic.idDocUrl ? (
-                  <span
-                    className="sh-btn sh-btn--ghost sh-btn--sm"
-                    style={{ cursor: "default", marginTop: 6 }}
-                  >
-                    <IdCard size={14} />
-                    {org.pic.idDocUrl}
-                  </span>
-                ) : (
-                  <p className="sh-muted">Belum diunggah.</p>
-                )}
-              </div>
-              <div>
-                <div className="sh-meta-label">Dokumen legal</div>
-                {org.legalDocs.length > 0 ? (
-                  <div className="sh-row" style={{ gap: 8, flexWrap: "wrap", marginTop: 6 }}>
-                    {org.legalDocs.map((d) => (
-                      <span key={d} className="sh-btn sh-btn--ghost sh-btn--sm" style={{ cursor: "default" }}>
-                        <FileText size={14} />
-                        {d}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="sh-muted">Belum ada dokumen.</p>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
 
       </div>
     </>
