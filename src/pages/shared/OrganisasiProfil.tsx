@@ -232,20 +232,19 @@ export default function OrganisasiProfil() {
                 </div>
                 <div>
                   <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                    <FileText size={13} /> Dokumen legal organisasi
+                    <FileText size={13} /> Dokumen
                   </div>
                   {org.legalDocs.length > 0 ? (
-                    <div className="sh-row" style={{ gap: 8, flexWrap: "wrap", marginTop: 6 }}>
+                    <div className="sh-row" style={{ gap: 12, flexWrap: "wrap" }}>
                       {org.legalDocs.map((d, i) => (
                         <button
                           key={d.name}
                           type="button"
-                          className="sh-btn sh-btn--ghost sh-btn--sm"
+                          className="dm-doclink"
                           onClick={() => openDoc("legal", d.name, i)}
-                          title="Pratinjau dokumen"
+                          title={d.name}
                         >
-                          <FileText size={14} />
-                          {d.name}
+                          Dokumen Legal{org.legalDocs.length > 1 ? ` ${i + 1}` : ""}
                         </button>
                       ))}
                     </div>
@@ -315,25 +314,19 @@ export default function OrganisasiProfil() {
                 )}
                 {/* KTP/KTM menempel pada PIC — hanya organisasi sendiri & admin. */}
                 {canSeeSensitive && (
-                  <div style={{ marginTop: 4 }}>
-                    <div className="sh-meta-label sh-row" style={{ gap: 6 }}>
-                      <IdCard size={13} /> KTP/KTM penanggung jawab
-                    </div>
+                  <div className="sh-row" style={{ gap: 8, marginTop: 2 }}>
+                    <IdCard size={16} style={{ color: "var(--ink-300)", flex: "none" }} />
                     {org.pic.idDocUrl ? (
                       <button
                         type="button"
-                        className="sh-btn sh-btn--ghost sh-btn--sm"
-                        style={{ marginTop: 4 }}
+                        className="dm-doclink"
                         onClick={() => openDoc("ktp", org.pic.idDocUrl)}
-                        title="Pratinjau dokumen"
+                        title={org.pic.idDocUrl}
                       >
-                        <IdCard size={14} />
-                        {org.pic.idDocUrl}
+                        ID PIC
                       </button>
                     ) : (
-                      <p className="sh-muted" style={{ margin: "4px 0 0" }}>
-                        Belum diunggah.
-                      </p>
+                      <span className="sh-muted">ID PIC belum diunggah.</span>
                     )}
                   </div>
                 )}

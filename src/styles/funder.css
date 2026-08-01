@@ -771,3 +771,20 @@ select:disabled,
     transform: rotate(360deg);
   }
 }
+
+/* Tautan dokumen: teks bergaris bawah, jelas bisa diklik untuk pratinjau. */
+.dm-doclink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--dm-blue);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.dm-doclink:hover {
+  color: var(--dm-blue-dark);
+}
