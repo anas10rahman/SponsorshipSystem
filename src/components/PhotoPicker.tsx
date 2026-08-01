@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { Pencil, X } from "lucide-react";
+import { Pencil, X, Loader2 } from "lucide-react";
+import { compressImage, formatBytes } from "@/lib/imageCompress";
 
 /** Pemilih foto/logo: gambar ditampilkan langsung, diganti lewat ikon pensil
  *  yang menempel di sudut foto (bukan tombol terpisah).
@@ -25,8 +26,9 @@ export function PhotoPicker({
   const ref = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [ok, setOk] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const pick = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const pick = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const reset = () => {
       if (ref.current) ref.current.value = "";
@@ -38,18 +40,30 @@ export function PhotoPicker({
       reset();
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setError("Ukuran gambar maksimal 2 MB.");
+    // Batas berkas masukan longgar karena hasilnya dikompres dulu.
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Ukuran gambar maksimal 10 MB.");
       reset();
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
+    setBusy(true);
+    try {
+      // Gambar diperkecil & dikompres supaya tidak membengkakkan data aplikasi.
+      const r = await compressImage(file);
       setError("");
-      onChange(String(reader.result));
-      setOk(`"${file.name}" siap disimpan.`);
-    };
-    reader.readAsDataURL(file);
+      onChange(r.dataUrl);
+      const saved = file.size - r.bytes;
+      setOk(
+        saved > 1024
+          ? `Siap disimpan · ${formatBytes(r.bytes)} (dari ${formatBytes(file.size)}).`
+          : `Siap disimpan · ${formatBytes(r.bytes)}.`,
+      );
+    } catch (err: any) {
+      setError(String(err?.message || "Gambar gagal diproses."));
+    } finally {
+      setBusy(false);
+      reset();
+    }
   };
 
   return (
