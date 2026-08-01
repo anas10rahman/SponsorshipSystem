@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
@@ -24,6 +25,21 @@ export default function AdminPengajuan() {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("semua");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [params, setParams] = useSearchParams();
+
+  // Notifikasi menautkan ke pengajuan tertentu (?id=) — langsung buka detailnya.
+  useEffect(() => {
+    const id = params.get("id");
+    if (id) setSelectedId(id);
+  }, [params]);
+
+  const closeDetail = () => {
+    setSelectedId(null);
+    if (params.has("id")) {
+      params.delete("id");
+      setParams(params, { replace: true });
+    }
+  };
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -123,7 +139,7 @@ export default function AdminPengajuan() {
         )}
       </div>
 
-      <PengajuanDetail pengajuan={selected} onClose={() => setSelectedId(null)} />
+      <PengajuanDetail pengajuan={selected} onClose={closeDetail} />
     </>
   );
 }

@@ -80,7 +80,6 @@ export default function FunderPengaturan() {
     if (emailBad(form.pic.email)) errs.add("pic.email");
     if (errs.size) {
       setErrors(errs);
-      toast.failed("Periksa kembali kolom yang ditandai merah.");
       return;
     }
     setErrors(new Set());

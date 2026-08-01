@@ -19,6 +19,7 @@ import {
   XCircle,
   MessageSquareWarning,
   Package as PackageIcon,
+  AlertCircle,
 } from "lucide-react";
 
 export default function FunderPengajuanReview() {
@@ -39,6 +40,7 @@ export default function FunderPengajuanReview() {
   );
   const [action, setAction] = useState<"revisi" | "tolak" | null>(null);
   const [note, setNote] = useState("");
+  const [noteErr, setNoteErr] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const org = useMemo(
@@ -84,7 +86,7 @@ export default function FunderPengajuanReview() {
   const confirmAction = async () => {
     if (!action) return;
     if (!note.trim()) {
-      toast.failed("Tulis catatan dulu untuk organisasi.");
+      setNoteErr(true);
       return;
     }
     setBusy(true);
@@ -247,6 +249,7 @@ export default function FunderPengajuanReview() {
               className="sh-btn sh-btn--warning"
               onClick={() => {
                 setNote("");
+                setNoteErr(false);
                 setAction("revisi");
               }}
               disabled={selectedPkg == null || busy}
@@ -264,6 +267,7 @@ export default function FunderPengajuanReview() {
               className="sh-btn sh-btn--secondary"
               onClick={() => {
                 setNote("");
+                setNoteErr(false);
                 setAction("tolak");
               }}
               disabled={busy}
@@ -376,20 +380,34 @@ export default function FunderPengajuanReview() {
           </div>
         )}
 
-        <div className="sh-field">
+        <div className={`sh-field${noteErr ? " sh-field--invalid" : ""}`}>
           <label className="sh-field__label">
             {action === "revisi" ? "Feedback untuk organisasi" : "Alasan penolakan"}
           </label>
           <textarea
             rows={4}
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={(e) => {
+              setNote(e.target.value);
+              if (noteErr) setNoteErr(false);
+            }}
             placeholder={
               action === "revisi"
                 ? "Tulis masukan/feedback yang perlu diperbaiki organisasi."
                 : "Jelaskan alasan penolakan."
             }
           />
+          {noteErr && (
+            <div
+              className="sh-row"
+              style={{ gap: 6, marginTop: 6, color: "var(--status-failed)", fontSize: 13 }}
+            >
+              <AlertCircle size={14} style={{ flex: "none" }} />
+              {action === "revisi"
+                ? "Tulis feedback yang perlu diperbaiki organisasi."
+                : "Tulis alasan penolakan."}
+            </div>
+          )}
         </div>
       </Modal>
     </>

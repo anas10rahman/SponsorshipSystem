@@ -16,12 +16,13 @@ export default function OrgTopUp() {
 
   const org = state.organizations.find((o) => o.id === currentUser?.orgId);
   const [amount, setAmount] = useState<number>(100_000);
+  const [amountErr, setAmountErr] = useState(false);
 
   const balance = org?.balance ?? 0;
 
   const submit = async () => {
     if (amount <= 0) {
-      toast.failed("Masukkan nominal top-up yang valid.");
+      setAmountErr(true);
       return;
     }
     try {
@@ -74,17 +75,25 @@ export default function OrgTopUp() {
                 ))}
               </div>
 
-              <div className="sh-field">
+              <div className={`sh-field${amountErr ? " sh-field--invalid" : ""}`}>
                 <label className="sh-field__label">Nominal lain (Rp)</label>
                 <input
                   type="number"
                   min={0}
                   value={amount || ""}
-                  onChange={(e) => setAmount(Number(e.target.value))}
+                  onChange={(e) => {
+                    setAmount(Number(e.target.value));
+                    if (amountErr) setAmountErr(false);
+                  }}
                   placeholder="Misal: 150000"
                 />
-                <span className="sh-field__hint">
-                  Top-up ini disimulasikan — tidak ada transaksi pembayaran nyata.
+                <span
+                  className="sh-field__hint"
+                  style={amountErr ? { color: "var(--status-failed)" } : undefined}
+                >
+                  {amountErr
+                    ? "Masukkan nominal top-up yang valid (lebih dari 0)."
+                    : "Top-up ini disimulasikan — tidak ada transaksi pembayaran nyata."}
                 </span>
               </div>
 

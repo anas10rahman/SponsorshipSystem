@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
@@ -27,6 +27,21 @@ export default function OrgPengajuanList() {
   const orgId = currentUser?.orgId ?? "";
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("semua");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [params, setParams] = useSearchParams();
+
+  // Notifikasi menautkan ke pengajuan tertentu (?id=) — langsung buka detailnya.
+  useEffect(() => {
+    const id = params.get("id");
+    if (id) setSelectedId(id);
+  }, [params]);
+
+  const closeDetail = () => {
+    setSelectedId(null);
+    if (params.has("id")) {
+      params.delete("id");
+      setParams(params, { replace: true });
+    }
+  };
 
   const mine = useMemo(
     () => state.pengajuan.filter((p) => p.orgId === orgId),
@@ -153,7 +168,7 @@ export default function OrgPengajuanList() {
         )}
       </div>
 
-      <PengajuanDetail pengajuan={selected} onClose={() => setSelectedId(null)} />
+      <PengajuanDetail pengajuan={selected} onClose={closeDetail} />
     </>
   );
 }

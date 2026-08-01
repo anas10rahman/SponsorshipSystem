@@ -34,6 +34,7 @@ export default function AdminOrganisasi() {
   const [reviewId, setReviewId] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState("");
+  const [noteErr, setNoteErr] = useState(false);
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<{ title: string; data: string | null } | null>(null);
 
@@ -84,7 +85,7 @@ export default function AdminOrganisasi() {
   const doReject = async () => {
     if (!review) return;
     if (!note.trim()) {
-      toast.failed("Tulis alasan penolakan.");
+      setNoteErr(true);
       return;
     }
     setBusy(true);
@@ -278,14 +279,25 @@ export default function AdminOrganisasi() {
           )}
 
           {rejecting && (
-            <div className="sh-field" style={{ marginTop: 12 }}>
+            <div
+              className={`sh-field${noteErr ? " sh-field--invalid" : ""}`}
+              style={{ marginTop: 12 }}
+            >
               <label className="sh-field__label">Alasan penolakan</label>
               <textarea
                 rows={3}
                 value={note}
-                onChange={(e) => setNote(e.target.value)}
+                onChange={(e) => {
+                  setNote(e.target.value);
+                  if (noteErr) setNoteErr(false);
+                }}
                 placeholder="Jelaskan apa yang perlu diperbaiki organisasi."
               />
+              {noteErr && (
+                <span className="sh-field__hint" style={{ color: "var(--status-failed)" }}>
+                  Alasan penolakan wajib diisi.
+                </span>
+              )}
             </div>
           )}
         </Modal>

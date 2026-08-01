@@ -50,6 +50,7 @@ async function expireStale(): Promise<{ expired: number; ids: string[] }> {
           oUser,
           "pengajuan.kadaluarsa",
           `Pengajuan "${p.event_name}" kadaluarsa (mitra sponsor tidak merespons ${EXPIRE_DAYS} hari). Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} dikembalikan ke saldo.`,
+          orgLink(p.id),
         ),
       );
     const fUser = await userIdForFunder(p.funder_id);
@@ -59,6 +60,7 @@ async function expireStale(): Promise<{ expired: number; ids: string[] }> {
           fUser,
           "pengajuan.kadaluarsa",
           `Pengajuan "${p.event_name}" kadaluarsa karena tidak ditinjau dalam ${EXPIRE_DAYS} hari.`,
+          funderLink(p.id),
         ),
       );
     await sql.transaction(tx);
@@ -163,8 +165,15 @@ const auditQ = (actorId: string | null, action: string, entityId: string, meta: 
   sql`insert into audit_logs (actor_id, action, entity, entity_id, meta)
       values (${actorId || null}, ${action}, 'pengajuan', ${entityId}, ${JSON.stringify(meta)}::jsonb)`;
 
-const notifQ = (userId: string, type: string, message: string) =>
-  sql`insert into notifications (user_id, type, message) values (${userId}, ${type}, ${message})`;
+const notifQ = (userId: string, type: string, message: string, link: string | null = null) =>
+  sql`insert into notifications (user_id, type, message, link)
+      values (${userId}, ${type}, ${message}, ${link})`;
+
+/* Tautan langsung ke pengajuan, sesuai peran penerima notifikasi.
+   Organisasi & admin memakai daftar + parameter id (detail tampil sebagai
+   dialog), mitra sponsor punya halaman tinjauan tersendiri. */
+const orgLink = (id: string) => `/org/pengajuan?id=${encodeURIComponent(id)}`;
+const funderLink = (id: string) => `/funder/pengajuan/${encodeURIComponent(id)}`;
 
 async function userIdForFunder(funderId: string): Promise<string | null> {
   const r = (await sql`select id from users where funder_id = ${funderId} limit 1`) as any[];
@@ -237,7 +246,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (isFirst) tx.push(sql`update organizations set balance = greatest(0, balance - ${SUBMISSION_FEE}) where id = ${p.orgId}`);
       tx.push(auditQ(b.actorId, "pengajuan.diajukan", p.id, { packages: cleanPackages(p.packages).length }));
       const fUser = await userIdForFunder(p.funderId);
-      if (fUser) tx.push(notifQ(fUser, "pengajuan.diajukan", `Pengajuan baru "${p.eventName}" menunggu tinjauan Anda.`));
+      if (fUser) tx.push(notifQ(fUser, "pengajuan.diajukan", `Pengajuan baru "${p.eventName}" menunggu tinjauan Anda.`, funderLink(p.id)));
       await sql.transaction(tx);
     } else if (op === "approve") {
       const p = await getPengajuan(b.id);
@@ -262,7 +271,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (amount > 0)
         tx.push(sql`update funders set budget_remaining = greatest(0, budget_remaining - ${amount}) where id = ${p.funder_id}`);
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Pengajuan "${p.event_name}" disetujui mitra sponsor. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin.`));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Pengajuan "${p.event_name}" disetujui mitra sponsor. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin.`, orgLink(b.id)));
       await sql.transaction(tx);
     } else if (op === "reject") {
       const p = await getPengajuan(b.id);
@@ -277,7 +286,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sql`update organizations set balance = balance + ${REJECT_REFUND} where id = ${p.org_id}`,
       ];
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Pengajuan "${p.event_name}" ditolak mitra sponsor. Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo (biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")}).`));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Pengajuan "${p.event_name}" ditolak mitra sponsor. Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo (biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")}).`, orgLink(b.id)));
       await sql.transaction(tx);
     } else if (op === "feedback") {
       const p = await getPengajuan(b.id);
@@ -302,6 +311,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             oUser,
             "pengajuan.revisi",
             `Pengajuan "${p.event_name}" perlu direvisi pada paket "${pkgName}".`,
+            orgLink(b.id),
           ),
         );
       await sql.transaction(tx);

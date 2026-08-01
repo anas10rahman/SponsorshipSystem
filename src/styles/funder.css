@@ -551,3 +551,65 @@
     display: none;
   }
 }
+
+/* ============================================================
+   Keadaan terkunci (disabled)
+   Sebelumnya input yang dinonaktifkan tetap tampak normal, sehingga
+   pengguna mengira masih bisa diisi. Beri isyarat visual yang jelas.
+   ============================================================ */
+
+input:disabled,
+textarea:disabled,
+select:disabled,
+.sh-input:disabled {
+  background: var(--canvas-tint, #f1f5f9);
+  color: var(--ink-500);
+  border-color: var(--line);
+  cursor: not-allowed;
+  opacity: 1; /* jangan pudar: teksnya harus tetap terbaca */
+  -webkit-text-fill-color: var(--ink-500); /* Safari mengabaikan color */
+}
+.sh-file-drop:disabled {
+  background: var(--canvas-tint, #f1f5f9);
+  cursor: not-allowed;
+}
+.sh-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* Blok/kartu yang dikunci seluruhnya (mis. paket yang tidak direvisi). */
+.dm-locked {
+  position: relative;
+  opacity: 0.72;
+}
+.dm-locked__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--canvas-tint, #f1f5f9);
+  border: 1px solid var(--line);
+  color: var(--ink-500);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Catatan revisi yang ditempel pada paket yang diminta diperbaiki. */
+.dm-revnote {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--status-pending-soft, #fff2ce);
+  border: 1px solid var(--status-pending, #d99a14);
+  color: var(--ink-700);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.dm-revnote svg {
+  flex: none;
+  color: var(--status-pending, #d99a14);
+  margin-top: 1px;
+}

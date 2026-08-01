@@ -31,6 +31,7 @@ import {
   Package as PackageIcon,
   AlertCircle,
   Lock,
+  MessageSquareWarning,
 } from "lucide-react";
 
 const STEPS = ["Informasi umum", "Paket sponsorship", "Dokumen", "Review"] as const;
@@ -110,6 +111,11 @@ export default function BuatPengajuan() {
   const isRevision = form.status === "perlu_revisi";
   // Saat revisi, hanya paket sponsorship yang boleh diubah.
   const locked = isRevision;
+  /* Paket yang diminta diperbaiki mitra sponsor. Saat revisi, hanya paket ini
+     yang boleh diubah; paket lain dikunci agar penawaran yang sudah ditinjau
+     tidak berubah diam-diam. */
+  const revisedIdx = isRevision ? (form.selectedPackage ?? null) : null;
+  const pkgLocked = (i: number) => isRevision && revisedIdx !== null && i !== revisedIdx;
 
   const funder = state.funders.find((f) => f.id === form.funderId);
   const org = state.organizations.find((o) => o.id === orgId);
@@ -154,8 +160,17 @@ export default function BuatPengajuan() {
     setPackage(pi, {
       requests: packages[pi].requests.map((r, idx) => (idx === li ? { ...r, ...patch } : r)),
     });
+  /* In-Cash dibatasi satu per paket (dana tunai cukup satu angka); In-Kind
+     boleh banyak. Poin baru otomatis In-Kind bila In-Cash sudah terpakai. */
+  const hasCash = (pi: number, exceptIdx = -1) =>
+    packages[pi].requests.some((r, idx) => idx !== exceptIdx && r.type === "in_cash");
   const addRequest = (pi: number) =>
-    setPackage(pi, { requests: [...packages[pi].requests, emptyRequest()] });
+    setPackage(pi, {
+      requests: [
+        ...packages[pi].requests,
+        hasCash(pi) ? { type: "in_kind" as const, amount: 0, spec: "" } : emptyRequest(),
+      ],
+    });
   const removeRequest = (pi: number, li: number) =>
     setPackage(pi, { requests: packages[pi].requests.filter((_, idx) => idx !== li) });
 
@@ -263,6 +278,8 @@ export default function BuatPengajuan() {
     }
     if (s === 1) {
       packages.forEach((pk, i) => {
+        // Paket terkunci sudah pernah ditinjau — jangan halangi pengguna karenanya.
+        if (pkgLocked(i)) return;
         const empty =
           pk.name.trim() === "" &&
           !pk.requests.some(requestFilled) &&
@@ -520,6 +537,7 @@ export default function BuatPengajuan() {
                 {packages.map((pk, pi) => (
                   <div
                     key={pi}
+                    className={pkgLocked(pi) ? "dm-locked" : undefined}
                     style={{
                       border: "1px solid var(--line)",
                       borderRadius: "var(--radius-lg)",
@@ -530,17 +548,35 @@ export default function BuatPengajuan() {
                     <div className="sh-row sh-row--between" style={{ marginBottom: 14 }}>
                       <div className="sh-row" style={{ gap: 8 }}>
                         <PackageIcon size={16} style={{ color: "var(--brand-500)" }} />
-                        <strong>Paket {pi + 1}</strong>
+                        <strong>
+                          Paket {pi + 1}
+                          {pk.name.trim() ? ` — ${pk.name.trim()}` : ""}
+                        </strong>
+                        {pkgLocked(pi) && (
+                          <span className="dm-locked__badge">
+                            <Lock size={12} />
+                            Tidak direvisi
+                          </span>
+                        )}
                       </div>
                       <button
                         className="sh-btn sh-btn--ghost sh-btn--icon"
                         onClick={() => removePackage(pi)}
                         title="Hapus paket"
-                        disabled={packages.length <= 1}
+                        disabled={packages.length <= 1 || isRevision}
                       >
                         <Trash2 size={16} />
                       </button>
                     </div>
+
+                    {isRevision && pi === revisedIdx && form.revisionNote && (
+                      <div className="dm-revnote">
+                        <MessageSquareWarning size={16} />
+                        <div>
+                          <strong>Catatan revisi dari mitra sponsor:</strong> {form.revisionNote}
+                        </div>
+                      </div>
+                    )}
 
                     <div
                       className={`sh-field${err(`pkg.${pi}.name`) ? " sh-field--invalid" : ""}`}
@@ -549,6 +585,7 @@ export default function BuatPengajuan() {
                       <label className="sh-field__label">Nama paket</label>
                       <input
                         value={pk.name}
+                        disabled={pkgLocked(pi)}
                         onChange={(e) => {
                           setPackage(pi, { name: e.target.value });
                           clearErr(`pkg.${pi}.name`, "packages");
@@ -561,6 +598,8 @@ export default function BuatPengajuan() {
                     <RequestEditor
                       requests={pk.requests}
                       total={packageAmount(pk)}
+                      cashTakenBy={pk.requests.findIndex((r) => r.type === "in_cash")}
+                      disabled={pkgLocked(pi)}
                       onChangeType={(li, t) =>
                         setRequest(pi, li, { type: t, amount: 0, spec: "" })
                       }
@@ -579,6 +618,7 @@ export default function BuatPengajuan() {
                       placeholder="Misal: Logo di poster kegiatan"
                       values={pk.benefits}
                       invalid={err(`pkg.${pi}.benefits`)}
+                      disabled={pkgLocked(pi)}
                       onChange={(li, v) => {
                         setBenefit(pi, li, v);
                         clearErr(`pkg.${pi}.benefits`, "packages");
@@ -600,6 +640,7 @@ export default function BuatPengajuan() {
               <button
                 className="sh-btn sh-btn--secondary sh-btn--sm"
                 onClick={addPackage}
+                disabled={isRevision}
                 style={{ marginTop: 14 }}
               >
                 <Plus size={14} />
@@ -883,6 +924,7 @@ function PointEditor({
   placeholder,
   values,
   invalid,
+  disabled,
   onChange,
   onAdd,
   onRemove,
@@ -892,6 +934,7 @@ function PointEditor({
   placeholder: string;
   values: string[];
   invalid?: boolean;
+  disabled?: boolean;
   onChange: (i: number, v: string) => void;
   onAdd: () => void;
   onRemove: (i: number) => void;
@@ -922,6 +965,7 @@ function PointEditor({
               className="sh-input"
               style={{ flex: 1 }}
               value={v}
+              disabled={disabled}
               onChange={(e) => onChange(i, e.target.value)}
               placeholder={placeholder}
             />
@@ -929,14 +973,19 @@ function PointEditor({
               className="sh-btn sh-btn--ghost sh-btn--icon"
               onClick={() => onRemove(i)}
               title="Hapus poin"
-              disabled={values.length <= 1}
+              disabled={disabled || values.length <= 1}
             >
               <X size={14} />
             </button>
           </div>
         ))}
       </div>
-      <button className="sh-btn sh-btn--ghost sh-btn--sm" onClick={onAdd} style={{ marginTop: 8 }}>
+      <button
+        className="sh-btn sh-btn--ghost sh-btn--sm"
+        onClick={onAdd}
+        disabled={disabled}
+        style={{ marginTop: 8 }}
+      >
         <Plus size={14} />
         Tambah poin
       </button>
@@ -949,6 +998,8 @@ function PointEditor({
 function RequestEditor({
   requests,
   total,
+  cashTakenBy,
+  disabled,
   onChangeType,
   onChangeAmount,
   onChangeSpec,
@@ -957,6 +1008,9 @@ function RequestEditor({
 }: {
   requests: SponsorshipRequest[];
   total: number;
+  /** Indeks poin yang sudah memakai In-Cash (-1 bila belum ada). */
+  cashTakenBy: number;
+  disabled?: boolean;
   onChangeType: (i: number, t: SponsorshipRequest["type"]) => void;
   onChangeAmount: (i: number, n: number) => void;
   onChangeSpec: (i: number, v: string) => void;
@@ -978,7 +1032,7 @@ function RequestEditor({
       </div>
       <div className="sh-muted" style={{ fontSize: 12, marginBottom: 8 }}>
         Apa yang diminta organisasi dari mitra sponsor. Pilih jenis tiap poin: In-Cash (dana) atau
-        In-Kind (barang/jasa).
+        In-Kind (barang/jasa). In-Cash hanya satu per paket; In-Kind boleh lebih dari satu.
       </div>
       <div style={{ display: "grid", gap: 8 }}>
         {requests.map((r, i) => (
@@ -987,14 +1041,18 @@ function RequestEditor({
               className="sh-input"
               style={{ flex: "none", width: 116 }}
               value={r.type}
+              disabled={disabled}
               onChange={(e) => onChangeType(i, e.target.value as SponsorshipRequest["type"])}
             >
-              <option value="in_cash">In-Cash</option>
+              <option value="in_cash" disabled={cashTakenBy !== -1 && cashTakenBy !== i}>
+                In-Cash
+              </option>
               <option value="in_kind">In-Kind</option>
             </select>
             {r.type === "in_cash" ? (
               <CurrencyInput
                 value={r.amount}
+                disabled={disabled}
                 onChange={(n) => onChangeAmount(i, n)}
                 placeholder="Nominal, mis: 5.000.000"
                 style={{ flex: 1 }}
@@ -1004,6 +1062,7 @@ function RequestEditor({
                 className="sh-input"
                 style={{ flex: 1 }}
                 value={r.spec}
+                disabled={disabled}
                 onChange={(e) => onChangeSpec(i, e.target.value)}
                 placeholder="Spesifikasi barang, mis: 100 kaos katun ukuran M"
               />
@@ -1012,14 +1071,19 @@ function RequestEditor({
               className="sh-btn sh-btn--ghost sh-btn--icon"
               onClick={() => onRemove(i)}
               title="Hapus poin"
-              disabled={requests.length <= 1}
+              disabled={disabled || requests.length <= 1}
             >
               <X size={14} />
             </button>
           </div>
         ))}
       </div>
-      <button className="sh-btn sh-btn--ghost sh-btn--sm" onClick={onAdd} style={{ marginTop: 8 }}>
+      <button
+        className="sh-btn sh-btn--ghost sh-btn--sm"
+        onClick={onAdd}
+        disabled={disabled}
+        style={{ marginTop: 8 }}
+      >
         <Plus size={14} />
         Tambah poin
       </button>

@@ -7,8 +7,9 @@ class HttpError extends Error {
   }
 }
 
-const notifQ = (userId: string, type: string, message: string) =>
-  sql`insert into notifications (user_id, type, message) values (${userId}, ${type}, ${message})`;
+const notifQ = (userId: string, type: string, message: string, link: string | null = null) =>
+  sql`insert into notifications (user_id, type, message, link)
+      values (${userId}, ${type}, ${message}, ${link})`;
 
 async function getOrg(id: string): Promise<any> {
   const r = (await sql`select * from organizations where id = ${id} limit 1`) as any[];
@@ -75,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sql`update organizations set verification_status = 'menunggu', verification_note = null, updated_at = now() where id = ${b.orgId}`,
       ];
       for (const aid of await adminUserIds())
-        tx.push(notifQ(aid, "verifikasi.diajukan", `Organisasi "${o.name}" mengajukan verifikasi.`));
+        tx.push(notifQ(aid, "verifikasi.diajukan", `Organisasi "${o.name}" mengajukan verifikasi.`, `/admin/organisasi/${o.id}`));
       await sql.transaction(tx);
     } else if (b.op === "verify_org") {
       const o = await getOrg(b.orgId);
@@ -88,7 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ];
       const oUser = await userIdForOrg(b.orgId);
       if (oUser)
-        tx.push(notifQ(oUser, "verifikasi.disetujui", `Organisasi Anda "${o.name}" telah diverifikasi. Anda kini bisa mengirim pengajuan.`));
+        tx.push(notifQ(oUser, "verifikasi.disetujui", `Organisasi Anda "${o.name}" telah diverifikasi. Anda kini bisa mengirim pengajuan.`, "/org/profil"));
       await sql.transaction(tx);
     } else if (b.op === "reject_org") {
       const o = await getOrg(b.orgId);
@@ -98,7 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ];
       const oUser = await userIdForOrg(b.orgId);
       if (oUser)
-        tx.push(notifQ(oUser, "verifikasi.ditolak", `Verifikasi organisasi "${o.name}" ditolak: ${note}`));
+        tx.push(notifQ(oUser, "verifikasi.ditolak", `Verifikasi organisasi "${o.name}" ditolak: ${note}`, "/org/profil"));
       await sql.transaction(tx);
     } else if (b.op === "delete_org") {
       // Admin hapus organisasi: hapus akun login + transaksi dulu (FK), lalu
