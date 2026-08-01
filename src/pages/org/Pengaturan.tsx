@@ -112,8 +112,9 @@ export default function OrgPengaturan() {
     // Medsos: jika diisi, wajib berupa LINK (bukan username) & sesuai platform.
     const filled = (v?: string) => !!v && v.trim() !== "";
     const isUrl = (v: string) => /^https?:\/\/\S+\.\S+/i.test(v.trim());
-    if (!filled(form.website) || !isUrl(form.website!)) errs.add("website");
-    if (!filled(form.instagram) || !isUrl(form.instagram!) || !/instagram\.com|instagr\.am/i.test(form.instagram!))
+    // Opsional: hanya divalidasi bentuknya bila memang diisi.
+    if (filled(form.website) && !isUrl(form.website!)) errs.add("website");
+    if (filled(form.instagram) && (!isUrl(form.instagram!) || !/instagram\.com|instagr\.am/i.test(form.instagram!)))
       errs.add("instagram");
     if (filled(form.tiktok) && (!isUrl(form.tiktok!) || !/tiktok\.com/i.test(form.tiktok!)))
       errs.add("tiktok");
@@ -237,7 +238,6 @@ export default function OrgPengaturan() {
               <div className="sh-form-grid">
                 <Field
                   label="Website"
-                  required
                   icon={<Globe size={14} />}
                   hint="Tempel link lengkap (https://…)"
                   invalid={errors.has("website")}
@@ -250,7 +250,6 @@ export default function OrgPengaturan() {
                 </Field>
                 <Field
                   label="Instagram"
-                  required
                   icon={<Instagram size={14} />}
                   hint="Tempel link, bukan username"
                   invalid={errors.has("instagram")}
