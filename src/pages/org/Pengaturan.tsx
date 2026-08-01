@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
@@ -34,6 +34,22 @@ export default function OrgPengaturan() {
   const [errors, setErrors] = useState<Set<string>>(new Set());
   // Pratinjau attachment: { title, data|null(loading) }
   const [preview, setPreview] = useState<{ title: string; data: string | null } | null>(null);
+
+  /* Foto PIC tidak ikut di /api/state (bisa 2MB). Ambil isinya saat halaman
+     dibuka supaya pratinjau tampil dan tidak terhapus saat menyimpan. */
+  useEffect(() => {
+    if (!org?.id || !org.pic.hasPhoto) return;
+    let alive = true;
+    api
+      .orgDoc(org.id, "picphoto")
+      .then((d) => {
+        if (alive && d) setForm((f) => (f ? { ...f, pic: { ...f.pic, photo: d } } : f));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [org?.id, org?.pic.hasPhoto]);
 
   if (!org || !form) return null;
 
@@ -307,7 +323,9 @@ export default function OrgPengaturan() {
                 label="Foto PIC"
                 value={form.pic.photo}
                 fallback={initials(form.pic.name || "?")}
-                onChange={(v) => setPic({ photo: v })}
+                // String kosong = minta hapus; undefined tak dipakai agar
+                // server tahu bedanya "biarkan" dan "hapus".
+                onChange={(v) => setPic({ photo: v ?? "" })}
                 size={96}
                 round
                 hint="PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama PIC."

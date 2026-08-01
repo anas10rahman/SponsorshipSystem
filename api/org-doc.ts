@@ -15,19 +15,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!orgId && !funderId)
       return res.status(400).json({ error: "orgId atau funderId wajib." });
+    // Id non-UUID bikin Postgres melempar error; tolak rapi supaya bukan 500.
+    const isUuid = (v: string) =>
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+    if ((orgId && !isUuid(orgId)) || (funderId && !isUuid(funderId)))
+      return res.status(400).json({ error: "Id tidak valid." });
 
     if (orgId) {
       const rows = (await sql`
-        select compro_data, pic_id_doc_data, legal_docs_data
+        select compro_data, pic_id_doc_data, pic_photo, legal_docs_data
         from organizations where id = ${orgId} limit 1`) as any[];
       const row = rows[0] ?? {};
       if (kind === "compro") return res.status(200).json({ data: row.compro_data ?? null });
       if (kind === "ktp") return res.status(200).json({ data: row.pic_id_doc_data ?? null });
+      if (kind === "picphoto") return res.status(200).json({ data: row.pic_photo ?? null });
       if (kind === "legal") {
         const docs = Array.isArray(row.legal_docs_data) ? row.legal_docs_data : [];
         return res.status(200).json({ data: docs[index]?.data ?? null });
       }
-      return res.status(400).json({ error: "kind harus 'compro', 'ktp', atau 'legal'." });
+      return res
+        .status(400)
+        .json({ error: "kind harus 'compro', 'ktp', 'picphoto', atau 'legal'." });
     }
 
     const rows = (await sql`

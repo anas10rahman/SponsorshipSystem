@@ -68,7 +68,9 @@ export function mapOrg(r: any) {
       position: r.pic_position ?? "",
       email: r.pic_email ?? "",
       idDocUrl: r.pic_id_doc_url ?? "",
-      photo: r.pic_photo ?? undefined,
+      // Foto PIC bisa mencapai 2MB — tidak ikut di /api/state, hanya penanda
+      // ada/tidaknya. Isinya diambil lazy lewat /api/org-doc?kind=picphoto.
+      hasPhoto: !!r.pic_has_photo,
     },
   };
 }
@@ -119,7 +121,8 @@ export async function assembleState() {
                ) as legal_docs_data,
                balance, phone, email, description, website, instagram, twitter,
                facebook, tiktok, compro_url, pic_name, pic_phone, pic_position,
-               pic_email, pic_id_doc_url, pic_photo, created_at, updated_at
+               pic_email, pic_id_doc_url, (pic_photo is not null) as pic_has_photo,
+               created_at, updated_at
           from organizations order by name`,
     // Kolom eksplisit: tanpa compro_data & isi berkas legal (base64 s/d 2MB).
     // Sama seperti organizations — blob diambil lazy lewat /api/org-doc.

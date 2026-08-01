@@ -21,8 +21,10 @@ export type OrgPic = {
   position: string; // jabatan di organisasi
   email: string; // email PIC
   idDocUrl: string; // KTP/KTM (PDF) — wajib
-  /** Foto PIC (data URL), opsional. */
+  /** Foto PIC (data URL) — hanya ada saat baru dipilih atau diambil lazy. */
   photo?: string;
+  /** Penanda foto tersimpan di server (isinya diambil terpisah). */
+  hasPhoto?: boolean;
   idDocData?: string; // isi KTP/KTM (data URL) — hanya saat baru diunggah / diambil lazy
 };
 

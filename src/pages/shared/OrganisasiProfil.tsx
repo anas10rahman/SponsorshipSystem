@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { Modal } from "@/components/Modal";
@@ -69,6 +69,20 @@ export default function OrganisasiProfil() {
       </>
     );
   }
+
+  /* Foto PIC diambil terpisah agar /api/state tetap ringan. */
+  const [picPhoto, setPicPhoto] = useState<string | null>(null);
+  useEffect(() => {
+    if (!org?.id || !org.pic.hasPhoto) return;
+    let alive = true;
+    api
+      .orgDoc(org.id, "picphoto")
+      .then((d) => alive && setPicPhoto(d))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [org?.id, org?.pic.hasPhoto]);
 
   /* Pratinjau lampiran: data tidak ikut di /api/state, jadi diambil saat dibuka. */
   const [doc, setDoc] = useState<{ title: string; data: string | null } | null>(null);
@@ -256,8 +270,8 @@ export default function OrganisasiProfil() {
           </div>
           <div className="dm-pic__body">
             <span className="dm-pic__avatar">
-              {org.pic.photo ? (
-                <img src={org.pic.photo} alt={org.pic.name} />
+              {picPhoto ? (
+                <img src={picPhoto} alt={org.pic.name} />
               ) : (
                 initials(org.pic.name || "?")
               )}

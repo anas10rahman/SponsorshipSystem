@@ -89,7 +89,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           pic_position = ${o.pic.position}, pic_email = ${o.pic.email},
           pic_id_doc_url = ${o.pic.idDocUrl},
           pic_id_doc_data = coalesce(${o.pic.idDocData ?? null}, pic_id_doc_data),
-          pic_photo = ${o.pic.photo ?? null}
+          -- Foto PIC: null/absen = biarkan seperti semula, "" = hapus,
+          -- selain itu = ganti. Ini mencegah foto hilang saat profil disimpan
+          -- tanpa fotonya ikut termuat (isinya diambil lazy).
+          pic_photo = case
+            when ${o.pic.photo ?? null}::text is null then pic_photo
+            when ${o.pic.photo ?? null}::text = '' then null
+            else ${o.pic.photo ?? null}::text
+          end
         where id = ${o.id}`;
     } else if (b.op === "topup") {
       await sql`update organizations set balance = balance + ${b.amount} where id = ${b.orgId}`;

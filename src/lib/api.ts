@@ -118,7 +118,7 @@ export const api = {
   /** Ambil isi (data URL) lampiran organisasi. `legal` memakai indeks berkas. */
   async orgDoc(
     orgId: string,
-    kind: "compro" | "ktp" | "legal",
+    kind: "compro" | "ktp" | "legal" | "picphoto",
     index = 0,
   ): Promise<string | null> {
     const r = await fetch(
