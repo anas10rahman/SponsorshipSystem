@@ -94,10 +94,6 @@ export default function PendanaProfil() {
           subtitle="Informasi profil mitra sponsor."
           actions={
             <div className="sh-row" style={{ gap: 8 }}>
-              <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
-                <ArrowLeft size={16} />
-                Kembali
-              </button>
               {isSelf && (
                 <Link to="/funder/pengaturan" className="sh-btn sh-btn--primary">
                   Edit profil
@@ -151,13 +147,14 @@ export default function PendanaProfil() {
             <div className="dm-prof__contacts">
               {canSeeContact ? (
                 <a
-                  className="dm-contact"
+                  className="dm-contact dm-contact--icon"
                   href={gmailLink(funder.email)}
                   target="_blank"
                   rel="noreferrer"
+                  title={funder.email}
+                  aria-label="Email"
                 >
-                  <Mail size={17} />
-                  {funder.email || "—"}
+                  <Mail size={18} />
                 </a>
               ) : (
                 <span className="dm-contact dm-contact--locked">
@@ -194,25 +191,27 @@ export default function PendanaProfil() {
 
               {funder.website && (
                 <a
-                  className="dm-contact"
+                  className="dm-contact dm-contact--icon"
                   href={normalizeWebsite(funder.website)}
                   target="_blank"
                   rel="noreferrer"
+                  title={funder.website}
+                  aria-label="Website"
                 >
-                  <Globe size={17} />
-                  {funder.website.replace(/^https?:\/\//i, "")}
+                  <Globe size={18} />
                 </a>
               )}
 
               {funder.instagram && (
                 <a
-                  className="dm-contact"
+                  className="dm-contact dm-contact--icon"
                   href={normalizeInstagram(funder.instagram)}
                   target="_blank"
                   rel="noreferrer"
+                  title={`@${instagramHandle(funder.instagram)}`}
+                  aria-label="Instagram"
                 >
-                  <Instagram size={17} />
-                  @{instagramHandle(funder.instagram)}
+                  <Instagram size={18} />
                 </a>
               )}
             </div>

@@ -115,10 +115,28 @@ export const api = {
   funder: (body: Record<string, unknown>) => post("funder", body),
   notifications: (body: Record<string, unknown>) => post("notifications", body),
 
-  /** Ambil isi (data URL) attachment organisasi: kind = "compro" | "ktp". */
-  async orgDoc(orgId: string, kind: "compro" | "ktp"): Promise<string | null> {
+  /** Ambil isi (data URL) lampiran organisasi. `legal` memakai indeks berkas. */
+  async orgDoc(
+    orgId: string,
+    kind: "compro" | "ktp" | "legal",
+    index = 0,
+  ): Promise<string | null> {
     const r = await fetch(
-      `${BASE}/org-doc?orgId=${encodeURIComponent(orgId)}&kind=${kind}`,
+      `${BASE}/org-doc?orgId=${encodeURIComponent(orgId)}&kind=${kind}&index=${index}`,
+    );
+    if (!r.ok) return null;
+    const d = await r.json().catch(() => ({}));
+    return (d as any).data ?? null;
+  },
+
+  /** Ambil isi (data URL) lampiran mitra sponsor. */
+  async funderDoc(
+    funderId: string,
+    kind: "compro" | "legal",
+    index = 0,
+  ): Promise<string | null> {
+    const r = await fetch(
+      `${BASE}/org-doc?funderId=${encodeURIComponent(funderId)}&kind=${kind}&index=${index}`,
     );
     if (!r.ok) return null;
     const d = await r.json().catch(() => ({}));

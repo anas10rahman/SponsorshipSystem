@@ -72,7 +72,7 @@ export function createSeedState(): AppState {
         logoInitials: "YS",
         verified: true,
         verificationStatus: "terverifikasi",
-        legalDocs: ["akta-yayasan.pdf", "skt-kemenkumham.pdf"],
+        legalDocs: [{ name: "akta-yayasan.pdf" }, { name: "skt-kemenkumham.pdf" }],
         payoutAccount: "BCA 0123456789",
         balance: 100_000,
         phone: "0812-3456-7890",
@@ -111,6 +111,7 @@ export function createSeedState(): AppState {
         twitter: "@sinerginusantara",
         facebook: "SinergiNusantara",
         address: "Jakarta, Indonesia",
+        legalDocs: [],
         pic: {
           name: "Budi Santoso",
           phone: "0815-1111-2222",
@@ -132,6 +133,7 @@ export function createSeedState(): AppState {
         website: "yayasancahaya.org",
         instagram: "@yayasancahaya",
         address: "Jakarta, Indonesia",
+        legalDocs: [],
         pic: {
           name: "Sari Wijaya",
           phone: "0816-3333-4444",
@@ -155,6 +157,7 @@ export function createSeedState(): AppState {
         twitter: "@bankdaya",
         facebook: "BankDaya",
         address: "Jakarta, Indonesia",
+        legalDocs: [],
         pic: {
           name: "Andi Pratama",
           phone: "0817-5555-6666",

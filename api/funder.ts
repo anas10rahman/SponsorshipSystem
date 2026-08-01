@@ -1,12 +1,39 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { sql, assembleState, readBody } from "./_db.js";
 
+
+/* Gabungkan berkas legal masuk dengan yang tersimpan: poin tanpa `data`
+   (mis. saat menyimpan profil tanpa mengunggah ulang) mempertahankan isi lama
+   berdasarkan nama. Hanya berkas yang akhirnya punya data yang disimpan. */
+async function resolveLegalDocs(
+  table: "organizations" | "funders",
+  id: string,
+  incoming: any,
+): Promise<any[]> {
+  const docs = Array.isArray(incoming) ? incoming : [];
+  const prev =
+    table === "organizations"
+      ? ((await sql`select legal_docs_data from organizations where id = ${id} limit 1`) as any[])
+      : ((await sql`select legal_docs_data from funders where id = ${id} limit 1`) as any[]);
+  const stored: any[] = Array.isArray(prev[0]?.legal_docs_data) ? prev[0].legal_docs_data : [];
+  const byName = new Map<string, string>();
+  for (const d of stored) if (d?.name && d?.data) byName.set(String(d.name), String(d.data));
+  return docs
+    .filter((d: any) => (d?.name || "").trim())
+    .map((d: any) => ({
+      name: String(d.name),
+      data: d?.data ? String(d.data) : byName.get(String(d.name)) ?? null,
+    }))
+    .filter((d: any) => d.data);
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try {
     const b = readBody(req);
     if (b.op === "update") {
       const f = b.funder;
+      const legal = await resolveLegalDocs("funders", f.id, f.legalDocs);
       const newTotal = Math.max(0, Number(f.budgetTotal) || 0);
       // Anggaran total di-set mitra sponsor; sisa dihitung ulang = total - yang sudah terpakai
       // (terpakai = total_lama - sisa_lama). Di-clamp agar patuh constraint.
@@ -18,6 +45,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           twitter = ${f.twitter ?? null}, facebook = ${f.facebook ?? null},
           logo_url = ${f.logoUrl ?? null}, phone = ${f.phone},
           address = ${f.address ?? ""},
+          compro_url = ${f.comproUrl ?? null},
+          compro_data = coalesce(${f.comproData ?? null}, compro_data),
+          legal_docs_data = ${JSON.stringify(legal)}::jsonb,
           budget_total = ${newTotal},
           budget_remaining = least(${newTotal}, greatest(0, ${newTotal} - (budget_total - budget_remaining))),
           pic_name = ${f.pic.name}, pic_phone = ${f.pic.phone},

@@ -103,7 +103,8 @@ create table organizations (
   -- Verifikasi oleh admin (gate pengajuan); verified disinkron dgn status
   verification_status org_verify_status not null default 'belum_diajukan',
   verification_note   text,                          -- alasan bila ditolak
-  legal_docs      text[] not null default '{}',    -- nama berkas / URL
+  legal_docs      text[] not null default '{}',    -- legacy: nama berkas saja
+  legal_docs_data jsonb not null default '[]'::jsonb, -- [{name, data}] berkas legal
   payout_account  text not null,                   -- contoh "BCA 0123456789"
   balance         numeric(16, 2) not null default 0 check (balance >= 0), -- saldo biaya pengajuan
   phone           text not null default '',         -- no.hp kontak (ber-gate ke lawan)
@@ -152,6 +153,9 @@ create table funders (
   twitter           text,                            -- X
   facebook          text,
   logo_url          text,                            -- logo pendana (URL/base64), opsional
+  compro_url        text,                            -- Company profile (PDF)
+  compro_data       text,                            -- isi compro (data URL), diambil lazy
+  legal_docs_data   jsonb not null default '[]'::jsonb, -- [{name, data}] berkas legal
   -- Penanggung jawab (PIC)
   pic_name          text not null default '',
   pic_phone         text not null default '',        -- no.WA aktif PIC
@@ -170,6 +174,12 @@ alter table users
 -- Migrasi idempotent: kolom reset password untuk DB yang sudah berjalan.
 alter table users add column if not exists reset_code    text;
 alter table users add column if not exists reset_expires timestamptz;
+
+-- Migrasi idempotent: berkas legal organisasi & berkas mitra sponsor.
+alter table organizations add column if not exists legal_docs_data jsonb not null default '[]'::jsonb;
+alter table funders       add column if not exists compro_url      text;
+alter table funders       add column if not exists compro_data     text;
+alter table funders       add column if not exists legal_docs_data jsonb not null default '[]'::jsonb;
 
 -- Migrasi idempotent: foto PIC organisasi & alamat kantor mitra sponsor.
 alter table organizations add column if not exists pic_photo text;

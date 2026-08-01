@@ -1,10 +1,15 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { useStore, useActions } from "@/lib/store";
 import { useToast } from "@/components/Toast";
 import { GantiPassword } from "@/components/GantiPassword";
+import { PhotoPicker } from "@/components/PhotoPicker";
+import { DocPicker } from "@/components/DocPicker";
+import { Modal } from "@/components/Modal";
+import { PdfPreview } from "@/components/PdfPreview";
+import { api } from "@/lib/api";
 import { initials } from "@/lib/format";
 import {
   normalizeInstagram,
@@ -16,11 +21,8 @@ import {
 import type { Funder, FunderType } from "@/lib/types";
 import {
   Save,
-  X,
   Instagram,
   Globe,
-  ArrowLeft,
-  ImagePlus,
   Mail,
   Phone,
   MapPin,
@@ -34,38 +36,30 @@ export default function FunderPengaturan() {
   const toast = useToast();
   const navigate = useNavigate();
   const funder = state.funders.find((f) => f.id === currentUser?.funderId);
-  const logoRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<Funder | null>(funder ?? null);
   const [focusText, setFocusText] = useState((funder?.focus ?? []).join(", "));
   const [errors, setErrors] = useState<Set<string>>(new Set());
+  const [preview, setPreview] = useState<{ title: string; data: string | null } | null>(null);
 
   if (!funder || !form) return null;
+
+  /* Pratinjau lampiran: berkas yang baru dipilih ada di memori, sisanya lazy. */
+  const openPreview = async (kind: "compro" | "legal", title: string, index = 0) => {
+    const inMem = kind === "compro" ? form.comproData : form.legalDocs[index]?.data;
+    if (inMem) {
+      setPreview({ title, data: inMem });
+      return;
+    }
+    setPreview({ title, data: null });
+    const d = await api.funderDoc(funder.id, kind, index).catch(() => null);
+    setPreview({ title, data: d ?? "" });
+  };
 
   const set = (patch: Partial<Funder>) => setForm((f) => (f ? { ...f, ...patch } : f));
   const setPic = (patch: Partial<Funder["pic"]>) =>
     setForm((f) => (f ? { ...f, pic: { ...f.pic, ...patch } } : f));
 
-  const onPickLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.failed("Logo harus berupa gambar (PNG/JPG).");
-      if (logoRef.current) logoRef.current.value = "";
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.failed("Ukuran logo maksimal 2 MB.");
-      if (logoRef.current) logoRef.current.value = "";
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      set({ logoUrl: String(reader.result) });
-      toast.success("Logo dipilih.");
-    };
-    reader.readAsDataURL(file);
-  };
 
   const save = async () => {
     const focus = focusText
@@ -82,12 +76,15 @@ export default function FunderPengaturan() {
     if (!form.description.trim()) errs.add("description");
     if (focus.length === 0) errs.add("focus");
     if (validatePhone(form.phone)) errs.add("phone");
-    if (validateWebsite(form.website ?? "")) errs.add("website");
-    if (validateInstagram(form.instagram ?? "")) errs.add("instagram");
+    // Website & Instagram wajib — jadi bahan penilaian organisasi.
+    if (!(form.website ?? "").trim() || validateWebsite(form.website ?? "")) errs.add("website");
+    if (!(form.instagram ?? "").trim() || validateInstagram(form.instagram ?? "")) errs.add("instagram");
     if (!form.pic.name.trim()) errs.add("pic.name");
     if (validatePhone(form.pic.phone)) errs.add("pic.phone");
     if (!form.pic.position.trim()) errs.add("pic.position");
     if (emailBad(form.pic.email)) errs.add("pic.email");
+    if (!(form.comproUrl ?? "").trim()) errs.add("comproUrl");
+    if (form.legalDocs.length === 0) errs.add("legalDocs");
     if (errs.size) {
       setErrors(errs);
       return;
@@ -104,7 +101,6 @@ export default function FunderPengaturan() {
         twitter: undefined,
         facebook: undefined,
       });
-      toast.success("Profil mitra sponsor tersimpan.");
       navigate("/funder/profil");
     } catch (e: any) {
       toast.failed(String(e?.message || "Gagal menyimpan profil."));
@@ -118,21 +114,6 @@ export default function FunderPengaturan() {
         <PageHead
           title="Edit profil mitra sponsor"
           subtitle="Lengkapi profil mitra sponsor dan penanggung jawab (PIC)."
-          actions={
-            <div className="sh-row" style={{ gap: 8 }}>
-              <button
-                className="sh-btn sh-btn--secondary"
-                onClick={() => navigate("/funder/profil")}
-              >
-                <ArrowLeft size={16} />
-                Kembali
-              </button>
-              <button className="sh-btn sh-btn--primary" onClick={save}>
-                <Save size={16} />
-                Simpan profil
-              </button>
-            </div>
-          }
         />
 
         <div style={{ display: "grid", gap: 20, maxWidth: 880 }}>
@@ -142,59 +123,14 @@ export default function FunderPengaturan() {
               <h3>Profil mitra sponsor</h3>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
-              {/* Logo */}
-              <div style={{ marginBottom: 18 }}>
-                <label className="sh-field__label" style={{ display: "block", marginBottom: 8 }}>
-                  Logo mitra sponsor
-                </label>
-                <input
-                  ref={logoRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={onPickLogo}
-                />
-                <div className="sh-row" style={{ gap: 14, alignItems: "center" }}>
-                  {form.logoUrl ? (
-                    <img
-                      src={form.logoUrl}
-                      alt="Logo"
-                      className="sh-org-logo"
-                      style={{ width: 64, height: 64, objectFit: "cover", padding: 0 }}
-                    />
-                  ) : (
-                    <span className="sh-org-logo" style={{ width: 64, height: 64, fontSize: 22 }}>
-                      {initials(form.name)}
-                    </span>
-                  )}
-                  <div className="sh-row" style={{ gap: 8 }}>
-                    <button
-                      type="button"
-                      className="sh-btn sh-btn--secondary sh-btn--sm"
-                      onClick={() => logoRef.current?.click()}
-                    >
-                      <ImagePlus size={14} />
-                      {form.logoUrl ? "Ganti logo" : "Unggah logo"}
-                    </button>
-                    {form.logoUrl && (
-                      <button
-                        type="button"
-                        className="sh-btn sh-btn--ghost sh-btn--sm"
-                        onClick={() => {
-                          set({ logoUrl: undefined });
-                          if (logoRef.current) logoRef.current.value = "";
-                        }}
-                      >
-                        <X size={14} />
-                        Hapus
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <span className="sh-field__hint">
-                  PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama.
-                </span>
-              </div>
+              <PhotoPicker
+                label="Logo mitra sponsor"
+                value={form.logoUrl}
+                fallback={initials(form.name)}
+                onChange={(v) => set({ logoUrl: v })}
+                size={96}
+                hint="PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama."
+              />
 
               <div className="sh-form-grid">
                 <Field label="Nama mitra sponsor" required invalid={errors.has("name")}>
@@ -285,6 +221,7 @@ export default function FunderPengaturan() {
               <div className="sh-form-grid">
                 <Field
                   label="Website"
+                  required
                   icon={<Globe size={14} />}
                   hint="Boleh tanpa https:// — dilengkapi otomatis."
                   invalid={errors.has("website")}
@@ -298,6 +235,7 @@ export default function FunderPengaturan() {
                 </Field>
                 <Field
                   label="Instagram"
+                  required
                   icon={<Instagram size={14} />}
                   hint="Isi username atau tautan — disimpan sebagai tautan."
                   invalid={errors.has("instagram")}
@@ -310,6 +248,38 @@ export default function FunderPengaturan() {
                   />
                 </Field>
               </div>
+            </div>
+          </section>
+
+          {/* ============ Dokumen mitra sponsor ============ */}
+          <section className="sh-card">
+            <header className="sh-card__header">
+              <h3>Dokumen mitra sponsor</h3>
+              <span className="sh-muted" style={{ fontSize: 12 }}>
+                PDF · menjadi dasar penilaian kredibilitas
+              </span>
+            </header>
+            <div className="sh-card__body">
+              <DocPicker
+                label="Company profile (compro)"
+                required
+                docs={form.comproUrl ? [{ name: form.comproUrl, data: form.comproData }] : []}
+                onChange={(docs) =>
+                  set({ comproUrl: docs[0]?.name ?? "", comproData: docs[0]?.data })
+                }
+                onPreview={() => openPreview("compro", form.comproUrl!)}
+                invalid={errors.has("comproUrl")}
+              />
+              <DocPicker
+                label="Dokumen legal"
+                required
+                multiple
+                docs={form.legalDocs}
+                onChange={(docs) => set({ legalDocs: docs })}
+                onPreview={(d, i) => openPreview("legal", d.name, i)}
+                invalid={errors.has("legalDocs")}
+                hint="Mis. akta pendirian, NIB, NPWP perusahaan."
+              />
             </div>
           </section>
 
@@ -377,6 +347,18 @@ export default function FunderPengaturan() {
           <GantiPassword />
         </div>
       </div>
+
+      {preview && (
+        <Modal open onClose={() => setPreview(null)} title={preview.title} width={760}>
+          {preview.data === null ? (
+            <p className="sh-muted">Memuat dokumen…</p>
+          ) : preview.data ? (
+            <PdfPreview dataUrl={preview.data} fileName={preview.title} />
+          ) : (
+            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+          )}
+        </Modal>
+      )}
     </>
   );
 }

@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
+import { Modal } from "@/components/Modal";
+import { PdfPreview } from "@/components/PdfPreview";
+import { api } from "@/lib/api";
 import { PageHead } from "@/components/PageHead";
 import { Empty } from "@/components/Empty";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -67,21 +70,25 @@ export default function OrganisasiProfil() {
     );
   }
 
+  /* Pratinjau lampiran: data tidak ikut di /api/state, jadi diambil saat dibuka. */
+  const [doc, setDoc] = useState<{ title: string; data: string | null } | null>(null);
+  const openDoc = async (kind: "ktp" | "legal", title: string, index = 0) => {
+    setDoc({ title, data: null });
+    const d = await api.orgDoc(org!.id, kind, index).catch(() => null);
+    setDoc({ title, data: d ?? "" });
+  };
+
   const title = isSelf ? "Profil saya" : "Profil organisasi";
 
   return (
     <>
-      <Topbar title={title} />
+      <Topbar />
       <div className="sh-shell__content">
         <PageHead
           title={title}
-          subtitle="Informasi organisasi dan rekam jejak pengajuan."
+          subtitle="Informasi profil organisasi."
           actions={
             <div className="sh-row" style={{ gap: 8 }}>
-              <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
-                <ArrowLeft size={16} />
-                Kembali
-              </button>
               {isSelf && (
                 <Link to="/org/pengaturan" className="sh-btn sh-btn--primary">
                   Edit profil
@@ -126,9 +133,15 @@ export default function OrganisasiProfil() {
 
             <div className="dm-prof__contacts">
               {canSeeContact ? (
-                <a className="dm-contact" href={gmailLink(org.email)} target="_blank" rel="noreferrer">
-                  <Mail size={17} />
-                  {org.email || "—"}
+                <a
+                  className="dm-contact dm-contact--icon"
+                  href={gmailLink(org.email)}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={org.email}
+                  aria-label="Email"
+                >
+                  <Mail size={18} />
                 </a>
               ) : (
                 <span className="dm-contact dm-contact--locked">
@@ -157,21 +170,39 @@ export default function OrganisasiProfil() {
                 ))}
 
               {org.website && (
-                <a className="dm-contact" href={org.website} target="_blank" rel="noreferrer">
-                  <Globe size={17} />
-                  {org.website.replace(/^https?:\/\//i, "")}
+                <a
+                  className="dm-contact dm-contact--icon"
+                  href={org.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={org.website}
+                  aria-label="Website"
+                >
+                  <Globe size={18} />
                 </a>
               )}
               {org.instagram && (
-                <a className="dm-contact" href={org.instagram} target="_blank" rel="noreferrer">
-                  <Instagram size={17} />
-                  Instagram
+                <a
+                  className="dm-contact dm-contact--icon"
+                  href={org.instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={org.instagram}
+                  aria-label="Instagram"
+                >
+                  <Instagram size={18} />
                 </a>
               )}
               {org.tiktok && (
-                <a className="dm-contact" href={org.tiktok} target="_blank" rel="noreferrer">
-                  <Music2 size={17} />
-                  TikTok
+                <a
+                  className="dm-contact dm-contact--icon"
+                  href={org.tiktok}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={org.tiktok}
+                  aria-label="TikTok"
+                >
+                  <Music2 size={18} />
                 </a>
               )}
             </div>
@@ -191,15 +222,17 @@ export default function OrganisasiProfil() {
                   </div>
                   {org.legalDocs.length > 0 ? (
                     <div className="sh-row" style={{ gap: 8, flexWrap: "wrap", marginTop: 6 }}>
-                      {org.legalDocs.map((d) => (
-                        <span
-                          key={d}
+                      {org.legalDocs.map((d, i) => (
+                        <button
+                          key={d.name}
+                          type="button"
                           className="sh-btn sh-btn--ghost sh-btn--sm"
-                          style={{ cursor: "default" }}
+                          onClick={() => openDoc("legal", d.name, i)}
+                          title="Pratinjau dokumen"
                         >
                           <FileText size={14} />
-                          {d}
-                        </span>
+                          {d.name}
+                        </button>
                       ))}
                     </div>
                   ) : (
@@ -273,13 +306,16 @@ export default function OrganisasiProfil() {
                       <IdCard size={13} /> KTP/KTM penanggung jawab
                     </div>
                     {org.pic.idDocUrl ? (
-                      <span
+                      <button
+                        type="button"
                         className="sh-btn sh-btn--ghost sh-btn--sm"
-                        style={{ cursor: "default", marginTop: 4 }}
+                        style={{ marginTop: 4 }}
+                        onClick={() => openDoc("ktp", org.pic.idDocUrl)}
+                        title="Pratinjau dokumen"
                       >
                         <IdCard size={14} />
                         {org.pic.idDocUrl}
-                      </span>
+                      </button>
                     ) : (
                       <p className="sh-muted" style={{ margin: "4px 0 0" }}>
                         Belum diunggah.
@@ -293,6 +329,18 @@ export default function OrganisasiProfil() {
         </section>
 
       </div>
+
+      {doc && (
+        <Modal open onClose={() => setDoc(null)} title={doc.title} width={760}>
+          {doc.data === null ? (
+            <p className="sh-muted">Memuat dokumen…</p>
+          ) : doc.data ? (
+            <PdfPreview dataUrl={doc.data} fileName={doc.title} />
+          ) : (
+            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+          )}
+        </Modal>
+      )}
     </>
   );
 }

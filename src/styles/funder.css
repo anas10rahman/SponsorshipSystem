@@ -655,3 +655,109 @@ select:disabled,
   height: 100%;
   object-fit: cover;
 }
+
+/* ---------- Pemilih foto dengan ikon pensil ---------- */
+.dm-photo {
+  position: relative;
+  display: inline-block;
+}
+.dm-photo__frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--brand-50);
+  color: var(--dm-blue);
+  font-weight: 800;
+  overflow: hidden;
+}
+.dm-photo__frame--round {
+  border-radius: 999px;
+}
+.dm-photo__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dm-photo__edit,
+.dm-photo__remove {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+}
+.dm-photo__edit {
+  right: -6px;
+  bottom: -6px;
+  background: var(--dm-blue);
+  color: #fff;
+}
+.dm-photo__edit:hover {
+  background: var(--dm-blue-dark);
+}
+.dm-photo__remove {
+  right: -6px;
+  top: -6px;
+  width: 26px;
+  height: 26px;
+  background: #fff;
+  color: var(--status-failed);
+  border-color: var(--line);
+}
+.dm-photo__remove:hover {
+  background: var(--status-failed-soft);
+}
+
+/* ---------- Daftar berkas terunggah ---------- */
+.dm-files {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.dm-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md, 10px);
+  background: var(--canvas-soft);
+}
+.dm-file__name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 13.5px;
+  word-break: break-all;
+  text-align: left;
+}
+
+/* Kontak berbentuk ikon saja — menghemat lebar; detail tampil sebagai tooltip. */
+.dm-contact--icon {
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+.dm-contact--icon:hover {
+  background: var(--brand-50);
+  border-color: var(--brand-200);
+}
+
+/* Teks bantuan pemilih foto selalu turun ke baris baru. */
+.dm-photo + span,
+.dm-photo ~ .sh-field__hint {
+  display: block;
+  margin-top: 8px;
+}

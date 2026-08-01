@@ -38,6 +38,32 @@ function orgRowComplete(o: any): boolean {
   );
 }
 
+
+/* Gabungkan berkas legal masuk dengan yang tersimpan: poin tanpa `data`
+   (mis. saat menyimpan profil tanpa mengunggah ulang) mempertahankan isi lama
+   berdasarkan nama. Hanya berkas yang akhirnya punya data yang disimpan. */
+async function resolveLegalDocs(
+  table: "organizations" | "funders",
+  id: string,
+  incoming: any,
+): Promise<any[]> {
+  const docs = Array.isArray(incoming) ? incoming : [];
+  const prev =
+    table === "organizations"
+      ? ((await sql`select legal_docs_data from organizations where id = ${id} limit 1`) as any[])
+      : ((await sql`select legal_docs_data from funders where id = ${id} limit 1`) as any[]);
+  const stored: any[] = Array.isArray(prev[0]?.legal_docs_data) ? prev[0].legal_docs_data : [];
+  const byName = new Map<string, string>();
+  for (const d of stored) if (d?.name && d?.data) byName.set(String(d.name), String(d.data));
+  return docs
+    .filter((d: any) => (d?.name || "").trim())
+    .map((d: any) => ({
+      name: String(d.name),
+      data: d?.data ? String(d.data) : byName.get(String(d.name)) ?? null,
+    }))
+    .filter((d: any) => d.data);
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try {
@@ -45,6 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (b.op === "update") {
       const o = b.org;
+      const legal = await resolveLegalDocs("organizations", o.id, o.legalDocs);
       await sql`
         update organizations set
           name = ${o.name}, category = ${o.category}, city = ${o.city},
@@ -56,7 +83,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           tiktok = ${o.tiktok ?? null},
           twitter = ${o.twitter ?? null}, facebook = ${o.facebook ?? null},
           payout_account = ${o.payoutAccount}, phone = ${o.phone},
-          legal_docs = ${o.legalDocs ?? []},
+          legal_docs = ${legal.map((d: any) => d.name)},
+          legal_docs_data = ${JSON.stringify(legal)}::jsonb,
           pic_name = ${o.pic.name}, pic_phone = ${o.pic.phone},
           pic_position = ${o.pic.position}, pic_email = ${o.pic.email},
           pic_id_doc_url = ${o.pic.idDocUrl},

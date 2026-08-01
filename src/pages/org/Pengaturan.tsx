@@ -1,8 +1,10 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Topbar } from "@/components/Topbar";
 import { PageHead } from "@/components/PageHead";
 import { RekeningValidator } from "@/components/RekeningValidator";
+import { PhotoPicker } from "@/components/PhotoPicker";
+import { DocPicker } from "@/components/DocPicker";
 import { Modal } from "@/components/Modal";
 import { PdfPreview } from "@/components/PdfPreview";
 import { GantiPassword } from "@/components/GantiPassword";
@@ -11,17 +13,12 @@ import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
 import { initials } from "@/lib/format";
 import type { Organization } from "@/lib/types";
+import { CITIES } from "@/lib/cities";
 import {
   Save,
-  UploadCloud,
-  FileText,
-  Eye,
-  X,
   Instagram,
   Music2,
   Globe,
-  ArrowLeft,
-  ImagePlus,
   CreditCard,
   Mail,
 } from "lucide-react";
@@ -32,10 +29,6 @@ export default function OrgPengaturan() {
   const toast = useToast();
   const navigate = useNavigate();
   const org = state.organizations.find((o) => o.id === currentUser?.orgId);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const logoRef = useRef<HTMLInputElement>(null);
-  const picPhotoRef = useRef<HTMLInputElement>(null);
-  const comproRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<Organization | null>(org ?? null);
   const [errors, setErrors] = useState<Set<string>>(new Set());
@@ -45,14 +38,20 @@ export default function OrgPengaturan() {
   if (!org || !form) return null;
 
   // Buka pratinjau: pakai data di memori (baru diunggah) atau ambil lazy dari server.
-  const openPreview = async (kind: "compro" | "ktp", title: string) => {
-    const inMem = kind === "compro" ? form.comproData : form.pic.idDocData;
+  const openPreview = async (kind: "compro" | "ktp" | "legal", title: string, index = 0) => {
+    // Berkas yang baru dipilih sudah ada di memori; sisanya diambil dari server.
+    const inMem =
+      kind === "compro"
+        ? form.comproData
+        : kind === "ktp"
+          ? form.pic.idDocData
+          : form.legalDocs[index]?.data;
     if (inMem) {
       setPreview({ title, data: inMem });
       return;
     }
     setPreview({ title, data: null });
-    const d = await api.orgDoc(org.id, kind).catch(() => null);
+    const d = await api.orgDoc(org.id, kind, index).catch(() => null);
     setPreview({ title, data: d ?? "" });
   };
 
@@ -72,88 +71,10 @@ export default function OrgPengaturan() {
     clearErr(...Object.keys(patch).map((k) => `pic.${k}`));
   };
 
-  // Validasi PDF ≤ 2 MB lalu baca sebagai data URL (untuk preview). null bila gagal.
-  const readPdf = (
-    file: File,
-    ref: React.RefObject<HTMLInputElement>,
-    label: string,
-    done: (name: string, data: string) => void,
-  ) => {
-    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      toast.failed(`${label} harus berformat PDF.`);
-      if (ref.current) ref.current.value = "";
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.failed(`Ukuran ${label} maksimal 2 MB.`);
-      if (ref.current) ref.current.value = "";
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      done(file.name, String(reader.result));
-      toast.success(`Berkas "${file.name}" dipilih.`);
-    };
-    reader.readAsDataURL(file);
-  };
 
-  const onPickId = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    readPdf(file, fileRef, "KTP/KTM", (name, data) => setPic({ idDocUrl: name, idDocData: data }));
-  };
 
-  const onPickCompro = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    readPdf(file, comproRef, "Company profile", (name, data) =>
-      set({ comproUrl: name, comproData: data }),
-    );
-  };
 
-  /* Foto PIC: gambar saja, maks 2 MB — disimpan sebagai data URL seperti logo. */
-  const onPickPicPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    const reset = () => {
-      if (picPhotoRef.current) picPhotoRef.current.value = "";
-    };
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.failed("Foto PIC harus berupa gambar (PNG/JPG).");
-      reset();
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.failed("Ukuran foto PIC maksimal 2 MB.");
-      reset();
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => setPic({ photo: String(reader.result) });
-    reader.readAsDataURL(file);
-  };
 
-  const onPickLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.failed("Logo harus berupa gambar (PNG/JPG).");
-      if (logoRef.current) logoRef.current.value = "";
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.failed("Ukuran logo maksimal 2 MB.");
-      if (logoRef.current) logoRef.current.value = "";
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      set({ logoUrl: String(reader.result) });
-      toast.success("Logo organisasi dipilih.");
-    };
-    reader.readAsDataURL(file);
-  };
 
   const save = async () => {
     // Kumpulkan field yang belum/ salah diisi → tandai merah (bukan toast).
@@ -161,10 +82,12 @@ export default function OrgPengaturan() {
     const emailBad = (v: string) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.trim());
     if (!form.name.trim()) errs.add("name");
     if (!form.category.trim()) errs.add("category");
+    if (!form.city.trim()) errs.add("city");
     if (emailBad(form.email)) errs.add("email"); // wajib & format valid
     if (!form.description.trim()) errs.add("description");
     if (!form.payoutAccount.trim()) errs.add("payoutAccount");
     if (!(form.comproUrl ?? "").trim()) errs.add("comproUrl");
+    if (form.legalDocs.length === 0) errs.add("legalDocs");
     if (!form.pic.idDocUrl.trim()) errs.add("pic.idDocUrl");
     if (!form.pic.name.trim()) errs.add("pic.name");
     if (!form.pic.phone.trim()) errs.add("pic.phone");
@@ -173,8 +96,8 @@ export default function OrgPengaturan() {
     // Medsos: jika diisi, wajib berupa LINK (bukan username) & sesuai platform.
     const filled = (v?: string) => !!v && v.trim() !== "";
     const isUrl = (v: string) => /^https?:\/\/\S+\.\S+/i.test(v.trim());
-    if (filled(form.website) && !isUrl(form.website!)) errs.add("website");
-    if (filled(form.instagram) && (!isUrl(form.instagram!) || !/instagram\.com|instagr\.am/i.test(form.instagram!)))
+    if (!filled(form.website) || !isUrl(form.website!)) errs.add("website");
+    if (!filled(form.instagram) || !isUrl(form.instagram!) || !/instagram\.com|instagr\.am/i.test(form.instagram!))
       errs.add("instagram");
     if (filled(form.tiktok) && (!isUrl(form.tiktok!) || !/tiktok\.com/i.test(form.tiktok!)))
       errs.add("tiktok");
@@ -190,7 +113,6 @@ export default function OrgPengaturan() {
         phone: form.pic.phone,
         logoInitials: initials(form.name),
       });
-      toast.success("Profil organisasi tersimpan.");
       navigate("/org/profil");
     } catch (e: any) {
       toast.failed(String(e?.message || "Gagal menyimpan profil."));
@@ -204,21 +126,6 @@ export default function OrgPengaturan() {
         <PageHead
           title="Edit profil organisasi"
           subtitle="Lengkapi profil organisasi dan penanggung jawab (PIC)."
-          actions={
-            <div className="sh-row" style={{ gap: 8 }}>
-              <button
-                className="sh-btn sh-btn--secondary"
-                onClick={() => navigate("/org/profil")}
-              >
-                <ArrowLeft size={16} />
-                Kembali
-              </button>
-              <button className="sh-btn sh-btn--primary" onClick={save}>
-                <Save size={16} />
-                Simpan profil
-              </button>
-            </div>
-          }
         />
 
         <div style={{ display: "grid", gap: 20, maxWidth: 880 }}>
@@ -228,62 +135,14 @@ export default function OrgPengaturan() {
               <h3>Profil organisasi</h3>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
-              {/* Logo organisasi */}
-              <div style={{ marginBottom: 18 }}>
-                <label className="sh-field__label" style={{ display: "block", marginBottom: 8 }}>
-                  Logo organisasi
-                </label>
-                <input
-                  ref={logoRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={onPickLogo}
-                />
-                <div className="sh-row" style={{ gap: 14, alignItems: "center" }}>
-                  {form.logoUrl ? (
-                    <img
-                      src={form.logoUrl}
-                      alt="Logo"
-                      className="sh-org-logo"
-                      style={{ width: 64, height: 64, objectFit: "cover", padding: 0 }}
-                    />
-                  ) : (
-                    <span
-                      className="sh-org-logo"
-                      style={{ width: 64, height: 64, fontSize: 22 }}
-                    >
-                      {form.logoInitials}
-                    </span>
-                  )}
-                  <div className="sh-row" style={{ gap: 8 }}>
-                    <button
-                      type="button"
-                      className="sh-btn sh-btn--secondary sh-btn--sm"
-                      onClick={() => logoRef.current?.click()}
-                    >
-                      <ImagePlus size={14} />
-                      {form.logoUrl ? "Ganti logo" : "Unggah logo"}
-                    </button>
-                    {form.logoUrl && (
-                      <button
-                        type="button"
-                        className="sh-btn sh-btn--ghost sh-btn--sm"
-                        onClick={() => {
-                          set({ logoUrl: undefined });
-                          if (logoRef.current) logoRef.current.value = "";
-                        }}
-                      >
-                        <X size={14} />
-                        Hapus
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <span className="sh-field__hint">
-                  PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama.
-                </span>
-              </div>
+              <PhotoPicker
+                label="Logo organisasi"
+                value={form.logoUrl}
+                fallback={form.logoInitials}
+                onChange={(v) => set({ logoUrl: v })}
+                size={96}
+                hint="PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama."
+              />
 
               <div className="sh-form-grid">
                 <Field label="Nama organisasi" required invalid={errors.has("name")}>
@@ -313,12 +172,19 @@ export default function OrgPengaturan() {
                     placeholder="halo@organisasi.org"
                   />
                 </Field>
-                <Field label="Kota">
-                  <input
-                    value={form.city}
-                    onChange={(e) => set({ city: e.target.value })}
-                    placeholder="Misal: Jakarta"
-                  />
+                <Field label="Kota" required invalid={errors.has("city")}>
+                  <select value={form.city} onChange={(e) => set({ city: e.target.value })}>
+                    <option value="">— Pilih kota —</option>
+                    {/* Kota tersimpan yang tak ada di daftar tetap tampil agar tidak hilang. */}
+                    {(CITIES.includes(form.city) || !form.city
+                      ? CITIES
+                      : [form.city, ...CITIES]
+                    ).map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                 </Field>
                 <Field
                   label="Rekening pencairan"
@@ -355,6 +221,7 @@ export default function OrgPengaturan() {
               <div className="sh-form-grid">
                 <Field
                   label="Website"
+                  required
                   icon={<Globe size={14} />}
                   hint="Tempel link lengkap (https://…)"
                   invalid={errors.has("website")}
@@ -367,6 +234,7 @@ export default function OrgPengaturan() {
                 </Field>
                 <Field
                   label="Instagram"
+                  required
                   icon={<Instagram size={14} />}
                   hint="Tempel link, bukan username"
                   invalid={errors.has("instagram")}
@@ -393,77 +261,36 @@ export default function OrgPengaturan() {
             </div>
           </section>
 
-          {/* ============ Company profile (compro) ============ */}
+          {/* ============ Dokumen organisasi ============ */}
           <section className="sh-card">
             <header className="sh-card__header">
-              <h3>
-                Company profile (compro) <Req />
-              </h3>
+              <h3>Dokumen organisasi</h3>
               <span className="sh-muted" style={{ fontSize: 12 }}>
                 PDF · diperlukan untuk verifikasi admin
               </span>
             </header>
             <div className="sh-card__body">
-              <input
-                ref={comproRef}
-                type="file"
-                accept="application/pdf,.pdf"
-                style={{ display: "none" }}
-                onChange={onPickCompro}
+              <DocPicker
+                label="Company profile (compro)"
+                required
+                docs={form.comproUrl ? [{ name: form.comproUrl, data: form.comproData }] : []}
+                onChange={(docs) =>
+                  set({ comproUrl: docs[0]?.name ?? "", comproData: docs[0]?.data })
+                }
+                onPreview={() => openPreview("compro", form.comproUrl!)}
+                invalid={errors.has("comproUrl")}
               />
-              {form.comproUrl ? (
-                <div
-                  className="sh-row sh-row--between"
-                  style={{
-                    padding: "14px 16px",
-                    border: "1px solid var(--line)",
-                    borderRadius: "var(--radius-md)",
-                    background: "var(--canvas-soft)",
-                  }}
-                >
-                  <div className="sh-row" style={{ gap: 10, minWidth: 0 }}>
-                    <FileText size={20} style={{ color: "var(--status-failed)", flex: "none" }} />
-                    <span style={{ fontWeight: 600, wordBreak: "break-all" }}>{form.comproUrl}</span>
-                  </div>
-                  <div className="sh-row" style={{ gap: 4, flex: "none" }}>
-                    <button
-                      className="sh-btn sh-btn--ghost sh-btn--sm"
-                      onClick={() => openPreview("compro", form.comproUrl!)}
-                    >
-                      <Eye size={14} />
-                      Pratinjau
-                    </button>
-                    <button
-                      className="sh-btn sh-btn--ghost sh-btn--icon"
-                      onClick={() => {
-                        set({ comproUrl: "", comproData: undefined });
-                        if (comproRef.current) comproRef.current.value = "";
-                      }}
-                      title="Hapus berkas"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  className="sh-file-drop"
-                  style={{
-                    width: "100%",
-                    cursor: "pointer",
-                    borderColor: errors.has("comproUrl") ? "var(--status-failed)" : undefined,
-                    background: errors.has("comproUrl") ? "rgba(220,38,38,0.05)" : undefined,
-                  }}
-                  onClick={() => comproRef.current?.click()}
-                >
-                  <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
-                  <span>Klik untuk unggah company profile.</span>
-                  <span className="sh-muted" style={{ fontSize: 12 }}>
-                    Wajib diisi · hanya format PDF.
-                  </span>
-                </button>
-              )}
+
+              <DocPicker
+                label="Dokumen legal organisasi"
+                required
+                multiple
+                docs={form.legalDocs}
+                onChange={(docs) => set({ legalDocs: docs })}
+                onPreview={(d, i) => openPreview("legal", d.name, i)}
+                invalid={errors.has("legalDocs")}
+                hint="Mis. akta pendirian, SK Kemenkumham, NPWP."
+              />
             </div>
           </section>
 
@@ -476,54 +303,15 @@ export default function OrgPengaturan() {
               </span>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
-              {/* Foto PIC — opsional, tampil sebagai avatar di profil. */}
-              <div style={{ marginBottom: 18 }}>
-                <label className="sh-field__label" style={{ display: "block", marginBottom: 8 }}>
-                  Foto PIC
-                </label>
-                <input
-                  ref={picPhotoRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={onPickPicPhoto}
-                />
-                <div className="sh-row" style={{ gap: 14, alignItems: "center" }}>
-                  <span className="dm-photo-preview">
-                    {form.pic.photo ? (
-                      <img src={form.pic.photo} alt="Foto PIC" />
-                    ) : (
-                      initials(form.pic.name || "?")
-                    )}
-                  </span>
-                  <div className="sh-row" style={{ gap: 8 }}>
-                    <button
-                      type="button"
-                      className="sh-btn sh-btn--secondary sh-btn--sm"
-                      onClick={() => picPhotoRef.current?.click()}
-                    >
-                      <ImagePlus size={14} />
-                      {form.pic.photo ? "Ganti foto" : "Unggah foto"}
-                    </button>
-                    {form.pic.photo && (
-                      <button
-                        type="button"
-                        className="sh-btn sh-btn--ghost sh-btn--sm"
-                        onClick={() => {
-                          setPic({ photo: undefined });
-                          if (picPhotoRef.current) picPhotoRef.current.value = "";
-                        }}
-                      >
-                        <X size={14} />
-                        Hapus
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <span className="sh-field__hint">
-                  PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama PIC.
-                </span>
-              </div>
+              <PhotoPicker
+                label="Foto PIC"
+                value={form.pic.photo}
+                fallback={initials(form.pic.name || "?")}
+                onChange={(v) => setPic({ photo: v })}
+                size={96}
+                round
+                hint="PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama PIC."
+              />
 
               <div className="sh-form-grid">
                 <Field label="Nama PIC" required invalid={errors.has("pic.name")}>
@@ -562,76 +350,21 @@ export default function OrgPengaturan() {
                 </Field>
               </div>
 
-              {/* Upload KTP/KTM (wajib, PDF) */}
               <div style={{ marginTop: 18 }}>
-                <label className="sh-field__label" style={{ display: "block", marginBottom: 8 }}>
-                  Upload KTP/KTM (PDF) <Req />
-                </label>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="application/pdf,.pdf"
-                  style={{ display: "none" }}
-                  onChange={onPickId}
+                <DocPicker
+                  label="Upload KTP/KTM (PDF)"
+                  required
+                  docs={
+                    form.pic.idDocUrl
+                      ? [{ name: form.pic.idDocUrl, data: form.pic.idDocData }]
+                      : []
+                  }
+                  onChange={(docs) =>
+                    setPic({ idDocUrl: docs[0]?.name ?? "", idDocData: docs[0]?.data })
+                  }
+                  onPreview={() => openPreview("ktp", form.pic.idDocUrl)}
+                  invalid={errors.has("pic.idDocUrl")}
                 />
-                {form.pic.idDocUrl ? (
-                  <div
-                    className="sh-row sh-row--between"
-                    style={{
-                      padding: "14px 16px",
-                      border: "1px solid var(--line)",
-                      borderRadius: "var(--radius-md)",
-                      background: "var(--canvas-soft)",
-                    }}
-                  >
-                    <div className="sh-row" style={{ gap: 10 }}>
-                      <FileText size={20} style={{ color: "var(--status-failed)" }} />
-                      <div>
-                        <div style={{ fontWeight: 600 }}>{form.pic.idDocUrl}</div>
-                        <div className="sh-muted" style={{ fontSize: 12 }}>
-                          Dokumen identitas PIC (hanya admin & organisasi yang melihat)
-                        </div>
-                      </div>
-                    </div>
-                    <div className="sh-row" style={{ gap: 4, flex: "none" }}>
-                      <button
-                        className="sh-btn sh-btn--ghost sh-btn--sm"
-                        onClick={() => openPreview("ktp", form.pic.idDocUrl)}
-                      >
-                        <Eye size={14} />
-                        Pratinjau
-                      </button>
-                      <button
-                        className="sh-btn sh-btn--ghost sh-btn--icon"
-                        onClick={() => {
-                          setPic({ idDocUrl: "", idDocData: undefined });
-                          if (fileRef.current) fileRef.current.value = "";
-                        }}
-                        title="Hapus berkas"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="sh-file-drop"
-                    style={{
-                      width: "100%",
-                      cursor: "pointer",
-                      borderColor: errors.has("pic.idDocUrl") ? "var(--status-failed)" : undefined,
-                      background: errors.has("pic.idDocUrl") ? "rgba(220,38,38,0.05)" : undefined,
-                    }}
-                    onClick={() => fileRef.current?.click()}
-                  >
-                    <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
-                    <span>Klik untuk unggah KTP/KTM PIC.</span>
-                    <span className="sh-muted" style={{ fontSize: 12 }}>
-                      Wajib diisi · hanya format PDF yang diperbolehkan.
-                    </span>
-                  </button>
-                )}
               </div>
             </div>
           </section>

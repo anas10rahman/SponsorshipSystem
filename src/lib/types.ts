@@ -26,6 +26,13 @@ export type OrgPic = {
   idDocData?: string; // isi KTP/KTM (data URL) — hanya saat baru diunggah / diambil lazy
 };
 
+/** Satu berkas lampiran (PDF). `data` (data URL) hanya ada saat baru diunggah
+ *  atau diambil lazy lewat /api/org-doc. */
+export type OrgDoc = {
+  name: string;
+  data?: string;
+};
+
 /** Status verifikasi organisasi oleh admin (gate pengajuan). */
 export type OrgVerificationStatus = "belum_diajukan" | "menunggu" | "terverifikasi" | "ditolak";
 
@@ -41,7 +48,8 @@ export type Organization = {
   verificationNote?: string; // alasan bila ditolak admin
   comproUrl?: string; // Company profile (PDF) — wajib untuk verifikasi
   comproData?: string; // isi compro (data URL) — hanya saat baru diunggah / diambil lazy
-  legalDocs: string[];
+  /** Berkas legal organisasi. `data` hanya ada saat baru diunggah / diambil lazy. */
+  legalDocs: OrgDoc[];
   payoutAccount: string;
   balance: number; // saldo untuk biaya pengajuan
   phone: string; // no.hp kontak (ber-gate ke lawan) — disinkronkan dari PIC
@@ -85,6 +93,9 @@ export type Funder = {
   logoUrl?: string; // logo mitra sponsor (data URL/base64), opsional
   /** Alamat kantor mitra sponsor. */
   address: string;
+  comproUrl?: string; // Company profile (PDF)
+  comproData?: string; // isi compro (data URL) — hanya saat baru diunggah
+  legalDocs: OrgDoc[]; // berkas legal mitra sponsor
   // Penanggung jawab
   pic: FunderPic;
 };

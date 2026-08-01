@@ -46,7 +46,12 @@ export function mapOrg(r: any) {
     verificationStatus: r.verification_status ?? "belum_diajukan",
     verificationNote: r.verification_note ?? undefined,
     comproUrl: r.compro_url ?? undefined,
-    legalDocs: r.legal_docs ?? [],
+    // Berkas legal: sumber baru jsonb [{name,data}]; data tak ikut dikirim.
+    // Baris lama yang hanya punya text[] tetap terbaca.
+    legalDocs: (Array.isArray(r.legal_docs_data) && r.legal_docs_data.length
+      ? r.legal_docs_data.map((d: any) => ({ name: String(d?.name ?? "") }))
+      : (r.legal_docs ?? []).map((n: string) => ({ name: String(n) }))
+    ).filter((d: any) => d.name),
     payoutAccount: r.payout_account,
     balance: Number(r.balance),
     phone: r.phone ?? "",
@@ -85,6 +90,10 @@ export function mapFunder(r: any) {
     facebook: r.facebook ?? undefined,
     logoUrl: r.logo_url ?? undefined,
     address: r.address ?? "",
+    comproUrl: r.compro_url ?? undefined,
+    legalDocs: (Array.isArray(r.legal_docs_data) ? r.legal_docs_data : [])
+      .map((d: any) => ({ name: String(d?.name ?? "") }))
+      .filter((d: any) => d.name),
     pic: {
       name: r.pic_name ?? "",
       phone: r.pic_phone ?? "",
@@ -103,11 +112,27 @@ export async function assembleState() {
     // ditarik di sini, tiap mutasi menyeret puluhan MB dari DB lalu dibuang.
     sql`select id, name, category, city, logo_initials, logo_url, verified,
                verification_status, verification_note, legal_docs, payout_account,
+               coalesce(
+                 (select jsonb_agg(jsonb_build_object('name', e->>'name'))
+                    from jsonb_array_elements(legal_docs_data) e),
+                 '[]'::jsonb
+               ) as legal_docs_data,
                balance, phone, email, description, website, instagram, twitter,
                facebook, tiktok, compro_url, pic_name, pic_phone, pic_position,
                pic_email, pic_id_doc_url, pic_photo, created_at, updated_at
           from organizations order by name`,
-    sql`select * from funders order by name`,
+    // Kolom eksplisit: tanpa compro_data & isi berkas legal (base64 s/d 2MB).
+    // Sama seperti organizations — blob diambil lazy lewat /api/org-doc.
+    sql`select id, name, type, focus, budget_total, budget_remaining, phone, email,
+               description, website, instagram, twitter, facebook, logo_url, address,
+               compro_url, pic_name, pic_phone, pic_position, pic_email,
+               created_at, updated_at,
+               coalesce(
+                 (select jsonb_agg(jsonb_build_object('name', e->>'name'))
+                    from jsonb_array_elements(legal_docs_data) e),
+                 '[]'::jsonb
+               ) as legal_docs_data
+          from funders order by name`,
     sql`select id, org_id, funder_id, event_name, event_location, event_date, description,
                event_budget, packages, selected_package, proposal_doc_url, extra_note,
                status, revision_note, created_at, updated_at,
