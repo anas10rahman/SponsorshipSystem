@@ -60,7 +60,6 @@ export default function AdminPengajuan() {
   return (
     <>
       <Topbar
-        title="Pengajuan terarah"
         search={{ value: search, onChange: setSearch, placeholder: "Cari event, org, mitra sponsor…" }}
       />
       <div className="sh-shell__content">

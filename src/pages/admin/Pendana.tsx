@@ -21,7 +21,6 @@ export default function AdminPendana() {
   return (
     <>
       <Topbar
-        title="Direktori mitra sponsor"
         search={{ value: search, onChange: setSearch, placeholder: "Cari mitra sponsor / fokus…" }}
       />
       <div className="sh-shell__content">

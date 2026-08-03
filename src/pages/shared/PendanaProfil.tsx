@@ -273,30 +273,6 @@ export default function PendanaProfil() {
         </section>
         )}
 
-        {/* Stats — hanya untuk pihak lain yang menilai brand ini. Di profil
-            sendiri angka ini mubazir: sudah ada di Dashboard & Portofolio.
-            Nominal dana tetap disembunyikan dari sisi organisasi. */}
-        {!isSelf && (
-        <div className="sh-stat-grid">
-          <StatCard
-            label="Pengajuan disetujui"
-            value={stats?.approved.length ?? 0}
-            icon={<CheckCircle2 size={20} />}
-          />
-          {!isOrgViewer && (
-            <StatCard
-              label="Total disalurkan"
-              value={formatRupiah(stats?.totalDisbursed ?? 0)}
-              icon={<HandCoins size={20} />}
-            />
-          )}
-          <StatCard
-            label="Organisasi didanai"
-            value={stats?.orgsFunded ?? 0}
-            icon={<Building2 size={20} />}
-          />
-        </div>
-        )}
 
       </div>
     </>

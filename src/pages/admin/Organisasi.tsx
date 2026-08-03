@@ -30,7 +30,7 @@ export default function AdminOrganisasi() {
   const { verifyOrg, rejectOrg } = useActions();
   const toast = useToast();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<Filter>("menunggu");
+  const [filter, setFilter] = useState<Filter>("semua");
   const [reviewId, setReviewId] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState("");
@@ -103,7 +103,6 @@ export default function AdminOrganisasi() {
   return (
     <>
       <Topbar
-        title="Direktori organisasi"
         search={{ value: search, onChange: setSearch, placeholder: "Cari organisasi…" }}
       />
       <div className="sh-shell__content">

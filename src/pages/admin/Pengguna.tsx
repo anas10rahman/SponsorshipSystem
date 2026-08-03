@@ -65,7 +65,6 @@ export default function AdminPengguna() {
   return (
     <>
       <Topbar
-        title="Manajemen pengguna"
         search={{ value: search, onChange: setSearch, placeholder: "Cari nama / username / email…" }}
       />
       <div className="sh-shell__content">

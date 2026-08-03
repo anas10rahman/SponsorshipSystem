@@ -81,7 +81,7 @@ export default function AdminLaporan() {
 
   return (
     <>
-      <Topbar title="Laporan" />
+      <Topbar />
       <div className="sh-shell__content">
         <PageHead
           title="Laporan"

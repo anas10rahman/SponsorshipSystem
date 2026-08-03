@@ -4,6 +4,11 @@ import { formatRupiah } from "./format";
 /** Biaya yang dipotong dari saldo organisasi saat mengirim pengajuan baru. */
 export const SUBMISSION_FEE = 50_000;
 
+/** Bila mitra sponsor menolak: bagian yang ditahan platform. Sisanya kembali
+ *  ke organisasi. Angka ini harus sama dengan yang dipakai server (api/_db.ts). */
+export const REJECT_ADMIN_FEE = 10_000;
+export const REJECT_REFUND = SUBMISSION_FEE - REJECT_ADMIN_FEE; // 40rb
+
 /** Nominal satu paket = jumlah seluruh poin in_cash. Toleran data lama
  *  (poin berupa string / properti `amount` legacy pada paket). */
 export function packageAmount(pkg: SponsorshipPackage | any): number {

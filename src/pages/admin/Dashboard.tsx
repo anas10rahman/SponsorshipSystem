@@ -6,22 +6,42 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { PengajuanDetail } from "@/components/PengajuanDetail";
 import { useStore } from "@/lib/store";
 import { formatRupiah, formatDate } from "@/lib/format";
-import { pengajuanBadge, pengajuanAmountLabel, selectedAmount } from "@/lib/pengajuan";
-import { Wallet, Send, CheckCircle2, Building2 } from "lucide-react";
+import {
+  pengajuanBadge,
+  pengajuanAmountLabel,
+  SUBMISSION_FEE,
+  REJECT_ADMIN_FEE,
+} from "@/lib/pengajuan";
+import { Wallet, Send, CheckCircle2, Building2, Hourglass } from "lucide-react";
 
 export default function AdminDashboard() {
   const { state } = useStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  /* Saldo platform dari biaya pengajuan. Biaya dipungut sekali saat organisasi
+     pertama kali mengirim pengajuan (Rp 50rb), lalu nasibnya ditentukan
+     keputusan mitra sponsor:
+       disetujui  -> seluruh 50rb menjadi pendapatan admin
+       ditolak    -> 10rb ditahan admin, 40rb dikembalikan ke organisasi
+       kadaluarsa -> 50rb dikembalikan penuh (admin tidak menahan apa pun)
+       diajukan / perlu revisi -> masih ditahan, belum jadi pendapatan */
   const stats = useMemo(() => {
     const sent = state.pengajuan.filter((p) => p.status !== "draf");
-    const approved = sent.filter((p) => p.status === "disetujui");
-    const approvedCash = approved.reduce((s, p) => s + selectedAmount(p), 0);
+    const by = (s: string) => sent.filter((p) => p.status === s).length;
+
+    const disetujui = by("disetujui");
+    const ditolak = by("ditolak");
+    const tertahan = by("diajukan") + by("perlu_revisi");
+
     return {
       sent: sent.length,
-      approved: approved.length,
-      approvedCash,
+      approved: disetujui,
       orgAktif: state.organizations.filter((o) => o.verified).length,
+      // Sudah final menjadi milik platform.
+      saldoDiterima: disetujui * SUBMISSION_FEE + ditolak * REJECT_ADMIN_FEE,
+      // Masih menggantung: sebagian bisa kembali ke organisasi.
+      saldoSementara: tertahan * SUBMISSION_FEE,
+      jumlahTertahan: tertahan,
     };
   }, [state.pengajuan, state.organizations]);
 
@@ -30,15 +50,25 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <Topbar title="Dashboard Admin" />
+      <Topbar />
       <div className="sh-shell__content">
         <Hero />
 
         <div className="sh-stat-grid">
           <StatCard
-            label="Total disetujui (in-cash)"
-            value={formatRupiah(stats.approvedCash)}
+            label="Saldo Diterima"
+            value={formatRupiah(stats.saldoDiterima)}
             icon={<Wallet size={20} />}
+          />
+          <StatCard
+            label="Saldo Sementara"
+            value={formatRupiah(stats.saldoSementara)}
+            icon={<Hourglass size={20} />}
+            trend={
+              stats.jumlahTertahan > 0
+                ? { direction: "up", label: `${stats.jumlahTertahan} pengajuan menunggu keputusan` }
+                : undefined
+            }
           />
           <StatCard label="Pengajuan dikirim" value={stats.sent} icon={<Send size={20} />} />
           <StatCard

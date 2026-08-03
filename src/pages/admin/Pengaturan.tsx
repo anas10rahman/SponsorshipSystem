@@ -9,7 +9,7 @@ export default function AdminPengaturan() {
 
   return (
     <>
-      <Topbar title="Pengaturan platform" />
+      <Topbar />
       <div className="sh-shell__content">
         <PageHead
           title="Pengaturan platform"
