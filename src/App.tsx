@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { StoreProvider, rolePath, useStore } from "./lib/store";
 import { RoleGuard } from "./components/RoleGuard";
 import { Shell } from "./components/Shell";
 import { ToastProvider } from "./components/Toast";
 import { BrandMark } from "./components/BrandMark";
 
+import Landing from "./pages/Landing";
+import LegalPublic from "./pages/LegalPublic";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Verify from "./pages/Verify";
@@ -36,6 +38,24 @@ import FunderPengaturan from "./pages/funder/Pengaturan";
 function RootRedirect() {
   const { currentUser } = useStore();
   return <Navigate to={currentUser ? rolePath[currentUser.role] : "/login"} replace />;
+}
+
+/**
+ * Pintu masuk "/" — bercabang sebelum data ter-fetch.
+ *
+ * `session.userId` dibaca sinkron dari localStorage saat reducer diinisialisasi,
+ * sedangkan `currentUser` baru terisi setelah daftar user datang dari server.
+ * Bercabang di `session.userId` membuat pengunjung anonim langsung mendapat
+ * landing page tanpa melewati layar "Memuat data…" milik HydrationGate.
+ */
+function RootEntry() {
+  const { state } = useStore();
+  if (!state.session.userId) return <Landing />;
+  return (
+    <HydrationGate>
+      <RootRedirect />
+    </HydrationGate>
+  );
 }
 
 function HydrationGate({ children }: { children: ReactNode }) {
@@ -82,9 +102,26 @@ export default function App() {
   return (
     <StoreProvider>
       <ToastProvider>
-      <HydrationGate>
       <Routes>
-        <Route path="/" element={<RootRedirect />} />
+        {/* === Publik: dirender tanpa menunggu data ter-hydrate === */}
+        <Route path="/" element={<RootEntry />} />
+        <Route
+          path="/kebijakan-privasi"
+          element={<LegalPublic title="Kebijakan Privasi" />}
+        />
+        <Route
+          path="/syarat-ketentuan"
+          element={<LegalPublic title="Syarat & Ketentuan" />}
+        />
+
+        {/* === Sisanya butuh data dari server === */}
+        <Route
+          element={
+            <HydrationGate>
+              <Outlet />
+            </HydrationGate>
+          }
+        >
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify" element={<Verify />} />
@@ -155,8 +192,8 @@ export default function App() {
         </Route>
 
         <Route path="*" element={<NotFound />} />
+        </Route>
       </Routes>
-      </HydrationGate>
       </ToastProvider>
     </StoreProvider>
   );

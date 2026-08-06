@@ -8,3 +8,6 @@ dist
 .DS_Store
 *.tsbuildinfo
 .claude/settings.local.json
+
+# visual brainstorming companion
+.superpowers
