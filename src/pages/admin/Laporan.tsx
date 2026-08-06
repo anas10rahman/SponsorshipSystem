@@ -130,13 +130,13 @@ export default function AdminLaporan() {
                   <tbody>
                     {topFunders.map(({ funder, total }) => (
                       <tr key={funder.id}>
-                        <td>
+                        <td data-label="Mitra Sponsor">
                           <div style={{ fontWeight: 700 }}>{funder.name}</div>
                           <div className="sh-muted" style={{ fontSize: 12 }}>
                             {funder.type}
                           </div>
                         </td>
-                        <td className="num">{formatRupiah(total)}</td>
+                        <td className="num" data-label="Total disetujui">{formatRupiah(total)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -163,13 +163,13 @@ export default function AdminLaporan() {
                   <tbody>
                     {topOrgs.map(({ org, total }) => (
                       <tr key={org.id}>
-                        <td>
+                        <td data-label="Organisasi">
                           <div style={{ fontWeight: 700 }}>{org.name}</div>
                           <div className="sh-muted" style={{ fontSize: 12 }}>
                             {org.category} · {org.city}
                           </div>
                         </td>
-                        <td className="num">{formatRupiah(total)}</td>
+                        <td className="num" data-label="Total disetujui">{formatRupiah(total)}</td>
                       </tr>
                     ))}
                   </tbody>

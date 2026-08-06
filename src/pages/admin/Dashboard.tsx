@@ -107,14 +107,14 @@ export default function AdminDashboard() {
                   const badge = pengajuanBadge(p.status);
                   return (
                     <tr key={p.id}>
-                      <td style={{ fontWeight: 600 }}>{p.eventName}</td>
-                      <td>{org?.name ?? "—"}</td>
-                      <td>{funder?.name ?? "—"}</td>
-                      <td className="num">{pengajuanAmountLabel(p)}</td>
-                      <td>
+                      <td style={{ fontWeight: 600 }} data-label="Event">{p.eventName}</td>
+                      <td data-label="Organisasi">{org?.name ?? "—"}</td>
+                      <td data-label="Mitra Sponsor">{funder?.name ?? "—"}</td>
+                      <td className="num" data-label="Nilai">{pengajuanAmountLabel(p)}</td>
+                      <td data-label="Status">
                         <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                       </td>
-                      <td className="sh-muted">{formatDate(p.updatedAt)}</td>
+                      <td className="sh-muted" data-label="Tanggal">{formatDate(p.updatedAt)}</td>
                       <td>
                         <button
                           className="sh-btn sh-btn--ghost sh-btn--sm"

@@ -119,19 +119,19 @@ export default function AdminPengguna() {
                       const badge = orgVerifyBadge(o.verificationStatus);
                       return (
                         <tr key={o.id}>
-                          <td>
+                          <td data-label="Organisasi">
                             <div className="sh-row" style={{ gap: 10 }}>
                               <span className="sh-org-logo">{o.logoInitials}</span>
                               <span style={{ fontWeight: 700 }}>{o.name}</span>
                             </div>
                           </td>
-                          <td>{u?.username ?? "—"}</td>
-                          <td className="sh-muted">{o.email || u?.email || "—"}</td>
-                          <td>
+                          <td data-label="Username">{u?.username ?? "—"}</td>
+                          <td className="sh-muted" data-label="Email">{o.email || u?.email || "—"}</td>
+                          <td data-label="Verifikasi">
                             <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                           </td>
-                          <td className="sh-muted">{u ? formatDate(u.createdAt) : "—"}</td>
-                          <td>
+                          <td className="sh-muted" data-label="Terdaftar">{u ? formatDate(u.createdAt) : "—"}</td>
+                          <td data-label="Aksi">
                             <button
                               className="sh-btn sh-btn--ghost sh-btn--icon"
                               onClick={() => setDel({ kind: "org", id: o.id, name: o.name })}
@@ -167,12 +167,12 @@ export default function AdminPengguna() {
                     const u = loginUser((x) => x.role === "funder" && x.funderId === f.id);
                     return (
                       <tr key={f.id}>
-                        <td style={{ fontWeight: 700 }}>{f.name}</td>
-                        <td>{u?.username ?? "—"}</td>
-                        <td className="sh-muted">{f.email || u?.email || "—"}</td>
-                        <td>{f.type}</td>
-                        <td className="sh-muted">{u ? formatDate(u.createdAt) : "—"}</td>
-                        <td>
+                        <td style={{ fontWeight: 700 }} data-label="Mitra Sponsor">{f.name}</td>
+                        <td data-label="Username">{u?.username ?? "—"}</td>
+                        <td className="sh-muted" data-label="Email">{f.email || u?.email || "—"}</td>
+                        <td data-label="Tipe">{f.type}</td>
+                        <td className="sh-muted" data-label="Terdaftar">{u ? formatDate(u.createdAt) : "—"}</td>
+                        <td data-label="Aksi">
                           <button
                             className="sh-btn sh-btn--ghost sh-btn--icon"
                             onClick={() => setDel({ kind: "funder", id: f.id, name: f.name })}

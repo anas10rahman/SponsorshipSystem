@@ -51,7 +51,7 @@ export default function AdminPendana() {
                     const pct = percent(used, f.budgetTotal);
                     return (
                       <tr key={f.id}>
-                        <td>
+                        <td data-label="Mitra Sponsor">
                           <Link
                             to={`/admin/pendana/${f.id}`}
                             style={{ fontWeight: 700, color: "inherit" }}
@@ -59,11 +59,11 @@ export default function AdminPendana() {
                             {f.name}
                           </Link>
                         </td>
-                        <td>{f.type}</td>
-                        <td>{f.focus.join(", ")}</td>
-                        <td className="num">{formatRupiah(f.budgetTotal)}</td>
-                        <td className="num">{formatRupiah(f.budgetRemaining)}</td>
-                        <td>
+                        <td data-label="Tipe">{f.type}</td>
+                        <td data-label="Fokus">{f.focus.join(", ")}</td>
+                        <td className="num" data-label="Anggaran total">{formatRupiah(f.budgetTotal)}</td>
+                        <td className="num" data-label="Sisa anggaran">{formatRupiah(f.budgetRemaining)}</td>
+                        <td data-label="Penggunaan">
                           <div className="sh-progress">
                             <div className="sh-progress__bar" style={{ width: `${pct}%` }} />
                           </div>

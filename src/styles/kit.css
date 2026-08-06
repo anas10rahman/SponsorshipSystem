@@ -180,6 +180,66 @@
   gap: var(--space-3);
 }
 
+/* ---------- Kontrol navigasi mobile (hamburger + drawer + scrim) ----------
+   Semua disembunyikan di desktop; diaktifkan di media query ≤1024px. */
+.sh-topbar__menu,
+.sh-topbar__brand,
+.sh-sidebar__close {
+  display: none;
+}
+
+.sh-topbar__menu {
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: calc(var(--space-2) * -1);
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--ink-700);
+  background: transparent;
+  cursor: pointer;
+  flex: none;
+}
+.sh-topbar__menu:hover {
+  background: var(--canvas-soft);
+  color: var(--ink-900);
+}
+
+.sh-topbar__brand {
+  align-items: center;
+  flex: none;
+}
+
+.sh-sidebar__close {
+  margin-left: auto;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, 0.72);
+  background: transparent;
+  cursor: pointer;
+  flex: none;
+}
+.sh-sidebar__close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.sh-scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+  z-index: 40;
+}
+
 /* ---------- Avatar ---------- */
 .sh-avatar {
   width: 36px;
@@ -1141,36 +1201,52 @@
   .sh-shell {
     grid-template-columns: 1fr;
   }
+
+  /* Sidebar berubah jadi drawer off-canvas (posisi fixed → keluar dari grid,
+     jadi tak ada lagi bug tinggi bar yang mengembang). */
   .sh-sidebar {
-    position: relative;
-    height: auto;
-    flex-direction: row;
-    overflow-x: auto;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-    padding: var(--space-3) var(--space-4);
-    gap: var(--space-3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100dvh;
+    width: min(84vw, 320px);
+    transform: translateX(-100%);
+    transition: transform var(--duration-base) var(--ease-standard);
+    z-index: 50;
+    border-right: 1px solid var(--line);
+    box-shadow: var(--shadow-3);
+    overflow-y: auto;
+    padding: var(--space-4) var(--space-4) var(--space-6);
+  }
+  .sh-shell--nav-open .sh-sidebar {
+    transform: translateX(0);
   }
   .sh-sidebar__brand {
-    padding: 0 var(--space-2) 0 0;
-    border-right: 1px solid var(--line);
-    margin-right: var(--space-3);
+    padding: var(--space-2) var(--space-2) var(--space-5);
   }
-  .sh-sidebar__group-label {
+  .sh-sidebar__close {
+    display: inline-flex;
+  }
+
+  /* Scrim gelap di belakang drawer */
+  .sh-scrim {
+    display: block;
+  }
+  .sh-shell--nav-open .sh-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Topbar jadi satu-satunya app bar: hamburger + brand, judul pindah ke PageHead */
+  .sh-topbar__menu,
+  .sh-topbar__brand {
+    display: inline-flex;
+  }
+  .sh-topbar__title {
     display: none;
   }
-  .sh-sidebar__nav {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: var(--space-2);
-  }
-  .sh-sidebar__link {
-    white-space: nowrap;
-    min-height: 36px;
-  }
-  .sh-sidebar__footer {
-    display: none;
-  }
+
   .sh-detail-layout {
     grid-template-columns: 1fr;
   }
@@ -1201,6 +1277,83 @@
   }
   .sh-user__meta {
     display: none;
+  }
+
+  /* Baris header yang tadinya nowrap → boleh turun baris supaya tombol tak
+     terpotong keluar layar (penyebab halaman kegeser horizontal). */
+  .sh-card__header {
+    flex-wrap: wrap;
+  }
+  .sh-page-head__actions {
+    flex-wrap: wrap;
+  }
+  .sh-page-head__actions .sh-btn {
+    flex: 1 1 auto;
+  }
+
+  /* ---------- Tabel → kartu bertumpuk ----------
+     thead disembunyikan (dibaca screen reader lewat data-label), tiap baris
+     jadi kartu, tiap sel menampilkan label di atas nilainya. */
+  .sh-table-wrap {
+    overflow-x: visible;
+  }
+  .sh-table {
+    min-width: 0;
+    font-size: var(--text-sm);
+  }
+  .sh-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .sh-table tbody,
+  .sh-table tbody tr,
+  .sh-table tbody td {
+    display: block;
+    width: 100%;
+  }
+  .sh-table tbody tr {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  .sh-table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+  .sh-table tbody td {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--line-soft);
+    text-align: left;
+  }
+  .sh-table tbody tr td:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .sh-table tbody tr td:first-child {
+    padding-top: 0;
+  }
+  .sh-table tbody td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 3px;
+    font-size: 11px;
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-500);
+  }
+  /* Sel tanpa label (atau eksplisit kosong): jangan render baris label. */
+  .sh-table tbody td:not([data-label])::before,
+  .sh-table tbody td[data-label=""]::before {
+    content: none;
   }
 }
 

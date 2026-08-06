@@ -149,7 +149,7 @@ export default function AdminOrganisasi() {
                     const badge = orgVerifyBadge(org.verificationStatus);
                     return (
                       <tr key={org.id}>
-                        <td>
+                        <td data-label="Organisasi">
                           <div className="sh-row" style={{ gap: 10 }}>
                             <span className="sh-org-logo">{org.logoInitials}</span>
                             <Link
@@ -160,13 +160,13 @@ export default function AdminOrganisasi() {
                             </Link>
                           </div>
                         </td>
-                        <td>{org.category}</td>
-                        <td>{org.city}</td>
-                        <td>
+                        <td data-label="Kategori">{org.category}</td>
+                        <td data-label="Kota">{org.city}</td>
+                        <td data-label="Status verifikasi">
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                         </td>
-                        <td>{sent}</td>
-                        <td>
+                        <td data-label="Pengajuan dikirim">{sent}</td>
+                        <td data-label="Aksi">
                           <button
                             className="sh-btn sh-btn--ghost sh-btn--sm"
                             onClick={() => {

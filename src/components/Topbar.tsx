@@ -1,8 +1,10 @@
-import { Search } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "@/lib/store";
 import { initials } from "@/lib/format";
 import { NotificationsMenu } from "./NotificationsMenu";
+import { BrandMark } from "./BrandMark";
+import { useMobileNav } from "./mobileNav";
 
 const PROFILE_PATH: Record<string, string> = {
   admin: "/admin/pengaturan",
@@ -19,6 +21,7 @@ type Props = {
 
 export function Topbar({ title = "", search }: Props) {
   const { state, currentUser } = useStore();
+  const { setOpen } = useMobileNav();
   const navigate = useNavigate();
 
   // Mitra sponsor: tampilkan nama brand + PIC (identitas yang dikenali lawan
@@ -36,6 +39,17 @@ export function Topbar({ title = "", search }: Props) {
 
   return (
     <header className="sh-topbar">
+      <button
+        type="button"
+        className="sh-topbar__menu"
+        onClick={() => setOpen(true)}
+        aria-label="Buka menu navigasi"
+      >
+        <Menu size={22} />
+      </button>
+      <span className="sh-topbar__brand" aria-hidden="true">
+        <BrandMark size={26} />
+      </span>
       <div className="sh-topbar__title">{title}</div>
       <div className="sh-topbar__spacer" />
 

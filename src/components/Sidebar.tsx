@@ -15,11 +15,13 @@ import {
   UserCog,
   LifeBuoy,
   ArrowUpRight,
+  X,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { BrandMark } from "./BrandMark";
 import { useActions, useStore } from "@/lib/store";
 import { useSupportEmail } from "./AppFooter";
+import { useMobileNav } from "./mobileNav";
 
 type Item = { to: string; label: string; icon: React.ReactNode };
 
@@ -55,6 +57,7 @@ const ROLE_LABEL: Record<Role, string> = {
 export function Sidebar({ role }: { role: Role }) {
   const { logout } = useActions();
   const { state, currentUser } = useStore();
+  const { setOpen } = useMobileNav();
   const support = useSupportEmail();
   const items = NAV[role];
 
@@ -73,6 +76,14 @@ export function Sidebar({ role }: { role: Role }) {
     <aside className="sh-sidebar">
       <div className="sh-sidebar__brand">
         <BrandMark size={32} onDark />
+        <button
+          type="button"
+          className="sh-sidebar__close"
+          onClick={() => setOpen(false)}
+          aria-label="Tutup menu"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       <div className="sh-sidebar__group-label">{ROLE_LABEL[role]}</div>

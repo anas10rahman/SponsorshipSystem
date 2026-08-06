@@ -106,20 +106,20 @@ export default function AdminPengajuan() {
                     const badge = pengajuanBadge(p.status);
                     return (
                       <tr key={p.id}>
-                        <td>
+                        <td data-label="ID">
                           <code style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
                             {p.id}
                           </code>
                         </td>
-                        <td>{p.eventName}</td>
-                        <td>{org?.name ?? "—"}</td>
-                        <td>{funder?.name ?? "—"}</td>
-                        <td>{packageCountLabel(p)}</td>
-                        <td className="num">{pengajuanAmountLabel(p)}</td>
-                        <td>
+                        <td data-label="Event">{p.eventName}</td>
+                        <td data-label="Organisasi">{org?.name ?? "—"}</td>
+                        <td data-label="Mitra Sponsor">{funder?.name ?? "—"}</td>
+                        <td data-label="Paket">{packageCountLabel(p)}</td>
+                        <td className="num" data-label="Nominal">{pengajuanAmountLabel(p)}</td>
+                        <td data-label="Status">
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                         </td>
-                        <td className="sh-muted">{formatDate(p.updatedAt)}</td>
+                        <td className="sh-muted" data-label="Tanggal">{formatDate(p.updatedAt)}</td>
                         <td>
                           <button
                             className="sh-btn sh-btn--ghost sh-btn--sm"

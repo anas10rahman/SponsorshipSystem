@@ -245,25 +245,25 @@ export default function FunderPengajuanInbox() {
                       const badge = pengajuanBadge(p.status);
                       return (
                         <tr key={p.id}>
-                          <td>
+                          <td data-label="Organisasi">
                             {org ? (
                               <Link to={`/funder/organisasi/${org.id}`}>{org.name}</Link>
                             ) : (
                               "—"
                             )}
                           </td>
-                          <td>
+                          <td data-label="Event">
                             <div style={{ fontWeight: 600 }}>{p.eventName}</div>
                             <div className="sh-muted" style={{ fontSize: 12 }}>
                               {p.eventLocation}
                             </div>
                           </td>
-                          <td>{org?.category || "—"}</td>
-                          <td className="sh-muted">{formatDate(p.createdAt)}</td>
-                          <td>
+                          <td data-label="Kategori">{org?.category || "—"}</td>
+                          <td className="sh-muted" data-label="Tanggal Pengajuan">{formatDate(p.createdAt)}</td>
+                          <td data-label="Status">
                             <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                           </td>
-                          <td>
+                          <td data-label="Aksi">
                             <Link
                               to={`/funder/pengajuan/${p.id}`}
                               className="sh-btn sh-btn--ghost sh-btn--sm"
