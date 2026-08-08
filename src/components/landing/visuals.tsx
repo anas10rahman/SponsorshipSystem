@@ -48,13 +48,19 @@ export function MatchVisual() {
   );
 }
 
-/** Diagram kecil di section Tentang: Organisasi ─◆─ Mitra Sponsor. */
+/** Logo DealMatch sebagai visual section Tentang. Lambangnya sendiri sudah
+ *  menyatakan "Two Sides. One Match." — D biru dan M hijau disambung satu
+ *  node — jadi lebih kuat daripada diagram abstrak yang mengulang hal sama. */
 export function AboutDiagram() {
   return (
-    <div className="lp-about__diagram" aria-hidden="true">
-      <span className="lp-about__node lp-about__node--org">ORGANISASI</span>
-      <span className="lp-about__arrow" />
-      <span className="lp-about__node lp-about__node--sponsor">SPONSOR</span>
+    <div className="lp-about__diagram">
+      <img
+        src="/logo-mark.png"
+        alt="Logo DealMatch"
+        className="lp-about__logo"
+        width={180}
+        height={180}
+      />
     </div>
   );
 }

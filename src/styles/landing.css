@@ -269,7 +269,7 @@ html:has(.lp) {
   line-height: 1.08;
   letter-spacing: -0.03em;
   font-weight: var(--weight-extrabold);
-  margin: var(--space-5) 0 var(--space-5);
+  margin: 0 0 var(--space-5);
 }
 .lp-hero__title .lp-accent {
   color: var(--dm-blue);
@@ -278,18 +278,6 @@ html:has(.lp) {
   font-size: var(--text-lg);
   color: var(--ink-500);
   max-width: 480px;
-  margin-bottom: var(--space-7);
-}
-.lp-hero__ctas {
-  display: flex;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-  margin-bottom: var(--space-6);
-}
-.lp-hero__note {
-  font-size: var(--text-sm);
-  color: var(--ink-300);
-  font-family: var(--font-mono);
 }
 
 /* Visual tanda tangan: dua sisi bertemu di satu node.
@@ -418,44 +406,16 @@ html:has(.lp) {
   align-items: center;
 }
 .lp-about__diagram {
-  display: flex;
-  align-items: center;
-  padding: var(--space-8) var(--space-5);
+  display: grid;
+  place-items: center;
+  padding: var(--space-9) var(--space-6);
   border: 1px solid var(--line);
   border-radius: 20px;
   background: var(--lp-surface);
 }
-.lp-about__node {
-  flex: 1;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  padding: var(--space-3);
-}
-.lp-about__node--org {
-  color: var(--dm-blue);
-}
-.lp-about__node--sponsor {
-  color: var(--green-700);
-}
-.lp-about__arrow {
-  flex: none;
-  width: 80px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--dm-blue), var(--dm-green));
-  position: relative;
-}
-.lp-about__arrow::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  transform: translate(-50%, -50%) rotate(45deg);
-  background: var(--dm-blue);
-  border-radius: 2px;
+.lp-about__logo {
+  width: 180px;
+  height: auto;
 }
 .lp-about__big {
   font-size: var(--text-xl);
@@ -992,8 +952,8 @@ html:has(.lp) {
   .lp-values {
     grid-template-columns: 1fr;
   }
-  .lp-hero__ctas .lp-btn {
-    flex: 1 1 100%;
+  .lp-about__logo {
+    width: 140px;
   }
   .lp-aud,
   .lp-ready__card {
