@@ -543,99 +543,145 @@ html:has(.lp) {
   color: var(--dm-green);
 }
 
-/* ---------- Cara kerja: tab peran + timeline ---------- */
-.lp-tabs {
-  display: inline-flex;
-  gap: 4px;
-  padding: 4px;
-  background: var(--lp-surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  margin-bottom: var(--space-8);
+/* ---------- Cara kerja: dua alur berdampingan ----------
+   Organisasi di kiri dengan rel menempel ke tepi kiri, Mitra Sponsor di
+   kanan dengan rel menempel ke tepi kanan, sehingga teks kedua sisi
+   mengalir ke tengah.
+
+   Titik milestone berada di dalam baris grid yang sama dengan judulnya,
+   dan garis penghubung ditarik dari bawah titik itu sampai tepi bawah
+   langkah. Jadi keduanya terikat pada kotak yang sama dan tidak bisa
+   melenceng betapa pun teksnya memanjang. */
+/* Baris disamakan lintas kolom lewat subgrid: langkah ke-N kedua sisi
+   duduk di baris yang sama, jadi "Daftar & Lengkapi Profil" milik
+   Organisasi sejajar dengan milik Mitra Sponsor. Kalau subgrid tidak
+   didukung, tiap kolom jatuh kembali ke baris sendiri — tetap rapi,
+   hanya tidak sejajar antar-kolom. */
+.lp-flows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto repeat(5, auto);
+  column-gap: var(--space-8);
+  row-gap: 0;
 }
-.lp-tab {
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-base);
-  color: var(--ink-500);
-  padding: 10px 22px;
-  border-radius: 9px;
-  transition: all var(--duration-base) var(--ease-standard);
-}
-.lp-tab:hover {
-  color: var(--ink-900);
-}
-.lp-tab.is-active {
-  color: #fff;
-}
-.lp-tab.is-active[data-side="org"] {
-  background: var(--dm-blue);
-}
-.lp-tab.is-active[data-side="sponsor"] {
-  background: var(--dm-green);
+.lp-flow {
+  display: grid;
+  grid-row: span 6;
+  grid-template-rows: subgrid;
 }
 
-.lp-timeline {
+.lp-flow--org {
+  --flow-accent: var(--dm-blue);
+  --flow-soft: var(--lp-org-soft);
+  --flow-halo: rgba(30, 58, 138, 0.14);
+}
+.lp-flow--sponsor {
+  --flow-accent: var(--dm-green);
+  --flow-soft: var(--lp-sponsor-soft);
+  --flow-halo: rgba(16, 185, 129, 0.18);
+}
+
+.lp-flow__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--flow-accent);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--line);
+}
+.lp-flow__badge {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--flow-soft);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.lp-flow__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-row: span 5;
+  grid-template-rows: subgrid;
+}
+.lp-flow__step {
   position: relative;
-  max-width: 760px;
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  column-gap: var(--space-5);
+  padding-bottom: var(--space-8);
 }
-.lp-timeline::before {
-  content: "";
-  position: absolute;
-  left: 27px;
-  top: 14px;
-  bottom: 14px;
-  width: 1.5px;
-  background: repeating-linear-gradient(
-    180deg,
-    var(--line-strong) 0 6px,
-    transparent 6px 12px
-  );
-}
-.lp-tl {
-  position: relative;
-  padding: 0 0 var(--space-8) 76px;
-}
-.lp-tl:last-child {
+.lp-flow__step:last-child {
   padding-bottom: 0;
 }
-.lp-tl__num {
+/* Penghubung antar-milestone: dari bawah titik ini sampai titik berikutnya. */
+.lp-flow__step::before {
+  content: "";
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 56px;
-  height: 56px;
+  top: 46px;
+  bottom: 0;
+  left: 22px;
+  width: 2px;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--flow-accent) 0 5px,
+    transparent 5px 11px
+  );
+  opacity: 0.4;
+}
+.lp-flow__step:last-child::before {
+  content: none;
+}
+
+.lp-flow__marker {
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  background: var(--lp-surface);
-  border: 1.5px solid var(--line);
+  background: var(--flow-accent);
+  color: #fff;
   display: grid;
   place-items: center;
   font-family: var(--font-mono);
   font-weight: var(--weight-bold);
-  font-size: var(--text-lg);
-  color: var(--ink-300);
-  transition: all var(--duration-slow) var(--ease-standard);
-}
-.lp-tl.is-in .lp-tl__num {
-  border-color: var(--lp-accent);
-  color: var(--lp-accent);
-  box-shadow: 0 0 0 6px var(--lp-accent-halo);
-}
-.lp-timeline[data-side="org"] {
-  --lp-accent: var(--dm-blue);
-  --lp-accent-halo: rgba(30, 58, 138, 0.09);
-}
-.lp-timeline[data-side="sponsor"] {
-  --lp-accent: var(--dm-green);
-  --lp-accent-halo: rgba(16, 185, 129, 0.12);
-}
-.lp-tl h3 {
-  font-size: var(--text-xl);
-  margin-bottom: var(--space-2);
-}
-.lp-tl p {
-  color: var(--ink-500);
   font-size: var(--text-md);
-  max-width: 520px;
+  box-shadow: 0 0 0 6px var(--flow-halo);
+  position: relative;
+  z-index: 1;
+}
+
+.lp-flow__body h3 {
+  font-size: var(--text-lg);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.lp-flow__body p {
+  font-size: var(--text-base);
+  color: var(--ink-500);
+}
+
+/* Sisi kanan dicerminkan: rel pindah ke tepi kanan, teks rata kanan. */
+.lp-flow--sponsor .lp-flow__head {
+  flex-direction: row-reverse;
+}
+.lp-flow--sponsor .lp-flow__step {
+  grid-template-columns: 1fr 46px;
+}
+.lp-flow--sponsor .lp-flow__marker {
+  order: 2;
+}
+.lp-flow--sponsor .lp-flow__body {
+  order: 1;
+  text-align: right;
+}
+.lp-flow--sponsor .lp-flow__step::before {
+  left: auto;
+  right: 22px;
 }
 
 /* ---------- Ready to match ---------- */
@@ -886,6 +932,35 @@ html:has(.lp) {
   .lp-ready {
     grid-template-columns: 1fr;
   }
+  /* Saat kedua alur menumpuk, tidak ada lagi "sisi kanan" — pencerminan
+     dibatalkan supaya keduanya terbaca dari tepi kiri yang sama. */
+  .lp-flows {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    row-gap: var(--space-9);
+  }
+  .lp-flow,
+  .lp-flow__list {
+    display: block;
+    grid-row: auto;
+  }
+  .lp-flow--sponsor .lp-flow__head {
+    flex-direction: row;
+  }
+  .lp-flow--sponsor .lp-flow__step {
+    grid-template-columns: 46px 1fr;
+  }
+  .lp-flow--sponsor .lp-flow__marker {
+    order: 0;
+  }
+  .lp-flow--sponsor .lp-flow__body {
+    order: 0;
+    text-align: left;
+  }
+  .lp-flow--sponsor .lp-flow__step::before {
+    left: 22px;
+    right: auto;
+  }
   .lp-foot__grid {
     grid-template-columns: 1fr 1fr;
     gap: var(--space-6);
@@ -915,17 +990,6 @@ html:has(.lp) {
   .lp-aud,
   .lp-ready__card {
     padding: var(--space-6);
-  }
-  .lp-tl {
-    padding-left: 60px;
-  }
-  .lp-tl__num {
-    width: 44px;
-    height: 44px;
-    font-size: var(--text-md);
-  }
-  .lp-timeline::before {
-    left: 21px;
   }
   .lp-saldo__row {
     flex-direction: column;
