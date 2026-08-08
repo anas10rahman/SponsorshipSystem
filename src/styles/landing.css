@@ -155,25 +155,6 @@ html:has(.lp) {
   color: var(--dm-blue);
 }
 
-.lp-btn--ghost-org {
-  background: transparent;
-  color: var(--dm-blue);
-  border-color: rgba(30, 58, 138, 0.35);
-}
-.lp-btn--ghost-org:hover {
-  background: var(--lp-org-soft);
-  border-color: var(--dm-blue);
-}
-.lp-btn--ghost-sponsor {
-  background: transparent;
-  color: var(--green-700);
-  border-color: rgba(16, 185, 129, 0.4);
-}
-.lp-btn--ghost-sponsor:hover {
-  background: var(--lp-sponsor-soft);
-  border-color: var(--dm-green);
-}
-
 /* ---------- Nav ---------- */
 .lp-nav {
   position: sticky;
@@ -802,30 +783,6 @@ html:has(.lp) {
   font-size: var(--text-md);
   color: var(--ink-500);
   max-width: 680px;
-}
-
-/* ---------- Penutup ---------- */
-.lp-outro {
-  text-align: center;
-  padding: var(--space-9) 0 0;
-  border-top: 1px solid var(--line);
-  margin-top: var(--space-9);
-}
-.lp-outro h2 {
-  font-size: clamp(24px, 3vw, 32px);
-  letter-spacing: -0.028em;
-}
-.lp-outro p {
-  color: var(--ink-500);
-  margin-top: var(--space-3);
-  font-size: var(--text-md);
-}
-.lp-outro__ctas {
-  margin-top: var(--space-6);
-  display: flex;
-  gap: var(--space-3);
-  justify-content: center;
-  flex-wrap: wrap;
 }
 
 /* ---------- Footer ---------- */

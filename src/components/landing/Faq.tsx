@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-import { Building2, Users } from "lucide-react";
 import { FAQ } from "@/lib/landingContent";
 import { SaldoTable } from "./SaldoTable";
 
@@ -34,22 +32,6 @@ export function Faq() {
               </div>
             </details>
           ))}
-        </div>
-
-        <div className="lp-outro" data-reveal>
-          <h2>Masih ada yang mau ditanyakan?</h2>
-          <p>
-            Tim kami siap bantu kamu mulai perjalanan sponsorship pertamamu di
-            DealMatch.
-          </p>
-          <div className="lp-outro__ctas">
-            <Link to="/register" className="lp-btn lp-btn--org">
-              <Users size={17} /> Daftar sebagai Organisasi
-            </Link>
-            <Link to="/register" className="lp-btn lp-btn--ghost-sponsor">
-              <Building2 size={17} /> Daftar sebagai Mitra Sponsor
-            </Link>
-          </div>
         </div>
       </div>
     </section>
