@@ -38,7 +38,14 @@ export default function Login() {
     <main className="sh-login">
       <form className="sh-login__card" onSubmit={onSubmit}>
         <div className="sh-login__brand">
-          <BrandMark />
+          <Link
+            to="/"
+            title="Kembali ke beranda"
+            aria-label="Kembali ke beranda"
+            style={{ display: "inline-flex", textDecoration: "none" }}
+          >
+            <BrandMark />
+          </Link>
         </div>
         <h1 className="sh-login__title">Login Sponsorship</h1>
         <p className="sh-login__sub">Masuk ke akun Anda, atau daftar akun baru.</p>

@@ -91,7 +91,14 @@ export default function Register() {
       <main className="sh-login">
         <div className="sh-login__card">
           <div className="sh-login__brand">
-            <BrandMark />
+            <Link
+              to="/"
+              title="Kembali ke beranda"
+              aria-label="Kembali ke beranda"
+              style={{ display: "inline-flex", textDecoration: "none" }}
+            >
+              <BrandMark />
+            </Link>
           </div>
           <h1 className="sh-login__title">Buat akun</h1>
           <p className="sh-login__sub">Daftar sebagai apa Anda ingin bergabung?</p>
@@ -128,7 +135,14 @@ export default function Register() {
     <main className="sh-login">
       <form className="sh-login__card" onSubmit={onSubmit}>
         <div className="sh-login__brand">
-          <BrandMark />
+          <Link
+            to="/"
+            title="Kembali ke beranda"
+            aria-label="Kembali ke beranda"
+            style={{ display: "inline-flex", textDecoration: "none" }}
+          >
+            <BrandMark />
+          </Link>
         </div>
         <h1 className="sh-login__title">Daftar sebagai {roleLabel}</h1>
         <button
