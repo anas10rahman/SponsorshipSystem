@@ -1,84 +1,185 @@
 /* ============================================================
-   Naskah landing page — semua teks & angka terpusat di sini
-   supaya bisa diubah tanpa menyentuh komponen.
+   Naskah landing page — sumber: "DealMatch Compro.docx" +
+   reference.html. Semua teks terpusat di sini supaya bisa
+   diubah tanpa menyentuh komponen.
+
+   Dua sisi platform dipetakan ke dua warna brand:
+     Organisasi   → biru  (--dm-blue  #1E3A8A)
+     Mitra Sponsor → hijau (--dm-green #10B981)
+   Sama seperti logo DM: D biru dan M hijau disambung satu node.
    ============================================================ */
 
-/* ⚠️⚠️ TODO ANAS — ANGKA DI BAWAH MASIH CONTOH, BUKAN DATA NYATA ⚠️⚠️
-   Ganti sebelum landing page dipromosikan ke calon pengguna.
-   Kalau belum ada angka yang layak dipajang, set `TAMPILKAN_ANGKA = false`
-   dan strip statistik di hero otomatis hilang tanpa menyisakan ruang kosong. */
-export const TAMPILKAN_ANGKA = true;
+export const TAGLINE = "Two Sides. One Match.";
 
-export const ANGKA_HERO = [
-  { value: "120+", label: "Organisasi terdaftar" },
-  { value: "45+", label: "Mitra sponsor" },
-  { value: "Rp 2,4 M", label: "Dana tersalurkan" },
-] as const;
-/* ⚠️⚠️ AKHIR BLOK ANGKA CONTOH ⚠️⚠️ */
-
-/** Klaim faktual — aman dipajang karena semuanya benar apa adanya. */
-export const TRUST_ITEMS = [
-  { icon: "shield", text: "Verifikasi organisasi" },
-  { icon: "doc", text: "Dokumen resmi terlampir" },
-  { icon: "clock", text: "Biaya pengajuan Rp 50.000" },
+export const NAV_LINKS = [
+  { href: "/#beranda", label: "Beranda" },
+  { href: "/#tentang", label: "Tentang Kami" },
+  { href: "/#untuk-siapa", label: "Untuk Siapa" },
+  { href: "/#cara-kerja", label: "Cara Kerja" },
+  { href: "/#faq", label: "FAQ" },
 ] as const;
 
-export const STEPS = [
+/* ---------- Tentang Kami ---------- */
+
+export const ABOUT_LEAD =
+  "DealMatch menghubungkan Organisasi dengan Mitra Sponsor dalam satu platform yang lebih mudah, cepat, dan terarah.";
+
+export const ABOUT_BODY =
+  "Kami membantu Organisasi mengajukan proposal sponsorship dengan lebih mudah. Di sisi lain, DealMatch membantu Mitra Sponsor menemukan peluang kolaborasi yang sesuai dengan tujuan campaign dan target audiens.";
+
+export const VALUE_PROPS = [
   {
-    title: "Daftar & verifikasi",
-    desc: "Buat akun sebagai organisasi atau mitra sponsor, lengkapi profil dan dokumen legalitas.",
+    title: "Smart Matching",
+    desc: "Tidak perlu lagi mengirim proposal secara acak. Incar mitra sponsor impianmu langsung.",
   },
   {
-    title: "Cari mitra sponsor",
-    desc: "Telusuri direktori mitra sponsor, lihat portofolio dan bidang yang mereka dukung.",
+    title: "One Platform",
+    desc: "Seluruh proses sponsorship terintegrasi dalam satu platform, dari awal sampai deal.",
   },
   {
-    title: "Susun pengajuan",
-    desc: "Isi informasi event, rancang paket sponsorship, lampirkan proposal PDF, lalu kirim.",
+    title: "Transparent Process",
+    desc: "Pantau status proposal dan saldo secara real-time, tanpa tebak-tebakan.",
   },
   {
-    title: "Sponsor memutuskan",
-    desc: "Mitra sponsor memilih paket lalu menyetujui, menolak, atau meminta revisi.",
+    title: "Quality Connections",
+    desc: "Kami hubungkan kamu dengan mitra sponsor yang benar-benar relevan dengan event-mu.",
+  },
+  {
+    title: "Save Time",
+    desc: "Proses terstruktur dengan batas waktu respons yang jelas. Tidak perlu menunggu tanpa kepastian.",
   },
 ] as const;
 
-export const FEATURES = [
+/* ---------- Untuk Siapa ---------- */
+
+export const AUDIENCES = [
   {
-    icon: "layers",
-    title: "Paket sponsorship",
-    desc: "Tawarkan beberapa tingkat nominal beserta benefitnya dalam satu pengajuan.",
+    side: "org",
+    title: "Organisasi",
+    who: "EO, Komunitas, BEM, HIMA, Karang Taruna, dan organisasi yang butuh support sponsor.",
+    points: [
+      "Temukan mitra sponsor yang paling relevan",
+      "Ajukan proposal langsung, simpan sebagai draft, lanjutkan kapan saja",
+      "Lacak status tiap pengajuan dari satu dasbor",
+      "Dapatkan kepastian status: Disetujui, Perlu Revisi, atau Ditolak",
+      "Bangun kolaborasi jangka panjang setelah proposal disetujui",
+    ],
   },
   {
-    icon: "doc",
-    title: "Dokumen wajib",
-    desc: "Proposal PDF ikut terkirim, jadi sponsor punya bahan lengkap untuk menilai.",
-  },
-  {
-    icon: "revise",
-    title: "Alur revisi",
-    desc: "Sponsor bisa minta perbaikan tanpa harus menolak pengajuan dari awal.",
-  },
-  {
-    icon: "lock",
-    title: "Kontak ber-gate",
-    desc: "Nomor telepon baru terbuka setelah ada pengajuan, koordinasi tetap di dalam sistem.",
-  },
-  {
-    icon: "eye",
-    title: "Pengawasan admin",
-    desc: "Admin memantau setiap pengajuan dan transaksi yang berjalan di platform.",
-  },
-  {
-    icon: "bell",
-    title: "Notifikasi & laporan",
-    desc: "Setiap perubahan status masuk notifikasi, rekapnya bisa diekspor.",
+    side: "sponsor",
+    title: "Mitra Sponsor",
+    who: "Brand, perusahaan, dan mitra yang ingin menjangkau audiens lewat event dan peluang kolaborasi.",
+    points: [
+      "Terima proposal yang sudah terkurasi",
+      "Tinjau detail acara secara lengkap",
+      "Konfirmasi status proposal dalam satu klik",
+      "Bangun eksposur ke komunitas yang tepat sasaran",
+    ],
   },
 ] as const;
+
+/* ---------- Cara Kerja (per peran) ---------- */
+
+export const FLOWS = {
+  org: [
+    {
+      title: "Daftar & Lengkapi Profil",
+      desc: "Buat akun sebagai Organisasi, lengkapi profil dan dokumen legalitas.",
+    },
+    {
+      title: "Verifikasi oleh Admin",
+      desc: "Data dan dokumen ditinjau Admin untuk memastikan setiap akun memiliki informasi yang valid sebelum dapat menggunakan platform.",
+    },
+    {
+      title: "Temukan Mitra Sponsor",
+      desc: "Telusuri direktori Mitra Sponsor sesuai kebutuhan event, bidang yang didukung, dan peluang kolaborasi yang ditawarkan.",
+    },
+    {
+      title: "Ajukan Proposal",
+      desc: "Lengkapi informasi event, pilih atau susun paket sponsorship, unggah proposal PDF, lalu kirim pengajuan kepada Mitra Sponsor pilihanmu.",
+    },
+    {
+      title: "Dapatkan Dukungan Sponsor",
+      desc: "Mitra Sponsor meninjau pengajuan dan memberikan keputusan akhir proposal event.",
+    },
+  ],
+  sponsor: [
+    {
+      title: "Daftar & Lengkapi Profil",
+      desc: "Buat akun sebagai Mitra Sponsor, lengkapi profil dan dokumen legalitas.",
+    },
+    {
+      title: "Verifikasi oleh Admin",
+      desc: "Data dan dokumen ditinjau Admin untuk memastikan setiap akun memiliki informasi yang valid sebelum dapat menggunakan platform.",
+    },
+    {
+      title: "Terima Proposal",
+      desc: "Lihat proposal event yang masuk dan temukan peluang kolaborasi yang sesuai dengan target audiens.",
+    },
+    {
+      title: "Tinjau Proposal",
+      desc: "Pelajari detail event, target audiens, benefit sponsorship, paket yang ditawarkan, serta informasi pendukung lainnya.",
+    },
+    {
+      title: "Tentukan Keputusan Kerjasama",
+      desc: "Berikan keputusan terhadap proposal: Disetujui, Perlu Revisi, atau Ditolak.",
+    },
+  ],
+} as const;
+
+/* ---------- Ready to Match ---------- */
+
+export const READY_CARDS = [
+  {
+    side: "org",
+    title: "Sedang mencari sponsor?",
+    desc: "Daftarkan organisasi kamu dan temukan mitra sponsor terbaik untuk event kamu.",
+    cta: "Daftar sekarang",
+  },
+  {
+    side: "sponsor",
+    title: "Tertarik menjadi sponsor?",
+    desc: "Daftarkan perusahaan atau brand kamu sebagai mitra sponsor terpercaya.",
+    cta: "Daftar sekarang",
+  },
+] as const;
+
+/* ---------- Rincian saldo (jawaban FAQ pertama) ---------- */
+
+export const SALDO_ROWS = [
+  {
+    title: "Pengajuan dikirim",
+    desc: "Dipotong saat proposal diajukan ke brand pilihan",
+    amount: "− Rp50.000",
+    tone: "minus",
+  },
+  {
+    title: "Brand menyetujui",
+    desc: "Kontak brand terbuka, biaya pengajuan resmi terpakai",
+    amount: "Terpakai",
+    tone: "neutral",
+  },
+  {
+    title: "Brand menolak",
+    desc: "Sebagian saldo dikembalikan otomatis ke akun kamu",
+    amount: "+ Rp40.000",
+    tone: "plus",
+  },
+  {
+    title: "Tidak direspons > 7 hari",
+    desc: "Dianggap kelalaian brand, bukan tanggung jawab kamu",
+    amount: "+ Rp50.000",
+    tone: "plus",
+  },
+] as const;
+
+/* ---------- FAQ ---------- */
 
 export const FAQ = [
   {
     q: "Apakah mendaftar dikenakan biaya?",
-    a: "Mendaftar dan membuat akun gratis. Biaya Rp 50.000 hanya dikenakan saat Anda mengirim satu pengajuan ke mitra sponsor.",
+    a: "Mendaftar dan membuat akun gratis. Saat pengajuan dikenakan biaya dengan sistem saldo seperti berikut:",
+    withSaldo: true,
   },
   {
     q: "Siapa yang bisa memulai pengajuan?",
@@ -102,24 +203,33 @@ export const FAQ = [
   },
 ] as const;
 
-export const ORG_BENEFITS = [
-  "Ajukan ke mitra sponsor yang relevan, bukan sebar proposal acak",
-  "Simpan sebagai draf, lanjutkan kapan saja",
-  "Lacak status tiap pengajuan dari satu dasbor",
-] as const;
+/* ---------- Footer ---------- */
 
-export const FUNDER_BENEFITS = [
-  "Pengajuan masuk rapi ke inbox, lengkap dengan dokumen",
-  "Bandingkan paket sponsorship sebelum memutuskan",
-  "Keputusan Anda final — tanpa perantara",
-] as const;
+export const FOOTER_TAGLINE =
+  "Platform yang mempertemukan Organisasi dan Mitra Sponsor — lebih mudah, cepat, dan terarah.";
 
-/** Href diawali "/" supaya tautan ini juga bekerja dari halaman legal:
- *  dari landing ia cuma menggeser scroll (same-document), dari halaman lain
- *  ia kembali ke beranda lalu meloncat ke section yang dituju. */
-export const NAV_LINKS = [
-  { href: "/#cara-kerja", label: "Cara kerja" },
-  { href: "/#untuk-siapa", label: "Untuk siapa" },
-  { href: "/#fitur", label: "Fitur" },
-  { href: "/#faq", label: "FAQ" },
+export const FOOTER_COLUMNS = [
+  {
+    title: "Produk",
+    links: [
+      { label: "Tentang", href: "/#tentang" },
+      { label: "Cara Kerja", href: "/#cara-kerja" },
+      { label: "Biaya", href: "/#faq" },
+    ],
+  },
+  {
+    title: "Untuk",
+    links: [
+      { label: "Organisasi", href: "/#untuk-siapa" },
+      { label: "Mitra Sponsor", href: "/#untuk-siapa" },
+    ],
+  },
+  {
+    title: "Bantuan",
+    links: [
+      { label: "FAQ", href: "/#faq" },
+      { label: "Kebijakan Privasi", href: "/kebijakan-privasi" },
+      { label: "Syarat & Ketentuan", href: "/syarat-ketentuan" },
+    ],
+  },
 ] as const;

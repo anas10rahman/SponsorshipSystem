@@ -1,15 +1,17 @@
+import { About } from "@/components/landing/About";
 import { Faq } from "@/components/landing/Faq";
-import { Features } from "@/components/landing/Features";
-import { FinalCta } from "@/components/landing/FinalCta";
 import { ForWho } from "@/components/landing/ForWho";
+import { HowItWorks } from "@/components/landing/HowItWorks";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingNav } from "@/components/landing/LandingNav";
-import { HowItWorks } from "@/components/landing/HowItWorks";
+import { ReadyToMatch } from "@/components/landing/ReadyToMatch";
 import { useReveal } from "@/components/landing/useReveal";
 
 /** Halaman publik di "/" — dirender tanpa menunggu data ter-hydrate,
- *  jadi pengunjung anonim tidak pernah melihat layar "Memuat data…". */
+ *  jadi pengunjung anonim tidak pernah melihat layar "Memuat data…".
+ *  Struktur & naskah mengikuti Compro: Beranda, Tentang Kami,
+ *  Untuk Siapa, Cara Kerja, Ready to Match, FAQ. */
 export default function Landing() {
   useReveal();
 
@@ -18,11 +20,11 @@ export default function Landing() {
       <LandingNav />
       <main>
         <LandingHero />
-        <HowItWorks />
+        <About />
         <ForWho />
-        <Features />
+        <HowItWorks />
+        <ReadyToMatch />
         <Faq />
-        <FinalCta />
       </main>
       <LandingFooter />
     </div>

@@ -5,8 +5,7 @@ import { BrandMark } from "@/components/BrandMark";
 import { NAV_LINKS } from "@/lib/landingContent";
 
 /** Nav landing yang menempel di atas. "Masuk" sengaja berupa tautan teks
- *  supaya "Daftar gratis" jadi satu-satunya tombol solid — arah untuk
- *  pengunjung baru tidak bersaing dengan tombol lain. */
+ *  supaya "Daftar Sekarang" jadi satu-satunya tombol solid di nav. */
 export function LandingNav() {
   const [open, setOpen] = useState(false);
 
@@ -19,7 +18,7 @@ export function LandingNav() {
 
         <nav className="lp-nav__links">
           {NAV_LINKS.map((l) => (
-            <a key={l.href} href={l.href}>
+            <a key={l.href + l.label} href={l.href}>
               {l.label}
             </a>
           ))}
@@ -29,8 +28,8 @@ export function LandingNav() {
           <Link to="/login" className="lp-nav__masuk">
             Masuk
           </Link>
-          <Link to="/register" className="lp-btn lp-btn--primary">
-            Daftar gratis
+          <Link to="/register" className="lp-btn lp-btn--org lp-btn--sm">
+            Daftar Sekarang
           </Link>
         </div>
 
@@ -47,7 +46,7 @@ export function LandingNav() {
       <div className={`lp-drawer${open ? " is-open" : ""}`}>
         {NAV_LINKS.map((l) => (
           <a
-            key={l.href}
+            key={l.href + l.label}
             href={l.href}
             className="lp-drawer__link"
             onClick={() => setOpen(false)}
@@ -56,8 +55,8 @@ export function LandingNav() {
           </a>
         ))}
         <div className="lp-drawer__actions">
-          <Link to="/register" className="lp-btn lp-btn--primary">
-            Daftar gratis
+          <Link to="/register" className="lp-btn lp-btn--org">
+            Daftar Sekarang
           </Link>
           <Link to="/login" className="lp-btn lp-btn--outline">
             Masuk
