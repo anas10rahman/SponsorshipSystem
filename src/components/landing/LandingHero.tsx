@@ -11,9 +11,10 @@ export function LandingHero() {
           </h1>
 
           <p className="lp-hero__lead">
-            Temukan match-mu di sini. Dapatkan sponsor yang relevan, jangkau
-            audiens yang tepat, dan bangun kolaborasi bernilai — dalam satu
-            platform.
+            Temukan match-mu di sini!
+            <br />
+            Dapatkan sponsor yang relevan, jangkau audiens yang tepat, dan
+            bangun kolaborasi bernilai dalam satu platform.
           </p>
         </div>
 

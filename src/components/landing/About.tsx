@@ -15,7 +15,6 @@ export function About() {
             <AboutDiagram />
           </div>
           <div data-reveal>
-            <span className="lp-eyebrow">Tentang DealMatch</span>
             <h2 className="lp-h2">{TAGLINE}</h2>
             <p className="lp-about__big" style={{ marginTop: 16 }}>
               {ABOUT_LEAD}
@@ -29,8 +28,7 @@ export function About() {
           style={{ margin: "80px 0 40px" }}
           data-reveal
         >
-          <span className="lp-eyebrow">Kenapa DealMatch</span>
-          <h2>Kenapa harus memilih DealMatch?</h2>
+          <h2>Kenapa DealMatch?</h2>
         </div>
 
         <div className="lp-values">
@@ -56,10 +54,6 @@ export function About() {
               <p>{v.desc}</p>
             </article>
           ))}
-
-          <div className="lp-value lp-value--end" data-reveal>
-            {TAGLINE}
-          </div>
         </div>
       </div>
     </section>

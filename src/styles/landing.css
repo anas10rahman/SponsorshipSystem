@@ -78,31 +78,6 @@ html:has(.lp) {
   }
 }
 
-/* ---------- Eyebrow ---------- */
-.lp-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-weight: var(--weight-medium);
-  color: var(--ink-500);
-  padding: 6px 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
-  background: var(--lp-surface);
-}
-.lp-eyebrow::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--dm-green);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
-}
-
 /* ---------- Tombol ---------- */
 .lp-btn {
   display: inline-flex;
@@ -377,7 +352,6 @@ html:has(.lp) {
 .lp-sec__head h2,
 .lp-h2 {
   font-size: clamp(26px, 3.4vw, 38px);
-  margin-top: var(--space-4);
   letter-spacing: -0.028em;
   line-height: 1.16;
 }
@@ -397,14 +371,35 @@ html:has(.lp) {
 .lp-about__diagram {
   display: grid;
   place-items: center;
-  padding: var(--space-9) var(--space-6);
+  padding: var(--space-10) var(--space-6);
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: var(--lp-surface);
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(30, 58, 138, 0.07),
+      transparent 62%
+    ),
+    var(--lp-surface);
+  perspective: 900px;
 }
+/* Kedalaman palsu untuk logo yang sumbernya datar: kemiringan perspektif
+   plus bayangan berlapis yang menumpuk sedikit demi sedikit, membentuk
+   kesan sisi timbul. Ini bukan render 3D — untuk itu perlu aset hasil
+   render, bukan CSS. */
 .lp-about__logo {
-  width: 180px;
+  width: 220px;
   height: auto;
+  transform: rotateX(11deg) rotateY(-13deg);
+  filter: drop-shadow(1px 1px 0 rgba(11, 21, 49, 0.2))
+    drop-shadow(2px 2px 0 rgba(11, 21, 49, 0.16))
+    drop-shadow(3px 3px 0 rgba(11, 21, 49, 0.12))
+    drop-shadow(4px 4px 0 rgba(11, 21, 49, 0.08))
+    drop-shadow(0 18px 26px rgba(30, 58, 138, 0.26));
+  transition: transform 0.5s var(--ease-standard);
+}
+.lp-about__diagram:hover .lp-about__logo {
+  transform: rotateX(4deg) rotateY(-5deg) scale(1.04);
 }
 .lp-about__big {
   font-size: var(--text-xl);
@@ -420,12 +415,18 @@ html:has(.lp) {
 /* ---------- Grid nilai (01–05) ----------
    Kartu berdiri sendiri dengan bingkai dan jarak, terangkat saat disentuh
    kursor. */
+/* Flex, bukan grid: lima kartu di tiga kolom menyisakan baris terakhir
+   berisi dua kartu. Grid akan memakukannya ke kolom 1–2; flex-wrap dengan
+   justify-content:center membuat baris sisa itu duduk di tengah. */
 .lp-values {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-5);
 }
 .lp-value {
+  flex: 0 1 calc((100% - 2 * var(--space-5)) / 3);
+  min-width: 240px;
   background: var(--lp-surface);
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -480,27 +481,6 @@ html:has(.lp) {
 .lp-value p {
   color: var(--ink-500);
   font-size: var(--text-base);
-}
-
-/* Lima kartu di grid tiga kolom menyisakan satu sel kosong.
-   Diisi tagline supaya barisnya tetap utuh. */
-.lp-value--end {
-  display: grid;
-  place-items: center;
-  text-align: center;
-  background: var(--lp-org-soft);
-  border-color: transparent;
-  color: var(--dm-blue);
-  font-family: var(--font-mono);
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-md);
-  letter-spacing: -0.01em;
-  box-shadow: none;
-}
-.lp-value--end:hover {
-  transform: none;
-  box-shadow: none;
-  border-color: transparent;
 }
 
 /* ---------- Untuk siapa ---------- */
@@ -968,8 +948,8 @@ html:has(.lp) {
     grid-template-columns: 1fr;
     gap: var(--space-7);
   }
-  .lp-values {
-    grid-template-columns: repeat(2, 1fr);
+  .lp-value {
+    flex-basis: calc((100% - var(--space-5)) / 2);
   }
   .lp-audience,
   .lp-ready {
@@ -1024,11 +1004,12 @@ html:has(.lp) {
   .lp-sec {
     padding: var(--space-9) 0;
   }
-  .lp-values {
-    grid-template-columns: 1fr;
+  .lp-value {
+    flex-basis: 100%;
+    min-width: 0;
   }
   .lp-about__logo {
-    width: 140px;
+    width: 160px;
   }
   .lp-aud,
   .lp-ready__card {

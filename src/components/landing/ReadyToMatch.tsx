@@ -9,8 +9,7 @@ export function ReadyToMatch() {
     <section className="lp-sec">
       <div className="lp-wrap">
         <div className="lp-sec__head lp-sec__head--center" data-reveal>
-          <span className="lp-eyebrow">Ready to Match?</span>
-          <h2>Pilih sisi kamu, mulai hari ini</h2>
+          <h2>Ready To Match?</h2>
         </div>
 
         <div className="lp-ready">

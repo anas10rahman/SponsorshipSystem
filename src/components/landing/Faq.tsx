@@ -8,8 +8,7 @@ export function Faq() {
     <section id="faq" className="lp-sec lp-sec--alt">
       <div className="lp-wrap">
         <div className="lp-sec__head" data-reveal>
-          <span className="lp-eyebrow">FAQ</span>
-          <h2>Pertanyaan yang sering muncul</h2>
+          <h2>FAQ</h2>
         </div>
 
         <div className="lp-faq">

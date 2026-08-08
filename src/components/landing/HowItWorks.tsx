@@ -19,12 +19,7 @@ export function HowItWorks() {
     <section id="cara-kerja" className="lp-sec lp-sec--alt">
       <div className="lp-wrap">
         <div className="lp-sec__head lp-sec__head--center" data-reveal>
-          <span className="lp-eyebrow">Cara Kerja</span>
-          <h2>Lima langkah, tanpa bolak-balik chat</h2>
-          <p>
-            Alurnya searah: organisasi yang mengajukan, mitra sponsor yang
-            memutuskan.
-          </p>
+          <h2>Cara DealMatch Bekerja</h2>
         </div>
 
         <div className="lp-flows">
