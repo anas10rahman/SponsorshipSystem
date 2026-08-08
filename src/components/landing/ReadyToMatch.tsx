@@ -21,7 +21,7 @@ export function ReadyToMatch() {
                 key={c.side}
                 className={`lp-ready__card lp-ready__card--${c.side}`}
                 data-reveal
-                style={{ transitionDelay: `${i * 90}ms` }}
+                style={{ animationDelay: `${i * 90}ms` }}
               >
                 <span className="lp-ready__glow" aria-hidden="true" />
                 <span className="lp-ready__icon">

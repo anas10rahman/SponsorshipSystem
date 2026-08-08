@@ -4,7 +4,7 @@ import {
   TAGLINE,
   VALUE_PROPS,
 } from "@/lib/landingContent";
-import { AboutDiagram } from "./visuals";
+import { AboutDiagram, ValueIcon } from "./visuals";
 
 export function About() {
   return (
@@ -24,26 +24,39 @@ export function About() {
           </div>
         </div>
 
-        <div className="lp-sec__head" style={{ margin: "80px 0 40px" }} data-reveal>
+        <div
+          className="lp-sec__head"
+          style={{ margin: "80px 0 40px" }}
+          data-reveal
+        >
           <span className="lp-eyebrow">Kenapa DealMatch</span>
           <h2>Kenapa harus memilih DealMatch?</h2>
         </div>
 
         <div className="lp-values">
           {VALUE_PROPS.map((v, i) => (
-            <div
+            <article
               key={v.title}
               className="lp-value"
               data-reveal
-              style={{ transitionDelay: `${(i % 3) * 70}ms` }}
+              style={{ animationDelay: `${(i % 3) * 70}ms` }}
             >
-              <div className="lp-value__num">
-                {String(i + 1).padStart(2, "0")}
+              <div className="lp-value__top">
+                <span className="lp-value__icon">
+                  <ValueIcon name={v.icon} />
+                </span>
+                {/* Referensi menaruh panah tautan di sudut ini. Kartu nilai
+                    tidak menuju ke mana pun, jadi diisi nomor langkah —
+                    menjaga keseimbangan sudutnya tanpa menjanjikan klik. */}
+                <span className="lp-value__num">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
               </div>
               <h3>{v.title}</h3>
               <p>{v.desc}</p>
-            </div>
+            </article>
           ))}
+
           <div className="lp-value lp-value--end" data-reveal>
             {TAGLINE}
           </div>

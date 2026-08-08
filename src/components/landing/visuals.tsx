@@ -1,3 +1,23 @@
+import { Clock, Eye, LayoutGrid, Sparkles, Target } from "lucide-react";
+
+/** Ikon nilai, dirujuk lewat nama string dari landingContent.ts.
+ *  Sengaja pakai Lucide yang sudah terpasang, bukan gambar dari CDN luar
+ *  seperti di referensi — kalau CDN-nya mati, kartunya ikut kosong. */
+const VALUE_ICONS = {
+  target: Target,
+  grid: LayoutGrid,
+  eye: Eye,
+  sparkles: Sparkles,
+  clock: Clock,
+} as const;
+
+export type ValueIconName = keyof typeof VALUE_ICONS;
+
+export function ValueIcon({ name }: { name: ValueIconName }) {
+  const Cmp = VALUE_ICONS[name];
+  return <Cmp size={20} strokeWidth={2} aria-hidden="true" />;
+}
+
 /** Visual tanda tangan hero: dua sisi bertemu di satu titik.
  *  Garis putus-putus biru datang dari sisi Organisasi, hijau dari sisi
  *  Mitra Sponsor, keduanya mengalir ke node DealMatch di tengah —

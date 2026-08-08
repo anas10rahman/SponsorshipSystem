@@ -43,7 +43,7 @@ export function HowItWorks() {
                     key={step.title}
                     className="lp-flow__step"
                     data-reveal
-                    style={{ transitionDelay: `${i * 70}ms` }}
+                    style={{ animationDelay: `${i * 70}ms` }}
                   >
                     <span className="lp-flow__marker" aria-hidden="true">
                       {i + 1}

@@ -60,14 +60,22 @@ html:has(.lp) {
    animasi murni lapisan tambahan. */
 .lp-reveal-on [data-reveal] {
   opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 0.6s var(--ease-standard),
-    transform 0.6s var(--ease-standard);
 }
+/* Keyframe, bukan transition + `transform: none` pada `.is-in`.
+   Aturan itu berspesifisitas (0,3,0) dan mengalahkan `:hover` (0,2,0) di
+   elemen yang sama, sehingga setiap efek angkat saat hover mati diam-diam
+   pada elemen yang juga ber-`data-reveal`. Tanpa `forwards`, elemen kembali
+   ke cascade normal begitu animasinya selesai; `backwards` dipakai agar
+   keadaan awal tetap berlaku selama animation-delay untuk efek bertahap. */
 .lp-reveal-on [data-reveal].is-in {
   opacity: 1;
-  transform: none;
+  animation: lp-rise 0.6s var(--ease-standard) backwards;
+}
+@keyframes lp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
 }
 
 /* ---------- Eyebrow ---------- */
@@ -409,47 +417,61 @@ html:has(.lp) {
   font-size: var(--text-md);
 }
 
-/* ---------- Grid nilai (01–05) ---------- */
+/* ---------- Grid nilai (01–05) ----------
+   Kartu berdiri sendiri dengan bingkai dan jarak, terangkat saat disentuh
+   kursor. */
 .lp-values {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  overflow: hidden;
+  gap: var(--space-5);
 }
 .lp-value {
   background: var(--lp-surface);
-  padding: var(--space-7) var(--space-6);
-  transition: background var(--duration-base) var(--ease-standard);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-1);
+  transition:
+    transform var(--duration-slow) var(--ease-standard),
+    box-shadow var(--duration-slow) var(--ease-standard),
+    border-color var(--duration-slow) var(--ease-standard);
 }
 .lp-value:hover {
-  background: var(--lp-surface-hi);
-}
-/* Lima kartu di grid tiga kolom menyisakan satu sel kosong yang kalau
-   dibiarkan tampak seperti lubang abu-abu. Sel itu diisi tagline. */
-.lp-value--end {
-  display: grid;
-  place-items: center;
-  text-align: center;
-  background: var(--lp-org-soft);
-  color: var(--dm-blue);
-  font-family: var(--font-mono);
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-md);
-  letter-spacing: -0.01em;
-}
-.lp-value--end:hover {
-  background: var(--lp-org-soft);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-3);
+  border-color: var(--brand-200);
 }
 
+.lp-value__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.lp-value__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--lp-org-soft);
+  color: var(--dm-blue);
+  display: grid;
+  place-items: center;
+  flex: none;
+  transition: background var(--duration-slow) var(--ease-standard);
+}
+.lp-value:hover .lp-value__icon {
+  background: var(--lp-sponsor-soft);
+  color: var(--green-700);
+}
 .lp-value__num {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--dm-green);
-  margin-bottom: var(--space-4);
+  color: var(--ink-300);
   font-weight: var(--weight-semibold);
+  flex: none;
 }
 .lp-value h3 {
   font-size: var(--text-lg);
@@ -458,6 +480,27 @@ html:has(.lp) {
 .lp-value p {
   color: var(--ink-500);
   font-size: var(--text-base);
+}
+
+/* Lima kartu di grid tiga kolom menyisakan satu sel kosong.
+   Diisi tagline supaya barisnya tetap utuh. */
+.lp-value--end {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: var(--lp-org-soft);
+  border-color: transparent;
+  color: var(--dm-blue);
+  font-family: var(--font-mono);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-md);
+  letter-spacing: -0.01em;
+  box-shadow: none;
+}
+.lp-value--end:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
 }
 
 /* ---------- Untuk siapa ---------- */
@@ -1013,15 +1056,15 @@ html:has(.lp) {
   .lp-reveal-on [data-reveal],
   .lp-reveal-on [data-reveal].is-in {
     opacity: 1;
-    transform: none;
-    transition: none;
+    animation: none;
   }
   .lp-dash--org,
   .lp-dash--sponsor,
   .lp-pulse {
     animation: none;
   }
-  .lp-btn:hover {
+  .lp-btn:hover,
+  .lp-value:hover {
     transform: none;
   }
 }

@@ -29,22 +29,27 @@ export const ABOUT_BODY =
 
 export const VALUE_PROPS = [
   {
+    icon: "target",
     title: "Smart Matching",
     desc: "Tidak perlu lagi mengirim proposal secara acak. Incar mitra sponsor impianmu langsung.",
   },
   {
+    icon: "grid",
     title: "One Platform",
     desc: "Seluruh proses sponsorship terintegrasi dalam satu platform, dari awal sampai deal.",
   },
   {
+    icon: "eye",
     title: "Transparent Process",
     desc: "Pantau status proposal dan saldo secara real-time, tanpa tebak-tebakan.",
   },
   {
+    icon: "sparkles",
     title: "Quality Connections",
     desc: "Kami hubungkan kamu dengan mitra sponsor yang benar-benar relevan dengan event-mu.",
   },
   {
+    icon: "clock",
     title: "Save Time",
     desc: "Proses terstruktur dengan batas waktu respons yang jelas. Tidak perlu menunggu tanpa kepastian.",
   },

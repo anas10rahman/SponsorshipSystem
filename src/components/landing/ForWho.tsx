@@ -20,7 +20,7 @@ export function ForWho() {
                 key={a.side}
                 className={`lp-aud lp-aud--${a.side}`}
                 data-reveal
-                style={{ transitionDelay: `${i * 90}ms` }}
+                style={{ animationDelay: `${i * 90}ms` }}
               >
                 <span className="lp-aud__icon">
                   <Ic size={21} />
