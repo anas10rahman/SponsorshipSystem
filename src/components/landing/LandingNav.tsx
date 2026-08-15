@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { NAV_LINKS } from "@/lib/landingContent";
@@ -18,9 +18,13 @@ export function LandingNav() {
 
         <nav className="lp-nav__links">
           {NAV_LINKS.map((l) => (
-            <a key={l.href + l.label} href={l.href}>
+            <NavLink
+              key={l.href}
+              to={l.href}
+              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+            >
               {l.label}
-            </a>
+            </NavLink>
           ))}
         </nav>
 
@@ -45,14 +49,16 @@ export function LandingNav() {
 
       <div className={`lp-drawer${open ? " is-open" : ""}`}>
         {NAV_LINKS.map((l) => (
-          <a
-            key={l.href + l.label}
-            href={l.href}
-            className="lp-drawer__link"
+          <NavLink
+            key={l.href}
+            to={l.href}
+            className={({ isActive }) =>
+              `lp-drawer__link${isActive ? " is-active" : ""}`
+            }
             onClick={() => setOpen(false)}
           >
             {l.label}
-          </a>
+          </NavLink>
         ))}
         <div className="lp-drawer__actions">
           <Link to="/register" className="lp-btn lp-btn--org">

@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import { LandingFooter } from "@/components/landing/LandingFooter";
-import { LandingNav } from "@/components/landing/LandingNav";
+import { PublicLayout } from "@/components/landing/PublicLayout";
 
 type Props = { title: string };
 
@@ -9,9 +8,8 @@ type Props = { title: string };
  *  bisa dipakai pengunjung yang belum login. Naskah resmi menyusul. */
 export default function LegalPublic({ title }: Props) {
   return (
-    <div className="lp">
-      <LandingNav />
-      <main className="lp-legal">
+    <PublicLayout>
+      <div className="lp-legal">
         <h1>{title}</h1>
         <p>
           Naskah resmi halaman ini sedang disusun dan akan dipublikasikan di
@@ -19,11 +17,10 @@ export default function LegalPublic({ title }: Props) {
         </p>
         <p>
           Ada pertanyaan yang tidak bisa menunggu?{" "}
-          <Link to="/">Kembali ke beranda</Link> dan hubungi kami lewat kanal
-          yang tersedia.
+          <Link to="/about">Kembali ke About Us</Link> dan hubungi kami lewat
+          kanal yang tersedia.
         </p>
-      </main>
-      <LandingFooter />
-    </div>
+      </div>
+    </PublicLayout>
   );
 }

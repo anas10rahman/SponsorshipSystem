@@ -7,6 +7,8 @@ import { ToastProvider } from "./components/Toast";
 import { BrandMark } from "./components/BrandMark";
 
 import Landing from "./pages/Landing";
+import FaqPage from "./pages/FaqPage";
+import UnderConstructionPage from "./pages/UnderConstructionPage";
 import LegalPublic from "./pages/LegalPublic";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -105,6 +107,38 @@ export default function App() {
       <Routes>
         {/* === Publik: dirender tanpa menunggu data ter-hydrate === */}
         <Route path="/" element={<RootEntry />} />
+        {/* Tiap menu nav publik punya halaman sendiri. "/about" memakai
+            komponen yang sama dengan "/" agar tetap terbuka meski sudah
+            login (RootEntry mengalihkan "/" ke dashboard). */}
+        <Route path="/about" element={<Landing />} />
+        <Route
+          path="/program"
+          element={
+            <UnderConstructionPage
+              title="Program"
+              blurb="Rincian program sponsorship DealMatch sedang kami susun. Segera hadir di sini."
+            />
+          }
+        />
+        <Route
+          path="/gallery"
+          element={
+            <UnderConstructionPage
+              title="Gallery"
+              blurb="Dokumentasi kolaborasi organisasi dan mitra sponsor sedang kami kumpulkan."
+            />
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <UnderConstructionPage
+              title="Contact"
+              blurb="Kanal kontak resmi DealMatch sedang disiapkan. Sementara ini hubungi kami lewat email yang tertera."
+            />
+          }
+        />
+        <Route path="/faq" element={<FaqPage />} />
         <Route
           path="/kebijakan-privasi"
           element={<LegalPublic title="Kebijakan Privasi" />}

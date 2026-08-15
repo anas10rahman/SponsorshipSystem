@@ -169,6 +169,27 @@ html:has(.lp) {
   color: var(--ink-900);
   text-decoration: none;
 }
+/* Halaman aktif — penanda wajib sejak nav jadi multi-halaman, bukan
+   anchor dalam satu halaman. */
+.lp-nav__links a.is-active {
+  color: var(--ink-900);
+  font-weight: var(--weight-bold);
+  position: relative;
+}
+.lp-nav__links a.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--lp-org), var(--lp-sponsor));
+}
+.lp-drawer__link.is-active {
+  color: var(--ink-900);
+  font-weight: var(--weight-bold);
+}
 .lp-nav__cta {
   display: flex;
   align-items: center;
@@ -1047,5 +1068,223 @@ html:has(.lp) {
   .lp-btn:hover,
   .lp-value:hover {
     transform: none;
+  }
+}
+
+/* ============================================================
+   Halaman "under construction" (Program, Gallery, Contact)
+   Animasi murni CSS — motif simpul DM: satu inti berdenyut dengan
+   tiga satelit mengorbit, sama seperti node penyambung di logo.
+   ============================================================ */
+
+.lp-uc {
+  display: flex;
+  align-items: center;
+  min-height: calc(100vh - var(--lp-nav-h, 72px) - 120px);
+  text-align: center;
+}
+
+.lp-uc__in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ---- Panggung animasi ---- */
+.lp-uc__stage {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  display: grid;
+  place-items: center;
+  margin-bottom: var(--space-4);
+}
+
+/* Riak yang melebar keluar dari inti. */
+.lp-uc__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--lp-org);
+  opacity: 0;
+  animation: lp-uc-ripple 3.2s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+.lp-uc__ring--2 {
+  border-color: var(--lp-sponsor);
+  animation-delay: 1.6s;
+}
+
+/* Bidang orbit: memutar ketiga satelit sekaligus. */
+.lp-uc__orbit {
+  position: absolute;
+  inset: 14px;
+  animation: lp-uc-spin 9s linear infinite;
+}
+
+.lp-uc__sat {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  margin: -6.5px 0 0 -6.5px;
+  /* Jarak orbit diseragamkan; sudut dibedakan per satelit. */
+  box-shadow: 0 2px 8px rgb(15 23 42 / 0.18);
+}
+.lp-uc__sat--a {
+  background: var(--lp-org);
+  transform: rotate(0deg) translateX(64px);
+}
+.lp-uc__sat--b {
+  background: var(--lp-sponsor);
+  transform: rotate(120deg) translateX(64px);
+}
+.lp-uc__sat--c {
+  background: var(--ink-300);
+  transform: rotate(240deg) translateX(64px);
+}
+
+/* Inti: gradien dua warna brand yang berdenyut pelan. */
+.lp-uc__core {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--lp-org), var(--lp-sponsor));
+  box-shadow: 0 10px 30px rgb(30 58 138 / 0.28);
+  animation: lp-uc-pulse 2.4s ease-in-out infinite;
+}
+
+/* ---- Teks ---- */
+.lp-uc__eyebrow {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lp-sponsor);
+  margin: 0;
+}
+
+.lp-uc__title {
+  font-size: clamp(28px, 5vw, 44px);
+  line-height: 1.15;
+  margin: 0;
+  /* Kilau yang menyapu perlahan melintasi judul. */
+  background: linear-gradient(
+    100deg,
+    var(--ink-900) 20%,
+    var(--lp-org) 42%,
+    var(--lp-sponsor) 52%,
+    var(--ink-900) 72%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: lp-uc-sheen 5s ease-in-out infinite;
+}
+
+.lp-uc__blurb {
+  max-width: 46ch;
+  color: var(--ink-500);
+  font-size: var(--text-md);
+  margin: 0;
+}
+
+/* ---- Bar progres tak tentu ---- */
+.lp-uc__bar {
+  width: min(280px, 70vw);
+  height: 5px;
+  border-radius: 999px;
+  background: var(--lp-surface-hi);
+  overflow: hidden;
+  margin-top: var(--space-2);
+}
+.lp-uc__bar span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--lp-org), var(--lp-sponsor));
+  animation: lp-uc-slide 1.9s ease-in-out infinite;
+}
+
+.lp-uc__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+@keyframes lp-uc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes lp-uc-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    border-radius: 18px;
+  }
+  50% {
+    transform: scale(1.08);
+    border-radius: 22px;
+  }
+}
+@keyframes lp-uc-ripple {
+  0% {
+    transform: scale(0.42);
+    opacity: 0.55;
+  }
+  80% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+@keyframes lp-uc-sheen {
+  0%,
+  100% {
+    background-position: 130% 0;
+  }
+  50% {
+    background-position: -30% 0;
+  }
+}
+@keyframes lp-uc-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+/* Hormati permintaan gerak minimal: tampilkan bentuk akhirnya, diam. */
+@media (prefers-reduced-motion: reduce) {
+  .lp-uc__orbit,
+  .lp-uc__core,
+  .lp-uc__ring,
+  .lp-uc__title,
+  .lp-uc__bar span {
+    animation: none;
+  }
+  .lp-uc__ring {
+    opacity: 0.25;
+  }
+  .lp-uc__title {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: var(--ink-900);
+  }
+  .lp-uc__bar span {
+    width: 100%;
   }
 }

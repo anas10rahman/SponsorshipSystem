@@ -11,12 +11,13 @@
 
 export const TAGLINE = "Two Sides. One Match.";
 
+/* Navigasi publik — tiap butir halaman tersendiri (bukan anchor ke section). */
 export const NAV_LINKS = [
-  { href: "/#beranda", label: "Beranda" },
-  { href: "/#tentang", label: "Tentang Kami" },
-  { href: "/#untuk-siapa", label: "Untuk Siapa" },
-  { href: "/#cara-kerja", label: "Cara Kerja" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/about", label: "About Us" },
+  { href: "/program", label: "Program" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/contact", label: "Contact" },
+  { href: "/faq", label: "FAQ" },
 ] as const;
 
 /* ---------- Tentang Kami ---------- */
@@ -217,22 +218,23 @@ export const FOOTER_COLUMNS = [
   {
     title: "Produk",
     links: [
-      { label: "Tentang", href: "/#tentang" },
-      { label: "Cara Kerja", href: "/#cara-kerja" },
-      { label: "Biaya", href: "/#faq" },
+      { label: "About Us", href: "/about" },
+      { label: "Program", href: "/program" },
+      { label: "Gallery", href: "/gallery" },
     ],
   },
   {
     title: "Untuk",
     links: [
-      { label: "Organisasi", href: "/#untuk-siapa" },
-      { label: "Mitra Sponsor", href: "/#untuk-siapa" },
+      { label: "Organisasi", href: "/about" },
+      { label: "Mitra Sponsor", href: "/about" },
     ],
   },
   {
     title: "Bantuan",
     links: [
-      { label: "FAQ", href: "/#faq" },
+      { label: "FAQ", href: "/faq" },
+      { label: "Contact", href: "/contact" },
       { label: "Kebijakan Privasi", href: "/kebijakan-privasi" },
       { label: "Syarat & Ketentuan", href: "/syarat-ketentuan" },
     ],
