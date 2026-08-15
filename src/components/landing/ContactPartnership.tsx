@@ -44,7 +44,7 @@ export function ContactPartnership() {
     if (!form.name.trim()) e.name = "Nama lengkap wajib diisi.";
     if (!form.email.trim()) e.email = "Email wajib diisi.";
     else if (!EMAIL_RE.test(form.email.trim())) e.email = "Format email tidak valid.";
-    if (!form.phone.trim()) e.phone = "Nomor telepon wajib diisi.";
+    if (!form.phone.trim()) e.phone = "Nomor WhatsApp wajib diisi.";
     if (!form.org.trim()) e.org = "Organisasi / brand wajib diisi.";
     // Satu field: dropdown, atau isian bebas saat "Lainnya…" dipilih.
     if (!form.subject) e.subject = "Pilih penawaran partnership.";
@@ -64,8 +64,8 @@ export function ContactPartnership() {
     const body = [
       `Nama Lengkap : ${form.name.trim()}`,
       `Email        : ${form.email.trim()}`,
-      `Telepon      : ${form.phone.trim() || "-"}`,
-      `Organisasi   : ${form.org.trim() || "-"}`,
+      `WhatsApp     : ${form.phone.trim()}`,
+      `Organisasi   : ${form.org.trim()}`,
       `Subjek       : ${subject}`,
       "",
       "Pesan:",
@@ -179,7 +179,7 @@ export function ContactPartnership() {
             </div>
 
             <div className="lp-contact__two">
-              <Field label="Nomor Telepon" required error={errors.phone} htmlFor="ct-phone">
+              <Field label="Nomor WhatsApp" required error={errors.phone} htmlFor="ct-phone">
                 <input
                   id="ct-phone"
                   type="tel"
