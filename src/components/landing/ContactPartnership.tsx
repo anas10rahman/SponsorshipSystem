@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Mail, Phone, MapPin, Instagram, Send, Info, ListRestart } from "lucide-react";
+import { Mail, Phone, MapPin, Instagram, Send, Info } from "lucide-react";
 import { CONTACT_INFO, CONTACT_SUBJECTS } from "@/lib/landingContent";
 
 type Errors = Partial<
@@ -209,47 +209,37 @@ export function ContactPartnership() {
             {/* Satu field saja. Memilih "Lainnya…" menukar dropdown menjadi
                 isian bebas di tempat yang sama — bukan field baru di bawahnya
                 — sehingga labelnya tetap satu: "Penawaran Partnership". */}
+            {/* Satu field, satu label. Dropdown SELALU tampil supaya pilihan
+                lain tetap bisa diganti kapan saja; memilih "Lainnya…" hanya
+                menambah isian bebas tepat di bawahnya, bukan menggantikannya. */}
             <Field
               label="Penawaran Partnership"
               required
               error={errors.subject}
-              htmlFor={form.subject === "other" ? "ct-other" : "ct-subject"}
+              htmlFor="ct-subject"
             >
-              {form.subject === "other" ? (
-                <div className="lp-field__swap">
-                  <input
-                    id="ct-other"
-                    value={form.otherSubject}
-                    onChange={(e) => set("otherSubject")(e.target.value)}
-                    placeholder="Tuliskan penawaran partnership Anda"
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    className="lp-field__revert"
-                    onClick={() => {
-                      set("subject")("");
-                      set("otherSubject")("");
-                    }}
-                    title="Kembali ke daftar pilihan"
-                  >
-                    <ListRestart size={16} />
-                    <span>Pilih dari daftar</span>
-                  </button>
-                </div>
-              ) : (
-                <select
-                  id="ct-subject"
-                  value={form.subject}
-                  onChange={(e) => set("subject")(e.target.value)}
-                >
-                  <option value="">Pilih penawaran partnership…</option>
-                  {CONTACT_SUBJECTS.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </select>
+              <select
+                id="ct-subject"
+                value={form.subject}
+                onChange={(e) => set("subject")(e.target.value)}
+              >
+                <option value="">Pilih penawaran partnership…</option>
+                {CONTACT_SUBJECTS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+
+              {form.subject === "other" && (
+                <input
+                  className="lp-field__extra"
+                  value={form.otherSubject}
+                  onChange={(e) => set("otherSubject")(e.target.value)}
+                  placeholder="Tuliskan penawaran partnership Anda"
+                  aria-label="Tuliskan penawaran partnership Anda"
+                  autoFocus
+                />
               )}
             </Field>
 

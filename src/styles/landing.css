@@ -1502,26 +1502,21 @@ a.lp-contact__row:hover .lp-contact__ico {
   border: 0;
 }
 
-/* Dropdown yang berubah jadi isian bebas di tempat yang sama saat
-   "Lainnya…" dipilih — tetap satu field, bukan field tambahan. */
-.lp-field__swap {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* Isian bebas yang menyertai dropdown saat "Lainnya…" dipilih. Dropdown
+   tetap tampil di atasnya supaya pilihan lain bisa diganti kapan saja;
+   ini bagian dari field yang sama, jadi tanpa label sendiri. */
+.lp-field__extra {
+  margin-top: 8px;
+  animation: lp-field-drop 0.22s var(--ease-standard);
 }
-.lp-field__revert {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--lp-org);
+@keyframes lp-field-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
-.lp-field__revert:hover {
-  text-decoration: underline;
+@media (prefers-reduced-motion: reduce) {
+  .lp-field__extra {
+    animation: none;
+  }
 }
