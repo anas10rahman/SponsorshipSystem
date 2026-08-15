@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { Mail, Phone, MapPin, Instagram, Send, Info } from "lucide-react";
+import { Mail, Phone, MapPin, Instagram, Send, Info, ListRestart } from "lucide-react";
 import { CONTACT_INFO, CONTACT_SUBJECTS } from "@/lib/landingContent";
 
-type Errors = Partial<Record<"name" | "email" | "subject" | "otherSubject" | "message", string>>;
+type Errors = Partial<
+  Record<"name" | "email" | "phone" | "org" | "subject" | "message", string>
+>;
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -32,7 +34,9 @@ export function ContactPartnership() {
 
   const set = (k: keyof typeof form) => (v: string) => {
     setForm((f) => ({ ...f, [k]: v }));
-    setErrors((e) => ({ ...e, [k]: undefined }));
+    // `otherSubject` berbagi satu field (dan satu pesan galat) dengan `subject`.
+    const errKey = k === "otherSubject" ? "subject" : k;
+    setErrors((e) => ({ ...e, [errKey]: undefined }));
   };
 
   function validate(): Errors {
@@ -40,9 +44,12 @@ export function ContactPartnership() {
     if (!form.name.trim()) e.name = "Nama lengkap wajib diisi.";
     if (!form.email.trim()) e.email = "Email wajib diisi.";
     else if (!EMAIL_RE.test(form.email.trim())) e.email = "Format email tidak valid.";
-    if (!form.subject) e.subject = "Pilih subjek penawaran.";
-    if (form.subject === "other" && !form.otherSubject.trim())
-      e.otherSubject = "Tuliskan subjek penawaran Anda.";
+    if (!form.phone.trim()) e.phone = "Nomor telepon wajib diisi.";
+    if (!form.org.trim()) e.org = "Organisasi / brand wajib diisi.";
+    // Satu field: dropdown, atau isian bebas saat "Lainnya…" dipilih.
+    if (!form.subject) e.subject = "Pilih penawaran partnership.";
+    else if (form.subject === "other" && !form.otherSubject.trim())
+      e.subject = "Tuliskan penawaran partnership Anda.";
     if (!form.message.trim()) e.message = "Pesan wajib diisi.";
     return e;
   }
@@ -74,13 +81,10 @@ export function ContactPartnership() {
   return (
     <section className="lp-sec lp-contact">
       <div className="lp-wrap">
-        <div className="lp-sec__head" data-reveal>
-          <h1>Penawaran Kerja Sama</h1>
-          <p>
-            Terbuka untuk Media Partner, Co-Branding, dan kolaborasi komunitas.
-            Sampaikan penawaran Anda — tim DealMatch akan menindaklanjuti.
-          </p>
-        </div>
+        {/* Judul & deskripsi sengaja tidak ditampilkan — halaman langsung ke
+            informasi kontak dan form. h1 tetap ada untuk pembaca layar dan
+            mesin telusur, karena setiap halaman butuh satu judul. */}
+        <h1 className="lp-sr-only">Penawaran Kerja Sama DealMatch</h1>
 
         <div className="lp-contact__grid">
           {/* ---------- Informasi kontak ---------- */}
@@ -175,7 +179,7 @@ export function ContactPartnership() {
             </div>
 
             <div className="lp-contact__two">
-              <Field label="Nomor Telepon" htmlFor="ct-phone">
+              <Field label="Nomor Telepon" required error={errors.phone} htmlFor="ct-phone">
                 <input
                   id="ct-phone"
                   type="tel"
@@ -186,7 +190,12 @@ export function ContactPartnership() {
                 />
               </Field>
 
-              <Field label="Organisasi / Brand" htmlFor="ct-org">
+              <Field
+                label="Organisasi / Brand"
+                required
+                error={errors.org}
+                htmlFor="ct-org"
+              >
                 <input
                   id="ct-org"
                   value={form.org}
@@ -197,38 +206,52 @@ export function ContactPartnership() {
               </Field>
             </div>
 
-            <Field label="Subjek" required error={errors.subject} htmlFor="ct-subject">
-              <select
-                id="ct-subject"
-                value={form.subject}
-                onChange={(e) => set("subject")(e.target.value)}
-              >
-                <option value="">Pilih subjek…</option>
-                {CONTACT_SUBJECTS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
+            {/* Satu field saja. Memilih "Lainnya…" menukar dropdown menjadi
+                isian bebas di tempat yang sama — bukan field baru di bawahnya
+                — sehingga labelnya tetap satu: "Penawaran Partnership". */}
+            <Field
+              label="Penawaran Partnership"
+              required
+              error={errors.subject}
+              htmlFor={form.subject === "other" ? "ct-other" : "ct-subject"}
+            >
+              {form.subject === "other" ? (
+                <div className="lp-field__swap">
+                  <input
+                    id="ct-other"
+                    value={form.otherSubject}
+                    onChange={(e) => set("otherSubject")(e.target.value)}
+                    placeholder="Tuliskan penawaran partnership Anda"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="lp-field__revert"
+                    onClick={() => {
+                      set("subject")("");
+                      set("otherSubject")("");
+                    }}
+                    title="Kembali ke daftar pilihan"
+                  >
+                    <ListRestart size={16} />
+                    <span>Pilih dari daftar</span>
+                  </button>
+                </div>
+              ) : (
+                <select
+                  id="ct-subject"
+                  value={form.subject}
+                  onChange={(e) => set("subject")(e.target.value)}
+                >
+                  <option value="">Pilih penawaran partnership…</option>
+                  {CONTACT_SUBJECTS.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+              )}
             </Field>
-
-            {/* Isian bebas hanya muncul saat "Lainnya…" dipilih. */}
-            {form.subject === "other" && (
-              <Field
-                label="Sebutkan subjek"
-                required
-                error={errors.otherSubject}
-                htmlFor="ct-other"
-              >
-                <input
-                  id="ct-other"
-                  value={form.otherSubject}
-                  onChange={(e) => set("otherSubject")(e.target.value)}
-                  placeholder="Tuliskan bentuk kerja sama yang Anda tawarkan"
-                  autoFocus
-                />
-              </Field>
-            )}
 
             <Field label="Pesan" required error={errors.message} htmlFor="ct-message">
               <textarea

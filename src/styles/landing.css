@@ -1487,3 +1487,41 @@ a.lp-contact__row:hover .lp-contact__ico {
     padding: var(--space-5);
   }
 }
+
+/* Judul yang hanya dibaca pembaca layar — dipakai saat judul halaman
+   sengaja tidak ditampilkan, supaya struktur heading tetap utuh. */
+.lp-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Dropdown yang berubah jadi isian bebas di tempat yang sama saat
+   "Lainnya…" dipilih — tetap satu field, bukan field tambahan. */
+.lp-field__swap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lp-field__revert {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--lp-org);
+}
+.lp-field__revert:hover {
+  text-decoration: underline;
+}
