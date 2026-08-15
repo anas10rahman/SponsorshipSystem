@@ -272,3 +272,32 @@ export const CONTACT_SUBJECTS = [
   { value: "community", label: "Community Collaboration" },
   { value: "other", label: "Lainnya…" },
 ] as const;
+
+/* ---------- Program ----------
+   Daftar program DealMatch. Bentuknya array supaya program berikutnya
+   cukup ditambahkan di sini tanpa menyentuh komponennya. */
+
+export const PROGRAMS = [
+  {
+    id: "webinar-sponsorship-2026-08",
+    title: "Paham Sponsorship dari Sudut Pandang Brand",
+    category: "Program Online",
+    poster: "/poster-webinar-sponsorship.jpeg",
+    date: "29 Agustus 2026",
+    time: "14.00 – 16.00 WIB",
+    price: "Rp 30.000 / orang · Rp 50.000 / 2 orang (hemat 10K)",
+    highlights: [
+      "Bongkar rahasia kenapa proposal kamu selalu di-ghosting brand",
+      'Ubah mindset dari "minta sponsor" jadi "tawarin value"',
+      "Tren sponsorship 2026 yang lagi jadi incaran brand",
+      "Kenali red flag sebelum kerjasama berujung kacau",
+      "Satu langkah lebih dekat ke proposal sponsorship yang di-ACC",
+    ],
+    speakers: [
+      { name: "Ali Abdi", role: "Marketing Komunikasi Media Partner Amazing Malang" },
+      { name: "Adelia PH", role: "Sponsorship & Community Strategist" },
+    ],
+    ctaLabel: "Daftar Program",
+    ctaUrl: "https://bit.ly/daftarwebinarsponsorship",
+  },
+] as const;

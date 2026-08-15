@@ -9,6 +9,7 @@ import { BrandMark } from "./components/BrandMark";
 import Landing from "./pages/Landing";
 import FaqPage from "./pages/FaqPage";
 import ContactPage from "./pages/ContactPage";
+import ProgramPage from "./pages/ProgramPage";
 import UnderConstructionPage from "./pages/UnderConstructionPage";
 import LegalPublic from "./pages/LegalPublic";
 import Login from "./pages/Login";
@@ -112,15 +113,7 @@ export default function App() {
             komponen yang sama dengan "/" agar tetap terbuka meski sudah
             login (RootEntry mengalihkan "/" ke dashboard). */}
         <Route path="/about" element={<Landing />} />
-        <Route
-          path="/program"
-          element={
-            <UnderConstructionPage
-              title="Program"
-              blurb="Rincian program sponsorship DealMatch sedang kami susun. Segera hadir di sini."
-            />
-          }
-        />
+        <Route path="/program" element={<ProgramPage />} />
         <Route
           path="/gallery"
           element={
