@@ -8,6 +8,7 @@ import { BrandMark } from "./components/BrandMark";
 
 import Landing from "./pages/Landing";
 import FaqPage from "./pages/FaqPage";
+import ContactPage from "./pages/ContactPage";
 import UnderConstructionPage from "./pages/UnderConstructionPage";
 import LegalPublic from "./pages/LegalPublic";
 import Login from "./pages/Login";
@@ -129,15 +130,7 @@ export default function App() {
             />
           }
         />
-        <Route
-          path="/contact"
-          element={
-            <UnderConstructionPage
-              title="Contact"
-              blurb="Kanal kontak resmi DealMatch sedang disiapkan. Sementara ini hubungi kami lewat email yang tertera."
-            />
-          }
-        />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/faq" element={<FaqPage />} />
         <Route
           path="/kebijakan-privasi"

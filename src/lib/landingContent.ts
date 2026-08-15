@@ -240,3 +240,35 @@ export const FOOTER_COLUMNS = [
     ],
   },
 ] as const;
+
+/* ---------- Contact ----------
+   Satu-satunya sumber data kontak publik. Halaman /contact tidak bisa
+   membaca email admin dari store: halaman publik dirender tanpa sesi,
+   dan /api/state memang tidak mengembalikan data untuk pengunjung anonim. */
+
+/* TODO(anas): ganti dengan kontak DealMatch yang sebenarnya.
+   `email` juga menjadi tujuan form penawaran kerja sama, jadi selama masih
+   placeholder penawaran yang masuk tidak akan sampai ke siapa pun.
+
+   `phone`/`whatsapp` sengaja DIKOSONGKAN, bukan diisi contoh: nomor karangan
+   yang terlihat wajar bisa saja milik orang lain, dan halaman ini publik.
+   Baris telepon otomatis disembunyikan selama kosong — isi keduanya untuk
+   memunculkannya kembali. */
+export const CONTACT_INFO = {
+  email: "halo@dealmatch.id",
+  phone: "",
+  /** Dipakai untuk tautan wa.me — hanya angka, tanpa tanda baca. */
+  whatsapp: "",
+  address: "Jakarta, Indonesia",
+  instagram: "@dealmatch.id",
+  instagramUrl: "https://instagram.com/dealmatch.id",
+} as const;
+
+/** Pilihan subjek pada form penawaran kerja sama. `other` memunculkan
+ *  isian bebas supaya penawaran di luar daftar tetap tertampung. */
+export const CONTACT_SUBJECTS = [
+  { value: "media-partner", label: "Media Partner" },
+  { value: "co-branding", label: "Co-Branding / Co-Campaign" },
+  { value: "community", label: "Community Collaboration" },
+  { value: "other", label: "Lainnya…" },
+] as const;
