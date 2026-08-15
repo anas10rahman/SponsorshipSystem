@@ -8,13 +8,9 @@ export function ProgramList() {
   return (
     <section className="lp-sec lp-program">
       <div className="lp-wrap">
-        <div className="lp-sec__head" data-reveal>
-          <h1>Program</h1>
-          <p>
-            Kelas dan kegiatan untuk mempertajam cara kamu menyusun, menawarkan,
-            dan menutup kerja sama sponsorship.
-          </p>
-        </div>
+        {/* Judul & deskripsi sengaja tidak ditampilkan — halaman langsung ke
+            kartu program. h1 tetap ada untuk pembaca layar dan mesin telusur. */}
+        <h1 className="lp-sr-only">Program DealMatch</h1>
 
         <div className="lp-program__list">
           {PROGRAMS.map((p) => (
