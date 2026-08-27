@@ -40,17 +40,6 @@ export default function Login() {
 
   return (
     <main className="sh-auth">
-      <aside className="sh-auth__panel">
-        <Link to="/" aria-label="Kembali ke beranda">
-          <BrandMark size={34} onDark />
-        </Link>
-        <p className="sh-auth__panel-tag">Two Sides. One Match.</p>
-        <p className="sh-auth__panel-sub">
-          Satu platform tempat organisasi dan mitra sponsor bertemu — lebih
-          mudah, cepat, dan terarah.
-        </p>
-      </aside>
-
       <div className="sh-auth__main">
         <form className="sh-auth__form" onSubmit={onSubmit}>
           <Link

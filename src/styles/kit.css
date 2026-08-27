@@ -1371,34 +1371,6 @@
 .sh-auth {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-/* Panel kiri memakai gradien brand, bukan gambar dari CDN pihak ketiga
-   seperti pada rujukan — kalau host itu mati, separuh halaman masuk ikut
-   kosong. */
-.sh-auth__panel {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-4);
-  padding: var(--space-9);
-  color: #fff;
-  background:
-    radial-gradient(circle at 78% 18%, rgba(16, 185, 129, 0.32), transparent 46%),
-    linear-gradient(150deg, #1e3a8a 0%, #17306f 52%, #0f1d44 100%);
-}
-.sh-auth__panel-tag {
-  font-size: var(--text-3xl);
-  font-weight: var(--weight-extrabold);
-  letter-spacing: -0.03em;
-  color: #fff;
-  margin-top: var(--space-5);
-}
-.sh-auth__panel-sub {
-  color: rgba(255, 255, 255, 0.74);
-  font-size: var(--text-md);
-  max-width: 380px;
 }
 
 .sh-auth__main {
@@ -1512,11 +1484,4 @@
   font-weight: var(--weight-bold);
 }
 
-@media (max-width: 900px) {
-  .sh-auth {
-    grid-template-columns: 1fr;
-  }
-  .sh-auth__panel {
-    display: none;
-  }
-}
+
