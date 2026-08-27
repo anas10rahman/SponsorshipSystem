@@ -1362,3 +1362,161 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   Halaman masuk — tata letak terbelah
+   Kelas sendiri (`.sh-auth`), bukan menumpang `.sh-login`, karena kelas
+   itu masih dipakai Register, Verify, ForgotPassword, dan NotFound.
+   ============================================================ */
+.sh-auth {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Panel kiri memakai gradien brand, bukan gambar dari CDN pihak ketiga
+   seperti pada rujukan — kalau host itu mati, separuh halaman masuk ikut
+   kosong. */
+.sh-auth__panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-9);
+  color: #fff;
+  background:
+    radial-gradient(circle at 78% 18%, rgba(16, 185, 129, 0.32), transparent 46%),
+    linear-gradient(150deg, #1e3a8a 0%, #17306f 52%, #0f1d44 100%);
+}
+.sh-auth__panel-tag {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  color: #fff;
+  margin-top: var(--space-5);
+}
+.sh-auth__panel-sub {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: var(--text-md);
+  max-width: 380px;
+}
+
+.sh-auth__main {
+  display: grid;
+  place-items: center;
+  padding: var(--space-7);
+  background: var(--surface);
+}
+.sh-auth__form {
+  width: min(384px, 100%);
+  display: flex;
+  flex-direction: column;
+}
+.sh-auth__brand {
+  align-self: center;
+  margin-bottom: var(--space-6);
+}
+.sh-auth__brand:hover {
+  text-decoration: none;
+}
+.sh-auth__title {
+  text-align: center;
+  font-size: var(--text-3xl);
+  letter-spacing: -0.02em;
+}
+.sh-auth__sub {
+  text-align: center;
+  color: var(--ink-500);
+  font-size: var(--text-base);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-7);
+}
+
+/* Kolom isian berbentuk pil dengan ikon di depan. Bingkai dipindah ke
+   pembungkus dan input di dalamnya dipolos, supaya PasswordInput —
+   yang membawa input plus tombol matanya sendiri — ikut menyatu. */
+.sh-auth__field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 48px;
+  padding-left: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink-300);
+  margin-bottom: var(--space-4);
+  transition:
+    border-color var(--duration-base) var(--ease-standard),
+    box-shadow var(--duration-base) var(--ease-standard);
+}
+.sh-auth__field:focus-within {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+.sh-auth__field > svg {
+  flex: none;
+}
+.sh-auth__field > div {
+  flex: 1;
+  min-width: 0;
+}
+.sh-auth__field input {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 var(--space-5) 0 0;
+  font-size: var(--text-base);
+  color: var(--ink-900);
+}
+.sh-auth__field input:focus {
+  outline: none;
+  border: 0;
+  box-shadow: none;
+}
+
+.sh-auth__row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-5);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.sh-auth__submit {
+  height: 46px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-500);
+  color: #fff;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+.sh-auth__submit:hover {
+  opacity: 0.9;
+}
+.sh-auth__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sh-auth__foot {
+  text-align: center;
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--ink-500);
+}
+.sh-auth__foot a {
+  font-weight: var(--weight-bold);
+}
+
+@media (max-width: 900px) {
+  .sh-auth {
+    grid-template-columns: 1fr;
+  }
+  .sh-auth__panel {
+    display: none;
+  }
+}

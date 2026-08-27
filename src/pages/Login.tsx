@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate, Navigate, Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Lock, User } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { PasswordInput } from "@/components/PasswordInput";
 import { rolePath, useActions, useStore } from "@/lib/store";
@@ -9,13 +10,16 @@ export default function Login() {
   const { login } = useActions();
   const navigate = useNavigate();
 
+  // Semua hook dipanggil sebelum percabangan apa pun. Sebelumnya `busy`
+  // dideklarasikan di bawah early return `currentUser`, sehingga jumlah hook
+  // berubah begitu login berhasil dan React melempar "Rendered fewer hooks
+  // than expected" pada setiap login.
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   if (currentUser) return <Navigate to={rolePath[currentUser.role]} replace />;
-
-  const [busy, setBusy] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,79 +39,73 @@ export default function Login() {
   };
 
   return (
-    <main className="sh-login">
-      <form className="sh-login__card" onSubmit={onSubmit}>
-        <div className="sh-login__brand">
+    <main className="sh-auth">
+      <aside className="sh-auth__panel">
+        <Link to="/" aria-label="Kembali ke beranda">
+          <BrandMark size={34} onDark />
+        </Link>
+        <p className="sh-auth__panel-tag">Two Sides. One Match.</p>
+        <p className="sh-auth__panel-sub">
+          Satu platform tempat organisasi dan mitra sponsor bertemu — lebih
+          mudah, cepat, dan terarah.
+        </p>
+      </aside>
+
+      <div className="sh-auth__main">
+        <form className="sh-auth__form" onSubmit={onSubmit}>
           <Link
             to="/"
+            className="sh-auth__brand"
             title="Kembali ke beranda"
             aria-label="Kembali ke beranda"
-            style={{ display: "inline-flex", textDecoration: "none" }}
           >
-            <BrandMark />
+            <BrandMark size={30} />
           </Link>
-        </div>
-        <h1 className="sh-login__title">Login Sponsorship</h1>
-        <p className="sh-login__sub">Masuk ke akun Anda, atau daftar akun baru.</p>
 
-        <div className="sh-field">
-          <label className="sh-field__label" htmlFor="username">
-            Username
-          </label>
-          <input
-            id="username"
-            autoFocus
-            autoComplete="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
-          />
-        </div>
+          <h1 className="sh-auth__title">Masuk</h1>
+          <p className="sh-auth__sub">
+            Selamat datang kembali. Masuk untuk melanjutkan.
+          </p>
 
-        <div className="sh-field">
-          <label className="sh-field__label" htmlFor="password">
-            Kata sandi
+          <label className="sh-auth__field" htmlFor="username">
+            <User size={17} aria-hidden="true" />
+            <input
+              id="username"
+              autoFocus
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
+              required
+            />
           </label>
-          <PasswordInput
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={setPassword}
-            placeholder="Masukkan kata sandi"
-          />
-          <div style={{ textAlign: "right", marginTop: 6 }}>
-            <Link to="/forgot" style={{ fontSize: 13, fontWeight: 600 }}>
-              Lupa kata sandi?
-            </Link>
+
+          <label className="sh-auth__field" htmlFor="password">
+            <Lock size={17} aria-hidden="true" />
+            <PasswordInput
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={setPassword}
+              placeholder="Kata sandi"
+            />
+          </label>
+
+          <div className="sh-auth__row">
+            <Link to="/forgot">Lupa kata sandi?</Link>
           </div>
-        </div>
 
-        {error && <div className="sh-notice sh-notice--failed">{error}</div>}
+          {error && <div className="sh-notice sh-notice--failed">{error}</div>}
 
-        <button
-          className="sh-btn sh-btn--primary"
-          type="submit"
-          style={{ width: "100%" }}
-          disabled={busy}
-        >
-          {busy ? "Memproses…" : "Masuk"}
-        </button>
+          <button className="sh-auth__submit" type="submit" disabled={busy}>
+            {busy ? "Memproses…" : "Masuk"}
+          </button>
 
-        <Link
-          to="/register"
-          className="sh-btn sh-btn--secondary"
-          style={{ width: "100%", justifyContent: "center" }}
-        >
-          Registrasi akun baru
-        </Link>
-
-        <div className="sh-login__demo" style={{ textAlign: "center" }}>
-          Belum punya akun?{" "}
-          <Link to="/register" style={{ fontWeight: 700 }}>
-            Daftar sebagai organisasi / mitra sponsor
-          </Link>
-        </div>
-      </form>
+          <p className="sh-auth__foot">
+            Belum punya akun? <Link to="/register">Daftar sekarang</Link>
+          </p>
+        </form>
+      </div>
     </main>
   );
 }
