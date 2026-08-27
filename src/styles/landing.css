@@ -31,11 +31,15 @@
   flex: 1 0 auto;
 }
 
+/* Ukuran mengikuti notion.com/product: konten maksimum 1252px dengan
+   gutter 64px, menyempit ke 32px di layar sempit. 1380 = konten 1252 +
+   dua gutter, karena box-sizing global border-box memasukkan padding ke
+   dalam max-width. */
 .lp-wrap {
   width: 100%;
-  max-width: 1160px;
+  max-width: 1380px;
   margin: 0 auto;
-  padding: 0 var(--space-6);
+  padding: 0 64px;
 }
 
 /* Anchor nav: beri jarak supaya judul section tidak tertutup nav sticky. */
@@ -243,26 +247,21 @@ html:has(.lp) {
 .lp-hero {
   padding: var(--space-9) 0 var(--space-8);
 }
-.lp-hero__grid {
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: var(--space-9);
-  align-items: center;
-}
 .lp-hero__title {
-  font-size: clamp(34px, 4.6vw, 54px);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
+  font-size: clamp(40px, 7.4vw, 96px);
+  line-height: 1.04;
+  letter-spacing: -0.048em;
   font-weight: var(--weight-extrabold);
-  margin: 0 0 var(--space-5);
+  margin: 0 0 var(--space-6);
 }
 .lp-hero__title .lp-accent {
   color: var(--dm-blue);
 }
 .lp-hero__lead {
-  font-size: var(--text-lg);
+  font-size: 20px;
+  line-height: 28px;
   color: var(--ink-500);
-  max-width: 480px;
+  max-width: 640px;
 }
 
 /* Kata berputar di headline. Lebarnya mengikuti isi, jadi "together"
@@ -271,7 +270,7 @@ html:has(.lp) {
 .lp-rotate {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.3em;
+  gap: 0.18em;
 }
 .lp-rotate__dot {
   width: 0.32em;
@@ -294,93 +293,6 @@ html:has(.lp) {
 @media (prefers-reduced-motion: reduce) {
   .lp-rotate__word {
     animation: none;
-  }
-}
-
-/* Visual tanda tangan: dua sisi bertemu di satu node.
-   Rasionya dikunci sama dengan viewBox SVG (440×420). Tanpa itu, saat
-   kotaknya melebar SVG ter-letterbox di tengah sementara label node
-   tetap menempel di tepi kotak — garis dan labelnya jadi tidak nyambung. */
-.lp-match {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 440 / 420;
-  max-height: 420px;
-  margin: 0 auto;
-}
-.lp-match__svg {
-  width: 100%;
-  height: 100%;
-}
-.lp-match__node {
-  position: absolute;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--line);
-  background: var(--lp-surface);
-  white-space: nowrap;
-  box-shadow: var(--shadow-2);
-}
-.lp-match__node--org {
-  top: 18%;
-  left: 2%;
-  color: var(--dm-blue);
-  border-color: rgba(30, 58, 138, 0.35);
-}
-.lp-match__node--sponsor {
-  bottom: 16%;
-  right: 0;
-  color: var(--green-700);
-  border-color: rgba(16, 185, 129, 0.4);
-}
-.lp-match__node--center {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  background: var(--dm-blue);
-  border-color: var(--dm-blue);
-  font-weight: var(--weight-bold);
-  padding: 12px 18px;
-  box-shadow:
-    0 0 0 8px rgba(30, 58, 138, 0.08),
-    0 12px 34px rgba(30, 58, 138, 0.3);
-}
-.lp-dash {
-  stroke: var(--line-strong);
-  stroke-width: 1.5;
-  fill: none;
-  stroke-dasharray: 5 7;
-}
-.lp-dash--org {
-  stroke: var(--dm-blue);
-  animation: lp-dashmove 2.2s linear infinite;
-}
-.lp-dash--sponsor {
-  stroke: var(--dm-green);
-  animation: lp-dashmove 2.2s linear infinite;
-}
-@keyframes lp-dashmove {
-  to {
-    stroke-dashoffset: -48;
-  }
-}
-.lp-pulse {
-  animation: lp-pulse 2.4s ease-in-out infinite;
-  transform-origin: center;
-}
-@keyframes lp-pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.15);
   }
 }
 
@@ -974,29 +886,11 @@ html:has(.lp) {
 /* ============================================================
    Responsif
    ============================================================ */
-/* Jarak hero dirapatkan lebih dulu supaya dua kolomnya bertahan lebih
-   lama sebelum benar-benar perlu menumpuk. */
-@media (max-width: 1100px) {
-  .lp-hero__grid {
-    gap: var(--space-6);
-  }
-}
-
 /* 900px, bukan lebih tinggi: nav butuh 845px untuk memuat brand, lima
    tautan, dan dua aksi. Mengolapskannya lebih awal membuat layar ~960px
    — ukuran jendela laptop terbelah yang lazim — tampil seperti ponsel
    padahal ruangnya masih cukup. */
 @media (max-width: 900px) {
-  .lp-hero__grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-7);
-  }
-  .lp-hero__lead {
-    max-width: none;
-  }
-  .lp-match {
-    max-width: 440px;
-  }
   .lp-about {
     grid-template-columns: 1fr;
     gap: var(--space-7);
@@ -1051,6 +945,9 @@ html:has(.lp) {
 }
 
 @media (max-width: 640px) {
+  .lp-wrap {
+    padding: 0 32px;
+  }
   .lp-hero {
     padding: var(--space-7) 0 var(--space-7);
   }
@@ -1090,11 +987,6 @@ html:has(.lp) {
   .lp-reveal-on [data-reveal],
   .lp-reveal-on [data-reveal].is-in {
     opacity: 1;
-    animation: none;
-  }
-  .lp-dash--org,
-  .lp-dash--sponsor,
-  .lp-pulse {
     animation: none;
   }
   .lp-btn:hover,

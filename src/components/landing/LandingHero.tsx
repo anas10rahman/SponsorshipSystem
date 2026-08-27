@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { MatchVisual } from "./visuals";
 
 const ROTATING = ["connect", "collaborate", "grow", "succeed"];
 const EVERY_MS = 2200;
@@ -18,13 +17,12 @@ export function LandingHero() {
 
   return (
     <section className="lp-hero" id="beranda">
-      <div className="lp-wrap lp-hero__grid">
+      <div className="lp-wrap">
         <div data-reveal className="is-in">
-          {/* Kata berputar dibiarkan selebar isinya, bukan dikunci ke kata
-              terpanjang — kotak tetap menyisakan celah 70-an px di depan
-              "together" untuk kata pendek. Ekornya ikut bergeser, sama
-              seperti referensi. `key` yang berubah me-mount ulang span
-              sehingga animasi masuknya terputar lagi. */}
+          {/* Kata berputar dibiarkan selebar isinya, jadi "together" ikut
+              bergeser — mengunci lebar ke kata terpanjang menyisakan celah
+              kosong untuk kata pendek. `key` yang berubah me-mount ulang
+              span sehingga animasi masuknya terputar lagi. */}
           <h1
             className="lp-hero__title"
             aria-label={`Where sponsors and organizations ${ROTATING[0]} together`}
@@ -47,10 +45,6 @@ export function LandingHero() {
             Dapatkan sponsor yang relevan, jangkau audiens yang tepat, dan
             bangun kolaborasi bernilai dalam satu platform.
           </p>
-        </div>
-
-        <div data-reveal className="is-in">
-          <MatchVisual />
         </div>
       </div>
     </section>
