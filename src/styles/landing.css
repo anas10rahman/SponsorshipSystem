@@ -247,9 +247,16 @@ html:has(.lp) {
 .lp-hero {
   padding: var(--space-9) 0 var(--space-8);
 }
+/* Hero rata tengah, dua baris: "Where sponsors and organizations" lalu
+   "● <kata> together". Baris pertama selebar 15,25em, jadi ukurannya
+   dibatasi 5.2vw/80px — pada 96px seperti rujukan, baris itu butuh
+   1444px sementara kolomnya cuma 1152px dan pecah jadi tiga baris. */
+.lp-hero__inner {
+  text-align: center;
+}
 .lp-hero__title {
-  font-size: clamp(40px, 7.4vw, 96px);
-  line-height: 1.04;
+  font-size: clamp(30px, 5.2vw, 80px);
+  line-height: 1.06;
   letter-spacing: -0.048em;
   font-weight: var(--weight-extrabold);
   margin: 0 0 var(--space-6);
@@ -262,6 +269,7 @@ html:has(.lp) {
   line-height: 28px;
   color: var(--ink-500);
   max-width: 640px;
+  margin: 0 auto;
 }
 
 /* Kata berputar di headline. Lebarnya mengikuti isi, jadi "together"

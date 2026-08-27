@@ -18,7 +18,7 @@ export function LandingHero() {
   return (
     <section className="lp-hero" id="beranda">
       <div className="lp-wrap">
-        <div data-reveal className="is-in">
+        <div data-reveal className="is-in lp-hero__inner">
           {/* Kata berputar dibiarkan selebar isinya, jadi "together" ikut
               bergeser — mengunci lebar ke kata terpanjang menyisakan celah
               kosong untuk kata pendek. `key` yang berubah me-mount ulang
@@ -28,7 +28,8 @@ export function LandingHero() {
             aria-label={`Where sponsors and organizations ${ROTATING[0]} together`}
           >
             <span aria-hidden="true">
-              Where sponsors and organizations{" "}
+              Where sponsors and organizations
+              <br />
               <span className="lp-rotate">
                 <span className="lp-rotate__dot" />
                 <span key={i} className="lp-rotate__word">
