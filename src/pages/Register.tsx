@@ -232,7 +232,7 @@ export default function Register() {
             <PasswordInput
               value={form.password}
               onChange={(v) => set({ password: v })}
-              placeholder="Min. 8 karakter, kombinasi kuat"
+              placeholder="Min. 8 characters, strong mix"
             />
             {form.password.length > 0 && (
               <ul

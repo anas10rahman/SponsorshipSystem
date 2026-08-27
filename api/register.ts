@@ -40,7 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!name || !username || !password || !email)
       throw new HttpError(400, "Name, email, username, and password are required.");
     if (!/^[a-zA-Z0-9._-]{3,}$/.test(username))
-      throw new HttpError(400, "Username minimal 3 karakter (huruf/angka/._-, tanpa spasi).");
+      throw new HttpError(400, "Username must be at least 3 characters (letters/numbers/._-, no spaces).");
     const pwErr = validatePassword(password);
     if (pwErr) throw new HttpError(400, pwErr);
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
