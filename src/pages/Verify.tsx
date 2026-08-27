@@ -24,17 +24,17 @@ export default function Verify() {
     e.preventDefault();
     setError("");
     if (!/^\d{6}$/.test(code.trim())) {
-      setError("Masukkan 6 digit kode dari email.");
+      setError("Enter the 6-digit code from your email.");
       return;
     }
     setBusy(true);
     const result = await verifyEmail(email, code.trim());
     setBusy(false);
     if (!result.ok) {
-      setError(result.error ?? "Verifikasi gagal.");
+      setError(result.error ?? "Verification failed.");
       return;
     }
-    toast.success("Email terverifikasi. Selamat datang!");
+    toast.success("Email verified. Welcome!");
     navigate("/");
   };
 
@@ -43,11 +43,11 @@ export default function Verify() {
     const r = await resendCode(email);
     setResending(false);
     if (!r.ok) {
-      toast.failed(r.error ?? "Gagal kirim ulang.");
+      toast.failed(r.error ?? "Resend failed.");
       return;
     }
     toast.success(
-      r.emailSent ? "Kode baru dikirim ke email Anda." : "Kode dibuat, tapi email gagal terkirim.",
+      r.emailSent ? "A new code has been sent to your email." : "Code created, but the email could not be sent.",
     );
   };
 
@@ -57,14 +57,14 @@ export default function Verify() {
         <div className="sh-login__brand">
           <BrandMark />
         </div>
-        <h1 className="sh-login__title">Verifikasi email</h1>
+        <h1 className="sh-login__title">Verify email</h1>
         <p className="sh-login__sub">
-          Kami mengirim kode 6 digit ke <strong>{email}</strong>. Masukkan kode di bawah untuk
+          We sent a 6-digit code to <strong>{email}</strong>. Masukkan kode di bawah untuk
           mengaktifkan akun.
         </p>
 
         <div className="sh-field">
-          <label className="sh-field__label">Kode verifikasi</label>
+          <label className="sh-field__label">Verification code</label>
           <input
             autoFocus
             inputMode="numeric"
@@ -84,7 +84,7 @@ export default function Verify() {
           style={{ width: "100%" }}
           disabled={busy}
         >
-          {busy ? "Memverifikasi…" : "Verifikasi & masuk"}
+          {busy ? "Verifying…" : "Verify & sign in"}
         </button>
 
         <button
@@ -94,17 +94,17 @@ export default function Verify() {
           onClick={onResend}
           disabled={resending}
         >
-          {resending ? "Mengirim…" : "Kirim ulang kode"}
+          {resending ? "Sending…" : "Resend code"}
         </button>
 
         <div className="sh-login__demo" style={{ textAlign: "center" }}>
           Salah email?{" "}
           <Link to="/register" style={{ fontWeight: 700 }}>
-            Daftar ulang
+            Sign up again
           </Link>{" "}
           ·{" "}
           <Link to="/login" style={{ fontWeight: 700 }}>
-            Masuk
+            Sign in
           </Link>
         </div>
       </form>

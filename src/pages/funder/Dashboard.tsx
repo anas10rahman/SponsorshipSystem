@@ -19,35 +19,35 @@ type Tile = {
 const TILES: Tile[] = [
   {
     key: "semua",
-    label: "Proposal Masuk",
-    hint: "Total proposal diterima",
+    label: "Incoming Proposals",
+    hint: "Total proposals received",
     tone: "blue",
     icon: <Inbox size={20} />,
   },
   {
     key: "diajukan",
     label: "Perlu Ditinjau",
-    hint: "Menunggu review Anda",
+    hint: "Awaiting your review",
     tone: "amber",
     icon: <Clock size={20} />,
   },
   {
     key: "disetujui",
-    label: "Disetujui",
+    label: "Approved",
     hint: "Proposal diterima",
     tone: "green",
     icon: <CheckCircle2 size={20} />,
   },
   {
     key: "ditolak",
-    label: "Ditolak",
-    hint: "Proposal ditolak",
+    label: "Rejected",
+    hint: "Proposals rejected",
     tone: "red",
     icon: <XCircle size={20} />,
   },
   {
     key: "kadaluarsa",
-    label: "Kadaluarsa",
+    label: "Expired",
     hint: "Melewati batas waktu",
     tone: "slate",
     icon: <Hourglass size={20} />,
@@ -74,8 +74,8 @@ export default function FunderDashboard() {
       <Topbar title="Dashboard" />
       <div className="sh-shell__content">
         <div className="dm-greet">
-          <h2>Selamat datang, {funder?.name ?? currentUser?.name ?? "Mitra Sponsor"}! 👋</h2>
-          <p>Kelola seluruh aktivitas sponsorship Anda di DealMatch.</p>
+          <h2>Selamat datang, {funder?.name ?? currentUser?.name ?? "Sponsor Partner"}! 👋</h2>
+          <p>Manage all your sponsorship activity on DealMatch.</p>
         </div>
 
         <div className="dm-tiles">

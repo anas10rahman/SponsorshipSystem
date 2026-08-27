@@ -28,30 +28,30 @@ type Item = { to: string; label: string; icon: React.ReactNode };
 const NAV: Record<Role, Item[]> = {
   admin: [
     { to: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
-    { to: "/admin/pengajuan", label: "Pengajuan", icon: <Send size={18} /> },
-    { to: "/admin/organisasi", label: "Organisasi", icon: <Building2 size={18} /> },
-    { to: "/admin/pendana", label: "Mitra Sponsor", icon: <Users size={18} /> },
-    { to: "/admin/pengguna", label: "Pengguna", icon: <UserCog size={18} /> },
-    { to: "/admin/laporan", label: "Laporan", icon: <FileText size={18} /> },
-    { to: "/admin/pengaturan", label: "Pengaturan", icon: <Settings size={18} /> },
+    { to: "/admin/pengajuan", label: "Submissions", icon: <Send size={18} /> },
+    { to: "/admin/organisasi", label: "Organization", icon: <Building2 size={18} /> },
+    { to: "/admin/pendana", label: "Sponsor Partner", icon: <Users size={18} /> },
+    { to: "/admin/pengguna", label: "Users", icon: <UserCog size={18} /> },
+    { to: "/admin/laporan", label: "Reports", icon: <FileText size={18} /> },
+    { to: "/admin/pengaturan", label: "Settings", icon: <Settings size={18} /> },
   ],
   org: [
     { to: "/org/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
-    { to: "/org/cari", label: "Cari mitra sponsor", icon: <Search size={18} /> },
-    { to: "/org/pengajuan", label: "Pengajuan saya", icon: <Send size={18} /> },
-    { to: "/org/topup", label: "Top-up saldo", icon: <Wallet size={18} /> },
+    { to: "/org/cari", label: "Find sponsor partners", icon: <Search size={18} /> },
+    { to: "/org/pengajuan", label: "My submissions", icon: <Send size={18} /> },
+    { to: "/org/topup", label: "Top up balance", icon: <Wallet size={18} /> },
   ],
   funder: [
     { to: "/funder/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
-    { to: "/funder/pengajuan", label: "Pengajuan Sponsorship", icon: <Inbox size={18} /> },
-    { to: "/funder/portofolio", label: "Portofolio Kolaborasi", icon: <Briefcase size={18} /> },
+    { to: "/funder/pengajuan", label: "Sponsorship Submissions", icon: <Inbox size={18} /> },
+    { to: "/funder/portofolio", label: "Collaboration Portfolio", icon: <Briefcase size={18} /> },
   ],
 };
 
 const ROLE_LABEL: Record<Role, string> = {
   admin: "Admin",
-  org: "Organisasi",
-  funder: "Mitra Sponsor",
+  org: "Organization",
+  funder: "Sponsor Partner",
 };
 
 export function Sidebar({ role }: { role: Role }) {
@@ -80,7 +80,7 @@ export function Sidebar({ role }: { role: Role }) {
           type="button"
           className="sh-sidebar__close"
           onClick={() => setOpen(false)}
-          aria-label="Tutup menu"
+          aria-label="Close menu"
         >
           <X size={20} />
         </button>
@@ -131,7 +131,7 @@ export function Sidebar({ role }: { role: Role }) {
             Butuh bantuan?
           </div>
           <p className="dm-help__text">
-            Hubungi tim DealMatch kapan pun Anda membutuhkan bantuan.
+            Reach the DealMatch team whenever you need help.
           </p>
           <a
             className="sh-btn sh-btn--secondary sh-btn--sm"
@@ -152,7 +152,7 @@ export function Sidebar({ role }: { role: Role }) {
             onClick={logout}
           >
             <LogOut size={16} />
-            Keluar
+            Sign out
           </button>
         </div>
       )}

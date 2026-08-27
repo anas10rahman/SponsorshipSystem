@@ -12,13 +12,13 @@ export default function LegalPublic({ title }: Props) {
       <div className="lp-legal">
         <h1>{title}</h1>
         <p>
-          Naskah resmi halaman ini sedang disusun dan akan dipublikasikan di
-          sini begitu final.
+          The official text for this page is being drafted and will be
+          published here once final.
         </p>
         <p>
-          Ada pertanyaan yang tidak bisa menunggu?{" "}
-          <Link to="/about">Kembali ke About Us</Link> dan hubungi kami lewat
-          kanal yang tersedia.
+          Something that cannot wait?{" "}
+          <Link to="/about">Back to About Us</Link> and reach us through the
+          channels listed there.
         </p>
       </div>
     </PublicLayout>

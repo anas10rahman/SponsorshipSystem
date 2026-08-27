@@ -34,7 +34,7 @@ export function Topbar({ title = "", search }: Props) {
   const displaySub = funder
     ? funder.pic.name
       ? `PIC: ${funder.pic.name}`
-      : "PIC belum diisi"
+      : "PIC not filled in"
     : (currentUser?.email ?? "");
 
   return (
@@ -43,7 +43,7 @@ export function Topbar({ title = "", search }: Props) {
         type="button"
         className="sh-topbar__menu"
         onClick={() => setOpen(true)}
-        aria-label="Buka menu navigasi"
+        aria-label="Open navigation menu"
       >
         <Menu size={22} />
       </button>
@@ -59,7 +59,7 @@ export function Topbar({ title = "", search }: Props) {
           <input
             value={search.value}
             onChange={(e) => search.onChange(e.target.value)}
-            placeholder={search.placeholder ?? "Cari…"}
+            placeholder={search.placeholder ?? "Search…"}
             aria-label="Pencarian"
           />
         </div>
@@ -73,7 +73,7 @@ export function Topbar({ title = "", search }: Props) {
             type="button"
             className="sh-user"
             onClick={() => navigate(PROFILE_PATH[currentUser.role])}
-            title="Buka profil"
+            title="Open profile"
             style={{ background: "transparent", cursor: "pointer" }}
           >
             <span className="sh-avatar">

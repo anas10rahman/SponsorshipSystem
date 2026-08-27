@@ -33,7 +33,7 @@ export function UnderConstruction({ title, blurb }: Props) {
         <h1 className="lp-uc__title">This page is under construction</h1>
         <p className="lp-uc__blurb">
           {blurb ??
-            "Halaman ini sedang kami siapkan. Sementara itu, jelajahi bagian lain DealMatch."}
+            "We are still putting this page together. In the meantime, explore the rest of DealMatch."}
         </p>
 
         <div className="lp-uc__bar" aria-hidden="true">
@@ -43,10 +43,10 @@ export function UnderConstruction({ title, blurb }: Props) {
         <div className="lp-uc__actions">
           <Link to="/about" className="lp-btn lp-btn--org">
             <ArrowLeft size={16} />
-            Kembali ke About Us
+            Back to About Us
           </Link>
           <Link to="/faq" className="lp-btn lp-btn--outline">
-            Lihat FAQ
+            View FAQ
           </Link>
         </div>
       </div>

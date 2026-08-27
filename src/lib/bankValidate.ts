@@ -13,7 +13,7 @@ export type Bank = {
 };
 
 /* Panjang di bawah memakai format yang lazim dipakai tiap bank. Bila sebuah
-   bank ternyata punya format berbeda, pengguna bisa memilih "Bank lainnya"
+   bank ternyata punya format berbeda, pengguna bisa memilih "Other bank"
    agar tidak terkunci oleh aturan yang terlalu ketat. */
 export const BANKS: Bank[] = [
   { name: "BCA", lengths: [10] },
@@ -31,7 +31,7 @@ export const BANKS: Bank[] = [
   { name: "Bank Mega", lengths: [15] },
   { name: "Bank Jago", lengths: [10] },
   { name: "Bank Muamalat", lengths: [10] },
-  { name: "Bank lainnya", lengths: [] },
+  { name: "Other bank", lengths: [] },
 ];
 
 export function findBank(name: string): Bank | undefined {
@@ -41,22 +41,22 @@ export function findBank(name: string): Bank | undefined {
 /** Periksa format nomor rekening. Kembalikan pesan error, atau null bila lolos. */
 export function validateAccountNumber(bankName: string, number: string): string | null {
   const digits = String(number || "").replace(/\D/g, "");
-  if (!bankName) return "Pilih bank terlebih dahulu.";
-  if (!digits) return "Nomor rekening wajib diisi.";
+  if (!bankName) return "Select a bank first.";
+  if (!digits) return "Account number is required.";
   const bank = findBank(bankName);
-  if (!bank) return "Bank tidak dikenal.";
+  if (!bank) return "Unknown bank.";
 
   // Deretan angka yang sama (0000000000) — hampir pasti salah ketik.
-  if (/^(\d)\1+$/.test(digits)) return "Nomor rekening tidak wajar.";
+  if (/^(\d)\1+$/.test(digits)) return "That account number looks wrong.";
 
   if (bank.lengths.length === 0) {
     if (digits.length < 6 || digits.length > 20)
-      return "Nomor rekening tidak wajar (6–20 digit).";
+      return "That account number looks wrong (6–20 digits).";
     return null;
   }
   if (!bank.lengths.includes(digits.length)) {
     const expect = bank.lengths.join(" atau ");
-    return `Nomor rekening ${bank.name} umumnya ${expect} digit — yang diisi ${digits.length} digit. Periksa lagi, atau pilih "Bank lainnya" bila formatnya memang berbeda.`;
+    return `Nomor rekening ${bank.name} umumnya ${expect} digit — yang diisi ${digits.length} digit. Periksa lagi, atau pilih "Other bank" bila formatnya memang berbeda.`;
   }
   return null;
 }

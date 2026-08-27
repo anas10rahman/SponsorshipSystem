@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { sql, assembleState, readBody } from "./_db.js";
 import { hasEmailProvider, makeOtp, sendVerificationEmail, OTP_TTL_MIN } from "./_email.js";
 import { validatePassword } from "./_password.js";
+import { setSession } from "./_auth.js";
 
 class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -35,20 +36,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const email = String(b.email || "").trim().toLowerCase();
 
     if (role !== "org" && role !== "funder")
-      throw new HttpError(400, "Peran registrasi tidak valid.");
+      throw new HttpError(400, "Invalid registration role.");
     if (!name || !username || !password || !email)
-      throw new HttpError(400, "Nama, email, username, dan kata sandi wajib diisi.");
+      throw new HttpError(400, "Name, email, username, and password are required.");
     if (!/^[a-zA-Z0-9._-]{3,}$/.test(username))
       throw new HttpError(400, "Username minimal 3 karakter (huruf/angka/._-, tanpa spasi).");
     const pwErr = validatePassword(password);
     if (pwErr) throw new HttpError(400, pwErr);
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
-      throw new HttpError(400, "Format email tidak valid.");
+      throw new HttpError(400, "That email format is not valid.");
 
     const dupU = (await sql`select 1 from users where username = ${username} limit 1`) as any[];
-    if (dupU.length) throw new HttpError(409, "Username sudah dipakai. Coba yang lain.");
+    if (dupU.length) throw new HttpError(409, "That username is taken. Try another.");
     const dupE = (await sql`select 1 from users where email = ${email} limit 1`) as any[];
-    if (dupE.length) throw new HttpError(409, "Email sudah terdaftar.");
+    if (dupE.length) throw new HttpError(409, "That email is already registered.");
 
     const initials = initialsOf(name);
     // Bila provider email aktif: akun dibuat belum terverifikasi + kirim OTP.
@@ -100,7 +101,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    res.status(200).json({ userId, state: await assembleState() });
+    setSession(res, userId);
+    res.status(200).json({ userId, state: await assembleState(userId) });
   } catch (e: any) {
     const status = e instanceof HttpError ? e.status : 500;
     res.status(status).json({ error: String(e?.message || e) });

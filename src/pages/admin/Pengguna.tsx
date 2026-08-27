@@ -53,10 +53,10 @@ export default function AdminPengguna() {
     try {
       if (del.kind === "org") await deleteOrg(del.id);
       else await deleteFunder(del.id);
-      toast.success(`${del.kind === "org" ? "Organisasi" : "Mitra Sponsor"} "${del.name}" dihapus.`);
+      toast.success(`${del.kind === "org" ? "Organization" : "Sponsor Partner"} "${del.name}" deleted.`);
       setDel(null);
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal menghapus."));
+      toast.failed(String(e?.message || "Could not delete."));
     } finally {
       setBusy(false);
     }
@@ -65,12 +65,12 @@ export default function AdminPengguna() {
   return (
     <>
       <Topbar
-        search={{ value: search, onChange: setSearch, placeholder: "Cari nama / username / email…" }}
+        search={{ value: search, onChange: setSearch, placeholder: "Search name / username / email…" }}
       />
       <div className="sh-shell__content">
         <PageHead
-          title="Manajemen pengguna"
-          subtitle="Kelola akun organisasi & mitra sponsor. Menghapus akun menghapus seluruh data terkaitnya."
+          title="User management"
+          subtitle="Manage organization and sponsor partner accounts. Deleting an account removes all of its related data."
         />
 
         <div className="sh-toolbar">
@@ -99,16 +99,16 @@ export default function AdminPengguna() {
         <section className="sh-card">
           {tab === "org" ? (
             orgRows.length === 0 ? (
-              <Empty title="Tidak ada organisasi" description="Belum ada akun organisasi." />
+              <Empty title="No organizations" description="No organization accounts yet." />
             ) : (
               <div className="sh-table-wrap">
                 <table className="sh-table">
                   <thead>
                     <tr>
-                      <th>Organisasi</th>
+                      <th>Organization</th>
                       <th>Username</th>
                       <th>Email</th>
-                      <th>Verifikasi</th>
+                      <th>Verification</th>
                       <th>Terdaftar</th>
                       <th style={{ width: 60 }}>Aksi</th>
                     </tr>
@@ -119,7 +119,7 @@ export default function AdminPengguna() {
                       const badge = orgVerifyBadge(o.verificationStatus);
                       return (
                         <tr key={o.id}>
-                          <td data-label="Organisasi">
+                          <td data-label="Organization">
                             <div className="sh-row" style={{ gap: 10 }}>
                               <span className="sh-org-logo">{o.logoInitials}</span>
                               <span style={{ fontWeight: 700 }}>{o.name}</span>
@@ -127,7 +127,7 @@ export default function AdminPengguna() {
                           </td>
                           <td data-label="Username">{u?.username ?? "—"}</td>
                           <td className="sh-muted" data-label="Email">{o.email || u?.email || "—"}</td>
-                          <td data-label="Verifikasi">
+                          <td data-label="Verification">
                             <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                           </td>
                           <td className="sh-muted" data-label="Terdaftar">{u ? formatDate(u.createdAt) : "—"}</td>
@@ -135,7 +135,7 @@ export default function AdminPengguna() {
                             <button
                               className="sh-btn sh-btn--ghost sh-btn--icon"
                               onClick={() => setDel({ kind: "org", id: o.id, name: o.name })}
-                              title="Hapus organisasi"
+                              title="Delete organization"
                             >
                               <Trash2 size={14} style={{ color: "var(--status-failed)" }} />
                             </button>
@@ -148,13 +148,13 @@ export default function AdminPengguna() {
               </div>
             )
           ) : funderRows.length === 0 ? (
-            <Empty title="Tidak ada mitra sponsor" description="Belum ada akun mitra sponsor." />
+            <Empty title="No sponsor partners" description="No sponsor partner accounts yet." />
           ) : (
             <div className="sh-table-wrap">
               <table className="sh-table">
                 <thead>
                   <tr>
-                    <th>Mitra Sponsor</th>
+                    <th>Sponsor Partner</th>
                     <th>Username</th>
                     <th>Email</th>
                     <th>Tipe</th>
@@ -167,7 +167,7 @@ export default function AdminPengguna() {
                     const u = loginUser((x) => x.role === "funder" && x.funderId === f.id);
                     return (
                       <tr key={f.id}>
-                        <td style={{ fontWeight: 700 }} data-label="Mitra Sponsor">{f.name}</td>
+                        <td style={{ fontWeight: 700 }} data-label="Sponsor Partner">{f.name}</td>
                         <td data-label="Username">{u?.username ?? "—"}</td>
                         <td className="sh-muted" data-label="Email">{f.email || u?.email || "—"}</td>
                         <td data-label="Tipe">{f.type}</td>
@@ -176,7 +176,7 @@ export default function AdminPengguna() {
                           <button
                             className="sh-btn sh-btn--ghost sh-btn--icon"
                             onClick={() => setDel({ kind: "funder", id: f.id, name: f.name })}
-                            title="Hapus mitra sponsor"
+                            title="Delete sponsor partner"
                           >
                             <Trash2 size={14} style={{ color: "var(--status-failed)" }} />
                           </button>
@@ -195,24 +195,24 @@ export default function AdminPengguna() {
         <Modal
           open
           onClose={() => setDel(null)}
-          title={del.kind === "org" ? "Hapus organisasi?" : "Hapus mitra sponsor?"}
+          title={del.kind === "org" ? "Delete this organization?" : "Delete this sponsor partner?"}
           width={460}
           footer={
             <>
               <button className="sh-btn sh-btn--secondary" onClick={() => setDel(null)} disabled={busy}>
-                Batal
+                Cancel
               </button>
               <button className="sh-btn sh-btn--danger" onClick={doDelete} disabled={busy}>
                 <Trash2 size={16} />
-                {busy ? "Menghapus…" : "Hapus permanen"}
+                {busy ? "Deleting…" : "Delete permanently"}
               </button>
             </>
           }
         >
           <p>
-            {del.kind === "org" ? "Organisasi" : "Mitra Sponsor"} <strong>{del.name}</strong> akan dihapus{" "}
-            <strong>permanen</strong> — beserta akun login dan seluruh pengajuan terkaitnya. Tindakan
-            ini tidak bisa dibatalkan.
+            {del.kind === "org" ? "Organization" : "Sponsor Partner"} <strong>{del.name}</strong> will be deleted{" "}
+            <strong>permanently</strong> — along with the login account and every related submission.
+            This cannot be undone.
           </p>
         </Modal>
       )}

@@ -12,8 +12,8 @@ export default function AdminPengaturan() {
       <Topbar />
       <div className="sh-shell__content">
         <PageHead
-          title="Pengaturan platform"
-          subtitle="Konfigurasi peran, verifikasi, dan kelola data demo."
+          title="Platform settings"
+          subtitle="Configure roles, verification, and manage demo data."
         />
 
         <div style={{ display: "grid", gap: 16, maxWidth: 720 }}>
@@ -24,7 +24,7 @@ export default function AdminPengaturan() {
                   <Users size={20} />
                 </span>
                 <div>
-                  <h3 style={{ marginBottom: 4 }}>Pengguna platform</h3>
+                  <h3 style={{ marginBottom: 4 }}>Platform users</h3>
                   <p className="sh-muted">
                     {state.users.length} pengguna terdaftar di akun demo.
                   </p>
@@ -66,9 +66,9 @@ export default function AdminPengaturan() {
                   <ShieldCheck size={20} />
                 </span>
                 <div>
-                  <h3 style={{ marginBottom: 4 }}>Ambang verifikasi</h3>
+                  <h3 style={{ marginBottom: 4 }}>Verification threshold</h3>
                   <p className="sh-muted">
-                    Untuk rilis pertama, semua transaksi memerlukan verifikasi manual oleh Admin.
+                    For the first release, every transaction requires manual verification by an Admin.
                   </p>
                 </div>
               </div>

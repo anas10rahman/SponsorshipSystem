@@ -18,11 +18,11 @@ import { CheckCircle2, XCircle, FileText, Eye, ShieldCheck } from "lucide-react"
 type Filter = "semua" | "menunggu" | "terverifikasi" | "ditolak" | "belum_diajukan";
 
 const FILTERS: Array<{ value: Filter; label: string }> = [
-  { value: "semua", label: "Semua" },
-  { value: "menunggu", label: "Menunggu" },
-  { value: "terverifikasi", label: "Terverifikasi" },
-  { value: "ditolak", label: "Ditolak" },
-  { value: "belum_diajukan", label: "Belum diajukan" },
+  { value: "semua", label: "All" },
+  { value: "menunggu", label: "Pending" },
+  { value: "terverifikasi", label: "Verified" },
+  { value: "ditolak", label: "Rejected" },
+  { value: "belum_diajukan", label: "Not requested" },
 ];
 
 export default function AdminOrganisasi() {
@@ -73,10 +73,10 @@ export default function AdminOrganisasi() {
     setBusy(true);
     try {
       await verifyOrg(review.id);
-      toast.success(`Organisasi "${review.name}" diverifikasi.`);
+      toast.success(`Organization "${review.name}" verified.`);
       closeReview();
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal memverifikasi."));
+      toast.failed(String(e?.message || "Verification failed."));
     } finally {
       setBusy(false);
     }
@@ -91,10 +91,10 @@ export default function AdminOrganisasi() {
     setBusy(true);
     try {
       await rejectOrg(review.id, note.trim());
-      toast.failed(`Verifikasi "${review.name}" ditolak.`);
+      toast.failed(`Verification for "${review.name}" rejected.`);
       closeReview();
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal menolak."));
+      toast.failed(String(e?.message || "Could not reject."));
     } finally {
       setBusy(false);
     }
@@ -103,12 +103,12 @@ export default function AdminOrganisasi() {
   return (
     <>
       <Topbar
-        search={{ value: search, onChange: setSearch, placeholder: "Cari organisasi…" }}
+        search={{ value: search, onChange: setSearch, placeholder: "Search organizations…" }}
       />
       <div className="sh-shell__content">
         <PageHead
-          title="Direktori organisasi"
-          subtitle="Tinjau & verifikasi organisasi. Hanya organisasi terverifikasi yang bisa mengirim pengajuan."
+          title="Organization directory"
+          subtitle="Review and verify organizations. Only verified organizations can send submissions."
         />
 
         <div className="sh-toolbar">
@@ -128,17 +128,17 @@ export default function AdminOrganisasi() {
 
         <section className="sh-card">
           {rows.length === 0 ? (
-            <Empty title="Tidak ada organisasi" description="Coba ubah filter." />
+            <Empty title="No organizations" description="Try changing the filters." />
           ) : (
             <div className="sh-table-wrap">
               <table className="sh-table">
                 <thead>
                   <tr>
-                    <th>Organisasi</th>
-                    <th>Kategori</th>
-                    <th>Kota</th>
-                    <th>Status verifikasi</th>
-                    <th>Pengajuan dikirim</th>
+                    <th>Organization</th>
+                    <th>Category</th>
+                    <th>City</th>
+                    <th>Verification status</th>
+                    <th>Submission sent</th>
                     <th style={{ width: 100 }}>Aksi</th>
                   </tr>
                 </thead>
@@ -149,7 +149,7 @@ export default function AdminOrganisasi() {
                     const badge = orgVerifyBadge(org.verificationStatus);
                     return (
                       <tr key={org.id}>
-                        <td data-label="Organisasi">
+                        <td data-label="Organization">
                           <div className="sh-row" style={{ gap: 10 }}>
                             <span className="sh-org-logo">{org.logoInitials}</span>
                             <Link
@@ -160,12 +160,12 @@ export default function AdminOrganisasi() {
                             </Link>
                           </div>
                         </td>
-                        <td data-label="Kategori">{org.category}</td>
-                        <td data-label="Kota">{org.city}</td>
-                        <td data-label="Status verifikasi">
+                        <td data-label="Category">{org.category}</td>
+                        <td data-label="City">{org.city}</td>
+                        <td data-label="Verification status">
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                         </td>
-                        <td data-label="Pengajuan dikirim">{sent}</td>
+                        <td data-label="Submission sent">{sent}</td>
                         <td data-label="Aksi">
                           <button
                             className="sh-btn sh-btn--ghost sh-btn--sm"
@@ -193,18 +193,18 @@ export default function AdminOrganisasi() {
         <Modal
           open
           onClose={closeReview}
-          title={`Verifikasi: ${review.name}`}
+          title={`Verification: ${review.name}`}
           width={640}
           footer={
             review.verificationStatus === "terverifikasi" ? (
-              <span className="sh-muted">Organisasi ini sudah terverifikasi.</span>
+              <span className="sh-muted">This organization is already verified.</span>
             ) : rejecting ? (
               <>
                 <button className="sh-btn sh-btn--secondary" onClick={() => setRejecting(false)} disabled={busy}>
-                  Batal
+                  Cancel
                 </button>
                 <button className="sh-btn sh-btn--danger" onClick={doReject} disabled={busy}>
-                  Kirim penolakan
+                  Send rejection
                 </button>
               </>
             ) : (
@@ -242,24 +242,24 @@ export default function AdminOrganisasi() {
               borderTop: "1px solid var(--line)",
             }}
           >
-            <Field label="Kategori">{review.category || "—"}</Field>
-            <Field label="Kota">{review.city || "—"}</Field>
+            <Field label="Category">{review.category || "—"}</Field>
+            <Field label="City">{review.city || "—"}</Field>
             <Field label="Email">{review.email || "—"}</Field>
-            <Field label="Rekening pencairan">{review.payoutAccount || "—"}</Field>
+            <Field label="Payout account">{review.payoutAccount || "—"}</Field>
             <div style={{ gridColumn: "1 / -1" }}>
-              <Field label="Deskripsi">{review.description || "—"}</Field>
+              <Field label="Description">{review.description || "—"}</Field>
             </div>
           </div>
 
           <h4 style={{ margin: "6px 0 8px" }}>Penanggung jawab (PIC)</h4>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <Field label="Nama">{review.pic.name || "—"}</Field>
-            <Field label="Jabatan">{review.pic.position || "—"}</Field>
+            <Field label="Name">{review.pic.name || "—"}</Field>
+            <Field label="Role">{review.pic.position || "—"}</Field>
             <Field label="No. WA">{review.pic.phone || "—"}</Field>
-            <Field label="Email PIC">{review.pic.email || "—"}</Field>
+            <Field label="PIC email">{review.pic.email || "—"}</Field>
           </div>
 
-          <h4 style={{ margin: "14px 0 8px" }}>Dokumen</h4>
+          <h4 style={{ margin: "14px 0 8px" }}>Documents</h4>
           <DocRow
             label="Company profile"
             name={review.comproUrl ?? ""}
@@ -290,11 +290,11 @@ export default function AdminOrganisasi() {
                   setNote(e.target.value);
                   if (noteErr) setNoteErr(false);
                 }}
-                placeholder="Jelaskan apa yang perlu diperbaiki organisasi."
+                placeholder="Explain what the organization needs to fix."
               />
               {noteErr && (
                 <span className="sh-field__hint" style={{ color: "var(--status-failed)" }}>
-                  Alasan penolakan wajib diisi.
+                  A rejection reason is required.
                 </span>
               )}
             </div>
@@ -306,15 +306,15 @@ export default function AdminOrganisasi() {
         <Modal
           open
           onClose={() => setPreview(null)}
-          title={preview.title || "Pratinjau dokumen"}
+          title={preview.title || "Document preview"}
           width={760}
         >
           {preview.data === null ? (
-            <p className="sh-muted">Memuat dokumen…</p>
+            <p className="sh-muted">Loading document…</p>
           ) : preview.data ? (
             <PdfPreview dataUrl={preview.data} fileName={preview.title} />
           ) : (
-            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+            <p className="sh-muted">The document could not be loaded.</p>
           )}
         </Modal>
       )}
@@ -355,7 +355,7 @@ function DocRow({
             <span style={{ wordBreak: "break-all" }}>{name}</span>
           </div>
         ) : (
-          <span className="sh-muted">Belum diunggah</span>
+          <span className="sh-muted">Not uploaded</span>
         )}
       </div>
       {name && onPreview && (

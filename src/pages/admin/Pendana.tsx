@@ -21,27 +21,27 @@ export default function AdminPendana() {
   return (
     <>
       <Topbar
-        search={{ value: search, onChange: setSearch, placeholder: "Cari mitra sponsor / fokus…" }}
+        search={{ value: search, onChange: setSearch, placeholder: "Search sponsor partner / focus…" }}
       />
       <div className="sh-shell__content">
         <PageHead
-          title="Direktori mitra sponsor"
-          subtitle="Pantau kapasitas anggaran & komitmen tiap mitra sponsor."
+          title="Sponsor partner directory"
+          subtitle="Track each sponsor partner's budget capacity and commitments."
         />
 
         <section className="sh-card">
           {rows.length === 0 ? (
-            <Empty title="Tidak ada mitra sponsor" />
+            <Empty title="No sponsor partners" />
           ) : (
             <div className="sh-table-wrap">
               <table className="sh-table">
                 <thead>
                   <tr>
-                    <th>Mitra Sponsor</th>
+                    <th>Sponsor Partner</th>
                     <th>Tipe</th>
                     <th>Fokus</th>
-                    <th>Anggaran total</th>
-                    <th>Sisa anggaran</th>
+                    <th>Total budget</th>
+                    <th>Remaining budget</th>
                     <th style={{ width: 180 }}>Penggunaan</th>
                   </tr>
                 </thead>
@@ -51,7 +51,7 @@ export default function AdminPendana() {
                     const pct = percent(used, f.budgetTotal);
                     return (
                       <tr key={f.id}>
-                        <td data-label="Mitra Sponsor">
+                        <td data-label="Sponsor Partner">
                           <Link
                             to={`/admin/pendana/${f.id}`}
                             style={{ fontWeight: 700, color: "inherit" }}
@@ -61,8 +61,8 @@ export default function AdminPendana() {
                         </td>
                         <td data-label="Tipe">{f.type}</td>
                         <td data-label="Fokus">{f.focus.join(", ")}</td>
-                        <td className="num" data-label="Anggaran total">{formatRupiah(f.budgetTotal)}</td>
-                        <td className="num" data-label="Sisa anggaran">{formatRupiah(f.budgetRemaining)}</td>
+                        <td className="num" data-label="Total budget">{formatRupiah(f.budgetTotal)}</td>
+                        <td className="num" data-label="Remaining budget">{formatRupiah(f.budgetRemaining)}</td>
                         <td data-label="Penggunaan">
                           <div className="sh-progress">
                             <div className="sh-progress__bar" style={{ width: `${pct}%` }} />

@@ -50,7 +50,7 @@ function RootRedirect() {
  * `session.userId` dibaca sinkron dari localStorage saat reducer diinisialisasi,
  * sedangkan `currentUser` baru terisi setelah daftar user datang dari server.
  * Bercabang di `session.userId` membuat pengunjung anonim langsung mendapat
- * landing page tanpa melewati layar "Memuat data…" milik HydrationGate.
+ * landing page tanpa melewati layar "Loading data…" milik HydrationGate.
  */
 function RootEntry() {
   const { state } = useStore();
@@ -79,7 +79,7 @@ function HydrationGate({ children }: { children: ReactNode }) {
               animation: "sh-spin 0.7s linear infinite",
             }}
           />
-          <p className="sh-muted">Memuat data…</p>
+          <p className="sh-muted">Loading data…</p>
         </div>
         <style>{`@keyframes sh-spin{to{transform:rotate(360deg)}}`}</style>
       </main>
@@ -90,10 +90,10 @@ function HydrationGate({ children }: { children: ReactNode }) {
       <main className="sh-login">
         <div className="sh-login__card" style={{ textAlign: "center", gap: 12 }}>
           <BrandMark size={40} style={{ justifyContent: "center" }} />
-          <h2>Gagal memuat data</h2>
-          <p className="sh-muted">{errorMsg || "Tidak dapat terhubung ke server."}</p>
+          <h2>Could not load data</h2>
+          <p className="sh-muted">{errorMsg || "Cannot reach the server."}</p>
           <button className="sh-btn sh-btn--primary" onClick={() => location.reload()}>
-            Coba lagi
+            Try again
           </button>
         </div>
       </main>
@@ -119,7 +119,7 @@ export default function App() {
           element={
             <UnderConstructionPage
               title="Gallery"
-              blurb="Dokumentasi kolaborasi organisasi dan mitra sponsor sedang kami kumpulkan."
+              blurb="We are still gathering documentation of collaborations between organizations and sponsor partners."
             />
           }
         />
@@ -127,11 +127,11 @@ export default function App() {
         <Route path="/faq" element={<FaqPage />} />
         <Route
           path="/kebijakan-privasi"
-          element={<LegalPublic title="Kebijakan Privasi" />}
+          element={<LegalPublic title="Privacy Policy" />}
         />
         <Route
           path="/syarat-ketentuan"
-          element={<LegalPublic title="Syarat & Ketentuan" />}
+          element={<LegalPublic title="Terms & Conditions" />}
         />
 
         {/* === Sisanya butuh data dari server === */}
@@ -203,11 +203,11 @@ export default function App() {
           {/* Halaman legal masih kerangka — isinya menunggu naskah resmi. */}
           <Route
             path="/funder/kebijakan-privasi"
-            element={<Placeholder title="Kebijakan Privasi" />}
+            element={<Placeholder title="Privacy Policy" />}
           />
           <Route
             path="/funder/syarat-ketentuan"
-            element={<Placeholder title="Syarat & Ketentuan" />}
+            element={<Placeholder title="Terms & Conditions" />}
           />
         </Route>
 

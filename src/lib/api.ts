@@ -31,8 +31,17 @@ export const api = {
     const data = await r.json().catch(() => ({}));
     if (r.status === 403 && (data as any).needsVerification)
       return data as { needsVerification: true; email: string };
-    if (!r.ok) throw new Error((data as any).error || "Login gagal.");
+    if (!r.ok) throw new Error((data as any).error || "Sign-in failed.");
     return data as { user: { id: string } };
+  },
+
+  /** Hapus cookie sesi di server. */
+  async logout() {
+    await fetch(`${BASE}/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ op: "logout" }),
+    }).catch(() => {});
   },
 
   async register(payload: Record<string, unknown>) {
@@ -42,7 +51,7 @@ export const api = {
       body: JSON.stringify(payload),
     });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error((data as any).error || "Registrasi gagal.");
+    if (!r.ok) throw new Error((data as any).error || "Registration failed.");
     return data as {
       needsVerification?: true;
       email?: string;
@@ -60,7 +69,7 @@ export const api = {
       body: JSON.stringify({ email, code }),
     });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error((data as any).error || "Verifikasi gagal.");
+    if (!r.ok) throw new Error((data as any).error || "Verification failed.");
     return data as { userId: string; state: AppState };
   },
 
@@ -71,7 +80,7 @@ export const api = {
       body: JSON.stringify({ email }),
     });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error((data as any).error || "Gagal kirim ulang kode.");
+    if (!r.ok) throw new Error((data as any).error || "Could not resend the code.");
     return data as { ok: true; emailSent: boolean; emailError?: string };
   },
 
@@ -84,18 +93,19 @@ export const api = {
     });
     const data = await r.json().catch(() => ({}));
     // Endpoint sengaja selalu 200 & netral; error jaringan tetap dilempar.
-    if (!r.ok) throw new Error((data as any).error || "Gagal mengirim kode reset.");
+    if (!r.ok) throw new Error((data as any).error || "Could not send the reset code.");
     return data as { ok: true; message: string };
   },
 
-  async changePassword(userId: string, currentPassword: string, password: string) {
+  /** Identitas diambil server dari cookie sesi — userId tak lagi dikirim client. */
+  async changePassword(currentPassword: string, password: string) {
     const r = await fetch(`${BASE}/login`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ op: "change", userId, currentPassword, password }),
+      body: JSON.stringify({ op: "change", currentPassword, password }),
     });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error((data as any).error || "Gagal mengganti kata sandi.");
+    if (!r.ok) throw new Error((data as any).error || "Could not change the password.");
     return data as { ok: true };
   },
 
@@ -106,7 +116,7 @@ export const api = {
       body: JSON.stringify({ op: "reset", email, code, password }),
     });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error((data as any).error || "Gagal reset kata sandi.");
+    if (!r.ok) throw new Error((data as any).error || "Could not reset the password.");
     return data as { ok: true };
   },
 

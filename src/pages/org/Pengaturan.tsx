@@ -132,37 +132,37 @@ export default function OrgPengaturan() {
       });
       navigate("/org/profil");
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal menyimpan profil."));
+      toast.failed(String(e?.message || "Could not save the profile."));
     }
   };
 
   return (
     <>
-      <Topbar title="Pengaturan organisasi" />
+      <Topbar title="Organization settings" />
       <div className="sh-shell__content">
         <PageHead
-          title="Edit profil organisasi"
-          subtitle="Lengkapi profil organisasi dan penanggung jawab (PIC)."
+          title="Edit organization profile"
+          subtitle="Complete the organization profile and the person in charge (PIC)."
         />
 
         <div style={{ display: "grid", gap: 20, maxWidth: 880 }}>
           {/* ============ Profil organisasi ============ */}
           <section className="sh-card">
             <header className="sh-card__header">
-              <h3>Profil organisasi</h3>
+              <h3>Organization profile</h3>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <PhotoPicker
-                label="Logo organisasi"
+                label="Organization logo"
                 value={form.logoUrl}
                 fallback={form.logoInitials}
                 onChange={(v) => set({ logoUrl: v })}
                 size={96}
-                hint="PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama."
+                hint="PNG/JPG, max 2 MB. If empty, the name initials are used."
               />
 
               <div className="sh-form-grid">
-                <Field label="Nama organisasi" required invalid={errors.has("name")}>
+                <Field label="Organization name" required invalid={errors.has("name")}>
                   <input
                     value={form.name}
                     onChange={(e) => set({ name: e.target.value })}
@@ -170,9 +170,9 @@ export default function OrgPengaturan() {
                   />
                 </Field>
                 <Field
-                  label="Kategori organisasi"
+                  label="Organization category"
                   required
-                  hint="Bidang gerak organisasi"
+                  hint="Organization focus area"
                   invalid={errors.has("category")}
                 >
                   <input
@@ -181,7 +181,7 @@ export default function OrgPengaturan() {
                     placeholder="Misal: Seni & Budaya / Edukasi / Olahraga"
                   />
                 </Field>
-                <Field label="Email organisasi" required invalid={errors.has("email")}>
+                <Field label="Organization email" required invalid={errors.has("email")}>
                   <input
                     type="email"
                     value={form.email}
@@ -189,9 +189,9 @@ export default function OrgPengaturan() {
                     placeholder="halo@organisasi.org"
                   />
                 </Field>
-                <Field label="Kota" required invalid={errors.has("city")}>
+                <Field label="City" required invalid={errors.has("city")}>
                   <select value={form.city} onChange={(e) => set({ city: e.target.value })}>
-                    <option value="">— Pilih kota —</option>
+                    <option value="">— Select a city —</option>
                     {/* Kota tersimpan yang tak ada di daftar tetap tampil agar tidak hilang. */}
                     {(CITIES.includes(form.city) || !form.city
                       ? CITIES
@@ -204,10 +204,10 @@ export default function OrgPengaturan() {
                   </select>
                 </Field>
                 <Field
-                  label="Rekening pencairan"
+                  label="Payout account"
                   required
                   icon={<CreditCard size={14} />}
-                  hint="Pilih bank, ketik nomor dua kali, lalu isi nama pemilik sesuai buku tabungan"
+                  hint="Select a bank, type the number twice, then enter the holder name as printed in the passbook"
                   invalid={errors.has("payoutAccount")}
                 >
                   <RekeningValidator
@@ -227,7 +227,7 @@ export default function OrgPengaturan() {
                     rows={4}
                     value={form.description}
                     onChange={(e) => set({ description: e.target.value })}
-                    placeholder="Ceritakan misi, fokus, dan kegiatan utama organisasi."
+                    placeholder="Describe your organization's mission, focus, and main activities."
                   />
                 </div>
               </div>
@@ -279,9 +279,9 @@ export default function OrgPengaturan() {
           {/* ============ Dokumen organisasi ============ */}
           <section className="sh-card">
             <header className="sh-card__header">
-              <h3>Dokumen organisasi</h3>
+              <h3>Organization documents</h3>
               <span className="sh-muted" style={{ fontSize: 12 }}>
-                PDF · diperlukan untuk verifikasi admin
+                PDF · required for admin verification
               </span>
             </header>
             <div className="sh-card__body">
@@ -297,7 +297,7 @@ export default function OrgPengaturan() {
               />
 
               <DocPicker
-                label="Dokumen legal organisasi"
+                label="Organization legal documents"
                 required
                 multiple
                 docs={form.legalDocs}
@@ -314,7 +314,7 @@ export default function OrgPengaturan() {
             <header className="sh-card__header">
               <h3>Penanggung jawab (PIC)</h3>
               <span className="sh-muted" style={{ fontSize: 12 }}>
-                Kontak utama untuk koordinasi
+                Main contact for coordination
               </span>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
@@ -327,25 +327,25 @@ export default function OrgPengaturan() {
                 onChange={(v) => setPic({ photo: v ?? "" })}
                 size={96}
                 round
-                hint="PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama PIC."
+                hint="PNG/JPG, max 2 MB. If empty, the PIC name initials are used."
               />
 
               <div className="sh-form-grid">
-                <Field label="Nama PIC" required invalid={errors.has("pic.name")}>
+                <Field label="PIC name" required invalid={errors.has("pic.name")}>
                   <input
                     value={form.pic.name}
                     onChange={(e) => setPic({ name: e.target.value })}
-                    placeholder="Nama lengkap penanggung jawab"
+                    placeholder="Full name of the person in charge"
                   />
                 </Field>
-                <Field label="Nomor WA PIC" required invalid={errors.has("pic.phone")}>
+                <Field label="PIC WhatsApp number" required invalid={errors.has("pic.phone")}>
                   <input
                     value={form.pic.phone}
                     onChange={(e) => setPic({ phone: e.target.value })}
                     placeholder="0812-3456-7890"
                   />
                 </Field>
-                <Field label="Jabatan di organisasi" required invalid={errors.has("pic.position")}>
+                <Field label="Role in the organization" required invalid={errors.has("pic.position")}>
                   <input
                     value={form.pic.position}
                     onChange={(e) => setPic({ position: e.target.value })}
@@ -353,7 +353,7 @@ export default function OrgPengaturan() {
                   />
                 </Field>
                 <Field
-                  label="Email PIC"
+                  label="PIC email"
                   required
                   icon={<Mail size={14} />}
                   invalid={errors.has("pic.email")}
@@ -389,7 +389,7 @@ export default function OrgPengaturan() {
           <div className="sh-row" style={{ justifyContent: "flex-end" }}>
             <button className="sh-btn sh-btn--primary" onClick={save}>
               <Save size={16} />
-              Simpan profil
+              Save profile
             </button>
           </div>
 
@@ -401,15 +401,15 @@ export default function OrgPengaturan() {
         <Modal
           open
           onClose={() => setPreview(null)}
-          title={preview.title || "Pratinjau dokumen"}
+          title={preview.title || "Document preview"}
           width={760}
         >
           {preview.data === null ? (
-            <p className="sh-muted">Memuat dokumen…</p>
+            <p className="sh-muted">Loading document…</p>
           ) : preview.data ? (
             <PdfPreview dataUrl={preview.data} fileName={preview.title} />
           ) : (
-            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+            <p className="sh-muted">The document could not be loaded.</p>
           )}
         </Modal>
       )}
@@ -445,7 +445,7 @@ function Field({
       {children}
       {invalid ? (
         <span className="sh-field__hint" style={{ color: "var(--status-failed)" }}>
-          Wajib diisi dengan benar.
+          Must be filled in correctly.
         </span>
       ) : (
         hint && <span className="sh-field__hint">{hint}</span>

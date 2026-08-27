@@ -23,9 +23,9 @@ export default function NotFound() {
         >
           404
         </div>
-        <h1 className="sh-login__title">Halaman tidak ditemukan</h1>
+        <h1 className="sh-login__title">Page not found</h1>
         <p className="sh-login__sub">
-          URL yang Anda buka tidak tersedia atau bukan untuk peran Anda.
+          That URL is unavailable or not meant for your role.
         </p>
         <div className="sh-row" style={{ gap: 8, marginTop: 8 }}>
           <button
@@ -33,10 +33,10 @@ export default function NotFound() {
             onClick={() => navigate(-1)}
           >
             <ArrowLeft size={16} />
-            Kembali
+            Back
           </button>
           <Link to={home} className="sh-btn sh-btn--primary">
-            Ke beranda
+            Go to home
           </Link>
         </div>
       </div>

@@ -12,10 +12,10 @@ class HttpError extends Error {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try {
-    if (!hasEmailProvider()) throw new HttpError(400, "Layanan email belum dikonfigurasi.");
+    if (!hasEmailProvider()) throw new HttpError(400, "Email service is not configured.");
     const b = readBody(req);
     const email = String(b.email || "").trim().toLowerCase();
-    if (!email) throw new HttpError(400, "Email wajib diisi.");
+    if (!email) throw new HttpError(400, "Email is required.");
 
     const rows = (await sql`
       select id, email_verified,
@@ -24,14 +24,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
              ) as can_resend
       from users where email = ${email} limit 1`) as any[];
     const row = rows[0];
-    if (!row) throw new HttpError(404, "Akun tidak ditemukan.");
-    if (row.email_verified) throw new HttpError(400, "Email sudah terverifikasi. Silakan login.");
+    if (!row) throw new HttpError(404, "Account not found.");
+    if (row.email_verified) throw new HttpError(400, "Email already verified. Please sign in.");
     if (!row.can_resend) throw new HttpError(429, "Tunggu sebentar sebelum minta kode lagi.");
 
     const code = makeOtp();
     await sql`
       update users set verify_code = crypt(${code}, gen_salt('bf')),
-        verify_expires = now() + make_interval(mins => ${OTP_TTL_MIN})
+        verify_expires = now() + make_interval(mins => ${OTP_TTL_MIN}),
+        verify_attempts = 0
       where id = ${row.id}`;
     const mail = await sendVerificationEmail(email, code);
     res.status(200).json({ ok: true, emailSent: mail.ok, ...(mail.ok ? {} : { emailError: mail.error }) });

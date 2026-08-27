@@ -60,7 +60,7 @@ export function RekeningValidator({
         onBlur={() => setTouched(true)}
         style={errStyle}
       >
-        <option value="">— Pilih bank —</option>
+        <option value="">— Select a bank —</option>
         {BANKS.map((b) => (
           <option key={b.name} value={b.name}>
             {b.name}
@@ -74,7 +74,7 @@ export function RekeningValidator({
         value={number}
         onChange={(e) => setNumber(e.target.value.replace(/\D/g, ""))}
         onBlur={() => setTouched(true)}
-        placeholder="Nomor rekening"
+        placeholder="Account number"
         style={errStyle}
       />
 
@@ -85,7 +85,7 @@ export function RekeningValidator({
         onChange={(e) => setConfirm(e.target.value.replace(/\D/g, ""))}
         onBlur={() => setTouched(true)}
         onPaste={(e) => e.preventDefault()} // ketik ulang manual — menyalin meniadakan gunanya
-        placeholder="Ketik ulang nomor rekening"
+        placeholder="Re-enter the account number"
         style={errStyle}
       />
 
@@ -94,7 +94,7 @@ export function RekeningValidator({
         value={owner}
         onChange={(e) => setOwner(e.target.value)}
         onBlur={() => setTouched(true)}
-        placeholder="Nama pemilik rekening (sesuai buku tabungan)"
+        placeholder="Account holder name (as printed in the passbook)"
         style={errStyle}
       />
 
@@ -117,8 +117,8 @@ export function RekeningValidator({
               a.n. <strong>{owner.trim()}</strong>
             </div>
             <div className="sh-muted" style={{ marginTop: 4 }}>
-              Pastikan sudah sesuai buku tabungan. Kepemilikan rekening diperiksa admin saat
-              verifikasi organisasi.
+              Make sure this matches the passbook. Account ownership is checked by an admin during
+              organization verification.
             </div>
           </div>
         </div>
@@ -129,10 +129,10 @@ export function RekeningValidator({
             <span>
               {formatError ??
                 (mismatch
-                  ? "Nomor rekening yang diketik ulang belum sama."
+                  ? "The re-entered account number does not match."
                   : confirm.length === 0
-                    ? "Ketik ulang nomor rekening untuk konfirmasi."
-                    : "Isi nama pemilik rekening.")}
+                    ? "Re-enter the account number to confirm."
+                    : "Enter the account holder name.")}
             </span>
           </div>
         )

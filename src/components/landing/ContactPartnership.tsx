@@ -41,16 +41,16 @@ export function ContactPartnership() {
 
   function validate(): Errors {
     const e: Errors = {};
-    if (!form.name.trim()) e.name = "Nama lengkap wajib diisi.";
-    if (!form.email.trim()) e.email = "Email wajib diisi.";
-    else if (!EMAIL_RE.test(form.email.trim())) e.email = "Format email tidak valid.";
-    if (!form.phone.trim()) e.phone = "Nomor WhatsApp wajib diisi.";
-    if (!form.org.trim()) e.org = "Organisasi / brand wajib diisi.";
+    if (!form.name.trim()) e.name = "Full name is required.";
+    if (!form.email.trim()) e.email = "Email is required.";
+    else if (!EMAIL_RE.test(form.email.trim())) e.email = "That email format is not valid.";
+    if (!form.phone.trim()) e.phone = "WhatsApp number is required.";
+    if (!form.org.trim()) e.org = "Organization / brand is required.";
     // Satu field: dropdown, atau isian bebas saat "Lainnya…" dipilih.
-    if (!form.subject) e.subject = "Pilih penawaran partnership.";
+    if (!form.subject) e.subject = "Select a partnership offer.";
     else if (form.subject === "other" && !form.otherSubject.trim())
-      e.subject = "Tuliskan penawaran partnership Anda.";
-    if (!form.message.trim()) e.message = "Pesan wajib diisi.";
+      e.subject = "Describe your partnership offer.";
+    if (!form.message.trim()) e.message = "A message is required.";
     return e;
   }
 
@@ -65,7 +65,7 @@ export function ContactPartnership() {
       `Nama Lengkap : ${form.name.trim()}`,
       `Email        : ${form.email.trim()}`,
       `WhatsApp     : ${form.phone.trim()}`,
-      `Organisasi   : ${form.org.trim()}`,
+      `Organization : ${form.org.trim()}`,
       `Subjek       : ${subject}`,
       "",
       "Pesan:",
@@ -84,7 +84,7 @@ export function ContactPartnership() {
         {/* Judul & deskripsi sengaja tidak ditampilkan — halaman langsung ke
             informasi kontak dan form. h1 tetap ada untuk pembaca layar dan
             mesin telusur, karena setiap halaman butuh satu judul. */}
-        <h1 className="lp-sr-only">Penawaran Kerja Sama DealMatch</h1>
+        <h1 className="lp-sr-only">DealMatch Partnership Offer</h1>
 
         <div className="lp-contact__grid">
           {/* ---------- Informasi kontak ---------- */}
@@ -118,7 +118,7 @@ export function ContactPartnership() {
                   <Phone size={16} />
                 </span>
                 <span>
-                  <strong>Telepon / WhatsApp</strong>
+                  <strong>Phone / WhatsApp</strong>
                   {CONTACT_INFO.phone}
                 </span>
               </a>
@@ -129,7 +129,7 @@ export function ContactPartnership() {
                 <MapPin size={16} />
               </span>
               <span>
-                <strong>Alamat</strong>
+                <strong>Address</strong>
                 {CONTACT_INFO.address}
               </span>
             </div>
@@ -152,16 +152,16 @@ export function ContactPartnership() {
           <form className="lp-contact__form" onSubmit={onSubmit} noValidate data-reveal>
             <h2 className="lp-contact__card-title">
               <Send size={18} />
-              Kirim Penawaran Kerja Sama
+              Send Partnership Offer
             </h2>
 
             <div className="lp-contact__two">
-              <Field label="Nama Lengkap" required error={errors.name} htmlFor="ct-name">
+              <Field label="Full Name" required error={errors.name} htmlFor="ct-name">
                 <input
                   id="ct-name"
                   value={form.name}
                   onChange={(e) => set("name")(e.target.value)}
-                  placeholder="Masukkan nama lengkap Anda"
+                  placeholder="Enter your full name"
                   autoComplete="name"
                 />
               </Field>
@@ -179,7 +179,7 @@ export function ContactPartnership() {
             </div>
 
             <div className="lp-contact__two">
-              <Field label="Nomor WhatsApp" required error={errors.phone} htmlFor="ct-phone">
+              <Field label="WhatsApp number" required error={errors.phone} htmlFor="ct-phone">
                 <input
                   id="ct-phone"
                   type="tel"
@@ -191,7 +191,7 @@ export function ContactPartnership() {
               </Field>
 
               <Field
-                label="Organisasi / Brand"
+                label="Organization / Brand"
                 required
                 error={errors.org}
                 htmlFor="ct-org"
@@ -200,7 +200,7 @@ export function ContactPartnership() {
                   id="ct-org"
                   value={form.org}
                   onChange={(e) => set("org")(e.target.value)}
-                  placeholder="Nama organisasi atau brand"
+                  placeholder="Organization or brand name"
                   autoComplete="organization"
                 />
               </Field>
@@ -208,12 +208,12 @@ export function ContactPartnership() {
 
             {/* Satu field saja. Memilih "Lainnya…" menukar dropdown menjadi
                 isian bebas di tempat yang sama — bukan field baru di bawahnya
-                — sehingga labelnya tetap satu: "Penawaran Partnership". */}
+                — sehingga labelnya tetap satu: "Partnership Offer". */}
             {/* Satu field, satu label. Dropdown SELALU tampil supaya pilihan
                 lain tetap bisa diganti kapan saja; memilih "Lainnya…" hanya
                 menambah isian bebas tepat di bawahnya, bukan menggantikannya. */}
             <Field
-              label="Penawaran Partnership"
+              label="Partnership Offer"
               required
               error={errors.subject}
               htmlFor="ct-subject"
@@ -223,7 +223,7 @@ export function ContactPartnership() {
                 value={form.subject}
                 onChange={(e) => set("subject")(e.target.value)}
               >
-                <option value="">Pilih penawaran partnership…</option>
+                <option value="">Select a partnership offer…</option>
                 {CONTACT_SUBJECTS.map((s) => (
                   <option key={s.value} value={s.value}>
                     {s.label}
@@ -236,8 +236,8 @@ export function ContactPartnership() {
                   className="lp-field__extra"
                   value={form.otherSubject}
                   onChange={(e) => set("otherSubject")(e.target.value)}
-                  placeholder="Tuliskan penawaran partnership Anda"
-                  aria-label="Tuliskan penawaran partnership Anda"
+                  placeholder="Describe your partnership offer"
+                  aria-label="Describe your partnership offer"
                   autoFocus
                 />
               )}
@@ -249,13 +249,13 @@ export function ContactPartnership() {
                 rows={6}
                 value={form.message}
                 onChange={(e) => set("message")(e.target.value)}
-                placeholder="Ceritakan penawaran kerja sama Anda — bentuk kolaborasi, target audiens, dan waktu pelaksanaan."
+                placeholder="Describe your partnership offer — the kind of collaboration, target audience, and timing."
               />
             </Field>
 
             <button type="submit" className="lp-btn lp-btn--org lp-contact__submit">
               <Send size={16} />
-              Kirim Penawaran
+              Send Offer
             </button>
             <p className="lp-contact__note">
               Tombol ini membuka aplikasi email Anda dengan pesan yang sudah

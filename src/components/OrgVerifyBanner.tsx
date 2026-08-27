@@ -20,9 +20,9 @@ export function OrgVerifyBanner({ org }: { org: Organization }) {
     setBusy(true);
     try {
       await requestOrgVerification();
-      toast.success("Verifikasi diajukan. Menunggu tinjauan admin.");
+      toast.success("Verification requested. Awaiting admin review.");
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal mengajukan verifikasi."));
+      toast.failed(String(e?.message || "Could not request verification."));
     } finally {
       setBusy(false);
     }
@@ -34,8 +34,8 @@ export function OrgVerifyBanner({ org }: { org: Organization }) {
       <div className="sh-notice" style={{ marginBottom: 20, display: "flex", gap: 10, alignItems: "flex-start" }}>
         <Clock size={18} style={{ flex: "none", marginTop: 1 }} />
         <div>
-          <strong>Menunggu verifikasi admin.</strong> Pengajuan pendanaan belum bisa dikirim sampai
-          organisasi Anda diverifikasi.
+          <strong>Awaiting admin verification.</strong> Funding submissions cannot be sent until
+          your organization is verified.
         </div>
       </div>
     );
@@ -56,13 +56,13 @@ export function OrgVerifyBanner({ org }: { org: Organization }) {
       <div style={{ flex: 1 }}>
         {rejected ? (
           <div style={{ marginBottom: 6 }}>
-            <strong>Verifikasi ditolak.</strong>{" "}
-            {org.verificationNote ? `Alasan: ${org.verificationNote}` : "Perbaiki data lalu ajukan ulang."}
+            <strong>Verification rejected.</strong>{" "}
+            {org.verificationNote ? `Reason: ${org.verificationNote}` : "Fix the details, then request again."}
           </div>
         ) : (
           <div style={{ marginBottom: 6 }}>
-            <strong>Organisasi belum terverifikasi.</strong> Verifikasi dulu agar bisa mengirim
-            pengajuan pendanaan.
+            <strong>Organization is not verified yet.</strong> Get verified first so you can send
+            funding submissions.
           </div>
         )}
 
@@ -73,15 +73,15 @@ export function OrgVerifyBanner({ org }: { org: Organization }) {
             disabled={busy}
             style={{ marginTop: 4 }}
           >
-            {busy ? "Mengajukan…" : rejected ? "Ajukan ulang verifikasi" : "Ajukan verifikasi"}
+            {busy ? "Mengajukan…" : rejected ? "Request verification again" : "Request verification"}
           </button>
         ) : (
           <div>
             <div style={{ fontSize: 13, marginBottom: 6 }}>
-              Lengkapi dulu: {missing.join(", ")}.
+              Complete these first: {missing.join(", ")}.
             </div>
             <Link to="/org/pengaturan" className="sh-btn sh-btn--secondary sh-btn--sm">
-              Lengkapi data pendaftaran
+              Complete registration details
             </Link>
           </div>
         )}

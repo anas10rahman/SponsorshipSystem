@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { sql, assembleState, readBody } from "./_db.js";
+import { AuthError, requireAuth, requireAdmin, requireFunder } from "./_auth.js";
 
 
 /* Gabungkan berkas legal masuk dengan yang tersimpan: poin tanpa `data`
@@ -30,9 +31,11 @@ async function resolveLegalDocs(
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try {
+    const session = await requireAuth(req);
     const b = readBody(req);
     if (b.op === "update") {
       const f = b.funder;
+      requireFunder(session, String(f?.id || ""));
       const legal = await resolveLegalDocs("funders", f.id, f.legalDocs);
       const newTotal = Math.max(0, Number(f.budgetTotal) || 0);
       // Anggaran total di-set mitra sponsor; sisa dihitung ulang = total - yang sudah terpakai
@@ -56,8 +59,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } else if (b.op === "delete_funder") {
       // Admin hapus mitra sponsor: hapus akun login + transaksi dulu (FK), lalu
       // mitra sponsor (pengajuan & proposal_supporters ikut cascade).
+      requireAdmin(session);
       const exists = (await sql`select 1 from funders where id = ${b.funderId} limit 1`) as any[];
-      if (!exists.length) return res.status(404).json({ error: "Mitra Sponsor tidak ditemukan." });
+      if (!exists.length) return res.status(404).json({ error: "Sponsor Partner not found." });
       await sql.transaction([
         sql`delete from transactions where funder_id = ${b.funderId}`,
         sql`delete from users where funder_id = ${b.funderId}`,
@@ -66,8 +70,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } else {
       return res.status(400).json({ error: "op tidak dikenal" });
     }
-    res.status(200).json(await assembleState());
+    res.status(200).json(await assembleState(session.userId));
   } catch (e: any) {
-    res.status(500).json({ error: String(e?.message || e) });
+    const status = e instanceof AuthError ? e.status : 500;
+    res.status(status).json({ error: String(e?.message || e) });
   }
 }

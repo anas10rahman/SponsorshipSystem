@@ -7,7 +7,7 @@ import { ReadyToMatch } from "@/components/landing/ReadyToMatch";
 
 /** Halaman "About Us" — sekaligus isi "/" untuk pengunjung anonim.
  *  Dirender tanpa menunggu data ter-hydrate, jadi pengunjung tidak pernah
- *  melihat layar "Memuat data…". FAQ kini halaman tersendiri di /faq. */
+ *  melihat layar "Loading data…". FAQ kini halaman tersendiri di /faq. */
 export default function Landing() {
   return (
     <PublicLayout>

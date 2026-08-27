@@ -27,19 +27,19 @@ export default function OrgTopUp() {
     }
     try {
       await topUpOrg(amount);
-      toast.success(`Saldo bertambah ${formatRupiah(amount)}.`);
+      toast.success(`Balance topped up by ${formatRupiah(amount)}.`);
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal top-up."));
+      toast.failed(String(e?.message || "Top-up failed."));
     }
   };
 
   return (
     <>
-      <Topbar title="Top-up saldo" />
+      <Topbar title="Top up balance" />
       <div className="sh-shell__content">
         <PageHead
-          title="Top-up saldo"
-          subtitle="Isi saldo organisasi untuk membayar biaya pengajuan proposal."
+          title="Top up balance"
+          subtitle="Top up the organization balance to cover proposal submission fees."
         />
 
         <div
@@ -53,7 +53,7 @@ export default function OrgTopUp() {
           {/* Form top-up */}
           <section className="sh-card">
             <header className="sh-card__header">
-              <h2>Pilih nominal</h2>
+              <h2>Choose an amount</h2>
             </header>
             <div className="sh-card__body sh-stack">
               <div
@@ -92,8 +92,8 @@ export default function OrgTopUp() {
                   style={amountErr ? { color: "var(--status-failed)" } : undefined}
                 >
                   {amountErr
-                    ? "Masukkan nominal top-up yang valid (lebih dari 0)."
-                    : "Top-up ini disimulasikan — tidak ada transaksi pembayaran nyata."}
+                    ? "Enter a valid top-up amount (greater than 0)."
+                    : "This top-up is simulated — no real payment is processed."}
                 </span>
               </div>
 
@@ -114,13 +114,13 @@ export default function OrgTopUp() {
                   <Wallet size={20} />
                 </span>
                 <div>
-                  <div className="sh-stat__label">Saldo saat ini</div>
+                  <div className="sh-stat__label">Current balance</div>
                   <div className="sh-stat__value tabular">{formatRupiah(balance)}</div>
                 </div>
               </div>
               <div className="sh-notice sh-notice--info">
                 Setiap mengirim pengajuan proposal baru, saldo Anda dipotong{" "}
-                <strong>{formatRupiah(SUBMISSION_FEE)}</strong> sebagai biaya pengajuan.
+                <strong>{formatRupiah(SUBMISSION_FEE)}</strong> as the submission fee.
               </div>
               <div className="sh-muted" style={{ fontSize: 13 }}>
                 Sisa kuota pengajuan ≈{" "}

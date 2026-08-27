@@ -186,7 +186,7 @@ export type PengajuanStatus =
 
 export type PengajuanEvent = {
   action: string;
-  actor: "Organisasi" | "Pendana" | "Admin";
+  actor: "Organization" | "Pendana" | "Admin";
   note: string;
   at: string;
 };

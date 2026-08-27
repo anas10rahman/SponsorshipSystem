@@ -38,7 +38,7 @@ export function Modal({ open, onClose, title, children, footer, width }: Props) 
           <button
             className="sh-btn sh-btn--ghost sh-btn--icon"
             onClick={onClose}
-            aria-label="Tutup"
+            aria-label="Close"
           >
             <X size={18} />
           </button>

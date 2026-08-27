@@ -31,7 +31,7 @@ export default function Login() {
         navigate(`/verify?email=${encodeURIComponent(result.email ?? "")}`);
         return;
       }
-      setError(result.error ?? "Login gagal.");
+      setError(result.error ?? "Sign-in failed.");
       return;
     }
     setError("");
@@ -45,15 +45,15 @@ export default function Login() {
           <Link
             to="/"
             className="sh-auth__brand"
-            title="Kembali ke beranda"
-            aria-label="Kembali ke beranda"
+            title="Back to home"
+            aria-label="Back to home"
           >
             <BrandMark size={30} />
           </Link>
 
-          <h1 className="sh-auth__title">Masuk</h1>
+          <h1 className="sh-auth__title">Sign in</h1>
           <p className="sh-auth__sub">
-            Selamat datang kembali. Masuk untuk melanjutkan.
+            Welcome back. Sign in to continue.
           </p>
 
           <label className="sh-auth__field" htmlFor="username">
@@ -76,22 +76,22 @@ export default function Login() {
               autoComplete="current-password"
               value={password}
               onChange={setPassword}
-              placeholder="Kata sandi"
+              placeholder="Password"
             />
           </label>
 
           <div className="sh-auth__row">
-            <Link to="/forgot">Lupa kata sandi?</Link>
+            <Link to="/forgot">Forgot password?</Link>
           </div>
 
           {error && <div className="sh-notice sh-notice--failed">{error}</div>}
 
           <button className="sh-auth__submit" type="submit" disabled={busy}>
-            {busy ? "Memproses…" : "Masuk"}
+            {busy ? "Processing…" : "Sign in"}
           </button>
 
           <p className="sh-auth__foot">
-            Belum punya akun? <Link to="/register">Daftar sekarang</Link>
+            Don't have an account? <Link to="/register">Sign up now</Link>
           </p>
         </form>
       </div>

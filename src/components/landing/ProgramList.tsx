@@ -33,7 +33,7 @@ export function ProgramList() {
                   <div>
                     <dt>
                       <CalendarDays size={16} />
-                      Tanggal
+                      Date
                     </dt>
                     <dd>{p.date}</dd>
                   </div>

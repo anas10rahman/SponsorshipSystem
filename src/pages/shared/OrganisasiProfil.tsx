@@ -54,14 +54,14 @@ export default function OrganisasiProfil() {
   if (!org) {
     return (
       <>
-        <Topbar title="Profil organisasi" />
+        <Topbar title="Organization profile" />
         <div className="sh-shell__content">
           <Empty
-            title="Organisasi tidak ditemukan"
+            title="Organization not found"
             action={
               <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
                 <ArrowLeft size={16} />
-                Kembali
+                Back
               </button>
             }
           />
@@ -92,7 +92,7 @@ export default function OrganisasiProfil() {
     setDoc({ title, data: d ?? "" });
   };
 
-  const title = isSelf ? "Profil saya" : "Profil organisasi";
+  const title = isSelf ? "My profile" : "Organization profile";
 
   return (
     <>
@@ -100,7 +100,7 @@ export default function OrganisasiProfil() {
       <div className="sh-shell__content">
         <PageHead
           title={title}
-          subtitle="Informasi profil organisasi."
+          subtitle="Organization profile information."
           actions={
             <div className="sh-row" style={{ gap: 8 }}>
               {isSelf && (
@@ -130,7 +130,7 @@ export default function OrganisasiProfil() {
               {org.verified ? (
                 <StatusBadge kind="custom" label="Terverifikasi" variant="success" />
               ) : (
-                <StatusBadge kind="custom" label="Belum terverifikasi" variant="pending" />
+                <StatusBadge kind="custom" label="Not verified" variant="pending" />
               )}
             </div>
 
@@ -143,7 +143,7 @@ export default function OrganisasiProfil() {
               </span>
             </div>
 
-            <p className="dm-prof__desc">{org.description || "Belum ada deskripsi."}</p>
+            <p className="dm-prof__desc">{org.description || "No description yet."}</p>
 
             <div className="dm-prof__contacts">
               {canSeeContact ? (
@@ -160,7 +160,7 @@ export default function OrganisasiProfil() {
               ) : (
                 <span className="dm-contact dm-contact--locked">
                   <Lock size={16} />
-                  Email terbuka setelah pengajuan
+                  Email opens after a submission
                 </span>
               )}
 
@@ -250,7 +250,7 @@ export default function OrganisasiProfil() {
                     </div>
                   ) : (
                     <p className="sh-muted" style={{ margin: "4px 0 0" }}>
-                      Belum ada dokumen.
+                      No documents yet.
                     </p>
                   )}
                 </div>
@@ -277,7 +277,7 @@ export default function OrganisasiProfil() {
             </span>
             <div style={{ minWidth: 0 }}>
               <h4 className="dm-pic__name">{org.pic.name || "—"}</h4>
-              <div className="dm-pic__role">{org.pic.position || "Jabatan belum diisi"}</div>
+              <div className="dm-pic__role">{org.pic.position || "Role not filled in"}</div>
               <div className="dm-pic__lines">
                 {canSeeContact ? (
                   <a
@@ -309,7 +309,7 @@ export default function OrganisasiProfil() {
                 ) : (
                   <span className="dm-contact dm-contact--locked">
                     <Lock size={16} />
-                    Email terbuka setelah pengajuan
+                    Email opens after a submission
                   </span>
                 )}
                 {/* KTP/KTM menempel pada PIC — hanya organisasi sendiri & admin. */}
@@ -326,7 +326,7 @@ export default function OrganisasiProfil() {
                         ID PIC
                       </button>
                     ) : (
-                      <span className="sh-muted">ID PIC belum diunggah.</span>
+                      <span className="sh-muted">PIC ID has not been uploaded.</span>
                     )}
                   </div>
                 )}
@@ -340,11 +340,11 @@ export default function OrganisasiProfil() {
       {doc && (
         <Modal open onClose={() => setDoc(null)} title={doc.title} width={760}>
           {doc.data === null ? (
-            <p className="sh-muted">Memuat dokumen…</p>
+            <p className="sh-muted">Loading document…</p>
           ) : doc.data ? (
             <PdfPreview dataUrl={doc.data} fileName={doc.title} />
           ) : (
-            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+            <p className="sh-muted">The document could not be loaded.</p>
           )}
         </Modal>
       )}

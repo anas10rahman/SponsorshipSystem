@@ -12,13 +12,13 @@ import type { PengajuanStatus } from "@/lib/types";
 import { Edit3, Eye } from "lucide-react";
 
 const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
-  { value: "semua", label: "Semua" },
-  { value: "draf", label: "Draf" },
-  { value: "diajukan", label: "Diajukan" },
-  { value: "perlu_revisi", label: "Perlu revisi" },
-  { value: "disetujui", label: "Disetujui" },
-  { value: "ditolak", label: "Ditolak" },
-  { value: "kadaluarsa", label: "Kadaluarsa" },
+  { value: "semua", label: "All" },
+  { value: "draf", label: "Draft" },
+  { value: "diajukan", label: "Submitted" },
+  { value: "perlu_revisi", label: "Needs revision" },
+  { value: "disetujui", label: "Approved" },
+  { value: "ditolak", label: "Rejected" },
+  { value: "kadaluarsa", label: "Expired" },
 ];
 
 export default function OrgPengajuanList() {
@@ -61,14 +61,14 @@ export default function OrgPengajuanList() {
 
   return (
     <>
-      <Topbar title="Pengajuan saya" />
+      <Topbar title="My submissions" />
       <div className="sh-shell__content">
         <PageHead
-          title="Pengajuan saya"
-          subtitle="Pengajuan sponsorship terarah ke mitra sponsor — lanjutkan draf, pantau status, dan revisi."
+          title="My submissions"
+          subtitle="Sponsorship submissions aimed at a sponsor partner — continue drafts, track status, and revise."
           actions={
             <Link to="/org/cari" className="sh-btn sh-btn--primary">
-              Ajukan ke mitra sponsor
+              Submit to a sponsor partner
             </Link>
           }
         />
@@ -90,11 +90,11 @@ export default function OrgPengajuanList() {
 
         {rows.length === 0 ? (
           <Empty
-            title="Belum ada pengajuan"
-            description="Mulai dengan memilih mitra sponsor di halaman Cari mitra sponsor."
+            title="No submissions yet"
+            description="Start by picking a sponsor partner on the Find sponsor partners page."
             action={
               <Link to="/org/cari" className="sh-btn sh-btn--primary">
-                Ke Cari mitra sponsor
+                Go to Find sponsor partners
               </Link>
             }
           />
@@ -106,8 +106,8 @@ export default function OrgPengajuanList() {
                   <tr>
                     <th>ID</th>
                     <th>Event</th>
-                    <th>Mitra Sponsor</th>
-                    <th>Paket</th>
+                    <th>Sponsor Partner</th>
+                    <th>Package</th>
                     <th>Nominal</th>
                     <th>Status</th>
                     <th>Diperbarui</th>
@@ -131,8 +131,8 @@ export default function OrgPengajuanList() {
                             {p.eventLocation}
                           </div>
                         </td>
-                        <td data-label="Mitra Sponsor">{funder?.name ?? "—"}</td>
-                        <td data-label="Paket">{packageCountLabel(p)}</td>
+                        <td data-label="Sponsor Partner">{funder?.name ?? "—"}</td>
+                        <td data-label="Package">{packageCountLabel(p)}</td>
                         <td className="num" data-label="Nominal">{pengajuanAmountLabel(p)}</td>
                         <td data-label="Status">
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
@@ -153,7 +153,7 @@ export default function OrgPengajuanList() {
                                 onClick={() => navigate(`/org/pengajuan/${p.id}/edit`)}
                               >
                                 <Edit3 size={14} />
-                                {p.status === "draf" ? "Lanjutkan" : "Revisi"}
+                                {p.status === "draf" ? "Lanjutkan" : "Revision"}
                               </button>
                             )}
                           </div>

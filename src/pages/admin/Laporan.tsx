@@ -69,7 +69,7 @@ export default function AdminLaporan() {
           .map((v) => `"${String(v).replaceAll('"', '""')}"`)
           .join(",");
       });
-    const header = "id,event,organisasi,mitra sponsor,jumlah_paket,paket_terpilih,nilai,status,dibuat";
+    const header = "id,event,organization,sponsor_partner,package_count,selected_package,value,status,created";
     const blob = new Blob([header + "\n" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -84,28 +84,28 @@ export default function AdminLaporan() {
       <Topbar />
       <div className="sh-shell__content">
         <PageHead
-          title="Laporan"
-          subtitle="Ringkasan pendanaan, top mitra sponsor, dan top organisasi."
+          title="Reports"
+          subtitle="Funding summary, top sponsor partners, and top organizations."
           actions={
             <button className="sh-btn sh-btn--secondary" onClick={exportCsv}>
-              Ekspor CSV
+              Export CSV
             </button>
           }
         />
 
         <div className="sh-stat-grid">
           <StatCard
-            label="Total disetujui"
+            label="Total approved"
             value={formatRupiah(totalApproved)}
             icon={<CheckCircle2 size={20} />}
           />
           <StatCard
-            label="Menunggu keputusan (est. maks)"
+            label="Awaiting decision (est. max)"
             value={formatRupiah(totalPending)}
             icon={<Clock size={20} />}
           />
           <StatCard
-            label="Pengajuan disetujui"
+            label="Submission approved"
             value={approved.length}
             icon={<Banknote size={20} />}
           />
@@ -114,29 +114,29 @@ export default function AdminLaporan() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
           <section className="sh-card">
             <header className="sh-card__header">
-              <h2>Top mitra sponsor (nilai disetujui)</h2>
+              <h2>Top sponsor partners (approved value)</h2>
             </header>
             {topFunders.every((t) => t.total === 0) ? (
-              <Empty title="Belum ada data" />
+              <Empty title="No data yet" />
             ) : (
               <div className="sh-table-wrap">
                 <table className="sh-table">
                   <thead>
                     <tr>
-                      <th>Mitra Sponsor</th>
-                      <th>Total disetujui</th>
+                      <th>Sponsor Partner</th>
+                      <th>Total approved</th>
                     </tr>
                   </thead>
                   <tbody>
                     {topFunders.map(({ funder, total }) => (
                       <tr key={funder.id}>
-                        <td data-label="Mitra Sponsor">
+                        <td data-label="Sponsor Partner">
                           <div style={{ fontWeight: 700 }}>{funder.name}</div>
                           <div className="sh-muted" style={{ fontSize: 12 }}>
                             {funder.type}
                           </div>
                         </td>
-                        <td className="num" data-label="Total disetujui">{formatRupiah(total)}</td>
+                        <td className="num" data-label="Total approved">{formatRupiah(total)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -147,29 +147,29 @@ export default function AdminLaporan() {
 
           <section className="sh-card">
             <header className="sh-card__header">
-              <h2>Top organisasi (nilai disetujui)</h2>
+              <h2>Top organizations (approved value)</h2>
             </header>
             {topOrgs.every((t) => t.total === 0) ? (
-              <Empty title="Belum ada data" />
+              <Empty title="No data yet" />
             ) : (
               <div className="sh-table-wrap">
                 <table className="sh-table">
                   <thead>
                     <tr>
-                      <th>Organisasi</th>
-                      <th>Total disetujui</th>
+                      <th>Organization</th>
+                      <th>Total approved</th>
                     </tr>
                   </thead>
                   <tbody>
                     {topOrgs.map(({ org, total }) => (
                       <tr key={org.id}>
-                        <td data-label="Organisasi">
+                        <td data-label="Organization">
                           <div style={{ fontWeight: 700 }}>{org.name}</div>
                           <div className="sh-muted" style={{ fontSize: 12 }}>
                             {org.category} · {org.city}
                           </div>
                         </td>
-                        <td className="num" data-label="Total disetujui">{formatRupiah(total)}</td>
+                        <td className="num" data-label="Total approved">{formatRupiah(total)}</td>
                       </tr>
                     ))}
                   </tbody>

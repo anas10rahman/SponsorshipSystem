@@ -26,7 +26,7 @@ export function AboutDiagram() {
     <div className="lp-about__diagram">
       <img
         src="/logo-mark.png"
-        alt="Logo DealMatch"
+        alt="DealMatch logo"
         className="lp-about__logo"
         width={180}
         height={180}

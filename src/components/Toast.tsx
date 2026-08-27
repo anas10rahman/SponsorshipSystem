@@ -72,7 +72,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <span style={{ flex: 1 }}>{t.message}</span>
             <button
               onClick={() => dismiss(t.id)}
-              aria-label="Tutup notifikasi"
+              aria-label="Dismiss notification"
               style={{ color: "inherit", opacity: 0.8 }}
             >
               <X size={14} />

@@ -13,7 +13,7 @@ export default function Placeholder({ title, subtitle }: Props) {
         <PageHead title={title} subtitle={subtitle} />
         <Empty
           title="Halaman dalam pengerjaan"
-          description="Konten halaman ini akan diisi di milestone berikutnya sesuai PRD §13."
+          description="This page will be filled in at the next milestone per PRD §13."
         />
       </div>
     </>

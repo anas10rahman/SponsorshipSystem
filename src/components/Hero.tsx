@@ -22,23 +22,23 @@ export function Hero() {
   if (currentUser.role === "admin") {
     const sent = state.pengajuan.filter((p) => p.status !== "draf").length;
     const total = approvedCashTo(() => true);
-    greeting = `Halo, ${currentUser.name}! 👋`;
-    subtitle = `Pantau aktivitas pendanaan lintas platform. ${sent} pengajuan tercatat sejauh ini.`;
+    greeting = `Hi, ${currentUser.name}! 👋`;
+    subtitle = `Track funding activity across the platform. ${sent} submissions recorded so far.`;
     value = formatRupiahShort(total);
-    label = "Total disetujui";
+    label = "Total approved";
   } else if (currentUser.role === "org") {
     const org = state.organizations.find((o) => o.id === currentUser.orgId);
-    greeting = `Halo, ${org?.name ?? "Organisasi"}! 👋`;
+    greeting = `Hi, ${org?.name ?? "Organization"}! 👋`;
     subtitle =
-      "Top-up saldo dulu, lalu susun pengajuan yang menarik dan ajukan ke mitra sponsor yang tepat.";
+      "Top up your balance first, then build a compelling submission and send it to the right sponsor partner.";
     value = formatRupiahShort(org?.balance ?? 0);
-    label = "Saldo";
+    label = "Balance";
   } else {
     const funder = state.funders.find((f) => f.id === currentUser.funderId);
     const total = approvedCashTo((_o, funderId) => funderId === currentUser.funderId);
-    greeting = `Halo, ${funder?.name ?? "Mitra Sponsor"}! 👋`;
+    greeting = `Hi, ${funder?.name ?? "Sponsor Partner"}! 👋`;
     subtitle =
-      "Banyak pengajuan menunggu dukunganmu. Tinjau dan bantu wujudkan program mereka.";
+      "Plenty of submissions are waiting for your support. Review them and help make these programs happen.";
     value = formatRupiahShort(total);
     label = "Disponsori";
   }

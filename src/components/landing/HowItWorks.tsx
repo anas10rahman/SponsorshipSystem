@@ -2,8 +2,8 @@ import { Building2, Users } from "lucide-react";
 import { FLOWS } from "@/lib/landingContent";
 
 const SIDES = [
-  { key: "org", label: "Organisasi", Icon: Users },
-  { key: "sponsor", label: "Mitra Sponsor", Icon: Building2 },
+  { key: "org", label: "Organizations", Icon: Users },
+  { key: "sponsor", label: "Sponsor Partners", Icon: Building2 },
 ] as const;
 
 /** Dua alur ditampilkan berdampingan: Organisasi di sisi kiri, Mitra
@@ -19,7 +19,7 @@ export function HowItWorks() {
     <section id="cara-kerja" className="lp-sec lp-sec--alt">
       <div className="lp-wrap">
         <div className="lp-sec__head lp-sec__head--center" data-reveal>
-          <h2>Cara DealMatch Bekerja</h2>
+          <h2>How DealMatch Works</h2>
         </div>
 
         <div className="lp-flows">

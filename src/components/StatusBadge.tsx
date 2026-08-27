@@ -3,17 +3,17 @@ import type { ProposalStatus, TransactionStatus } from "@/lib/types";
 type Variant = "success" | "pending" | "failed" | "info" | "neutral";
 
 const TX_MAP: Record<TransactionStatus, { label: string; variant: Variant }> = {
-  menunggu: { label: "Menunggu", variant: "pending" },
-  diproses: { label: "Diproses", variant: "info" },
-  disalurkan: { label: "Disalurkan", variant: "success" },
-  ditolak: { label: "Ditolak", variant: "failed" },
+  menunggu: { label: "Pending", variant: "pending" },
+  diproses: { label: "Processing", variant: "info" },
+  disalurkan: { label: "Disbursed", variant: "success" },
+  ditolak: { label: "Rejected", variant: "failed" },
 };
 
 const PROP_MAP: Record<ProposalStatus, { label: string; variant: Variant }> = {
-  draf: { label: "Draf", variant: "neutral" },
-  aktif: { label: "Aktif", variant: "info" },
-  tercapai: { label: "Tercapai", variant: "success" },
-  arsip: { label: "Arsip", variant: "neutral" },
+  draf: { label: "Draft", variant: "neutral" },
+  aktif: { label: "Active", variant: "info" },
+  tercapai: { label: "Fulfilled", variant: "success" },
+  arsip: { label: "Archived", variant: "neutral" },
 };
 
 type Props =

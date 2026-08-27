@@ -7,6 +7,7 @@ import {
   REJECT_ADMIN_FEE,
   REJECT_REFUND,
 } from "./_db.js";
+import { AuthError, requireAuth, requireAdmin, requireOrg, requireFunder } from "./_auth.js";
 
 class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -33,8 +34,8 @@ async function expireStale(): Promise<{ expired: number; ids: string[] }> {
   const ids: string[] = [];
   for (const p of rows) {
     const note =
-      `Mitra Sponsor tidak merespons dalam ${EXPIRE_DAYS} hari. Pengajuan dibatalkan otomatis; ` +
-      `biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} dikembalikan penuh ke saldo organisasi.`;
+      `The Sponsor Partner did not respond within ${EXPIRE_DAYS} days. The submission was cancelled automatically; ` +
+      `the Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} submission fee was fully refunded to the organization balance.`;
     const tx: any[] = [
       // Kunci status di WHERE: kalau mitra sponsor memutuskan barusan, baris ini tidak tersentuh.
       sql`update pengajuan set status = 'kadaluarsa', updated_at = now()
@@ -49,7 +50,7 @@ async function expireStale(): Promise<{ expired: number; ids: string[] }> {
         notifQ(
           oUser,
           "pengajuan.kadaluarsa",
-          `Pengajuan "${p.event_name}" kadaluarsa (mitra sponsor tidak merespons ${EXPIRE_DAYS} hari). Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} dikembalikan ke saldo.`,
+          `Submission "${p.event_name}" expired (the sponsor partner did not respond within ${EXPIRE_DAYS} days). Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} was refunded to your balance.`,
           orgLink(p.id),
         ),
       );
@@ -59,7 +60,7 @@ async function expireStale(): Promise<{ expired: number; ids: string[] }> {
         notifQ(
           fUser,
           "pengajuan.kadaluarsa",
-          `Pengajuan "${p.event_name}" kadaluarsa karena tidak ditinjau dalam ${EXPIRE_DAYS} hari.`,
+          `Submission "${p.event_name}" expired because it was not reviewed within ${EXPIRE_DAYS} days.`,
           funderLink(p.id),
         ),
       );
@@ -185,8 +186,19 @@ async function userIdForOrg(orgId: string): Promise<string | null> {
 }
 async function getPengajuan(id: string): Promise<any> {
   const r = (await sql`select * from pengajuan where id = ${id} limit 1`) as any[];
-  if (!r.length) throw new HttpError(404, "Pengajuan tidak ditemukan.");
+  if (!r.length) throw new HttpError(404, "Submission not found.");
   return r[0];
+}
+
+/* Tulis pengajuan (save/submit) hanya oleh organisasi pemiliknya.
+   Bila baris sudah ada, kepemilikan dibaca dari DB — bukan dari `orgId`
+   kiriman client, supaya tak bisa diakui lewat body request. */
+async function requireOwnsPengajuan(session: any, p: any): Promise<void> {
+  const id = String(p?.id || "");
+  if (!id) throw new HttpError(400, "Submission id is required.");
+  const rows = (await sql`select org_id from pengajuan where id = ${id} limit 1`) as any[];
+  const ownerOrgId = rows[0]?.org_id ?? String(p?.orgId || "");
+  requireOrg(session, ownerOrgId);
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -208,17 +220,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try {
+    const session = await requireAuth(req);
     const b = readBody(req);
     const op = b.op as string;
 
     if (op === "expire") {
       // Jalur manual (mis. tombol admin / uji coba): kembalikan state terbaru.
+      requireAdmin(session);
       await expireStale();
-      return res.status(200).json(await assembleState());
+      return res.status(200).json(await assembleState(session.userId));
     }
 
     if (op === "save") {
       const p = b.pengajuan;
+      // Hanya organisasi pemilik yang boleh menulis pengajuan ini. Bila id sudah
+      // ada, pemiliknya dikunci ke baris DB (bukan orgId kiriman client).
+      await requireOwnsPengajuan(session, p);
       const existing = (await sql`select id from pengajuan where id = ${p.id} limit 1`) as any[];
       const docs = await resolveDocuments(p.id, p.documents);
       const tx = [upsertPengajuan(p, p.status || "draf", p.revisionNote ?? null, docs)];
@@ -226,32 +243,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await sql.transaction(tx);
     } else if (op === "submit") {
       const p = b.pengajuan;
+      await requireOwnsPengajuan(session, p);
       // Gate: organisasi wajib terverifikasi admin sebelum boleh mengirim pengajuan.
       const org = (await sql`select verification_status from organizations where id = ${p.orgId} limit 1`) as any[];
       if (org[0]?.verification_status !== "terverifikasi")
-        throw new HttpError(400, "Organisasi belum terverifikasi admin. Ajukan verifikasi dulu sebelum mengirim pengajuan.");
+        throw new HttpError(400, "Your organization is not admin-verified yet. Request verification before sending a submission.");
       const existing = (await sql`select status from pengajuan where id = ${p.id} limit 1`) as any[];
       const isFirst = !existing.length || existing[0].status === "draf";
       if (isFirst) {
         const bal = (await sql`select balance from organizations where id = ${p.orgId} limit 1`) as any[];
         if (Number(bal[0]?.balance ?? 0) < SUBMISSION_FEE)
-          throw new HttpError(400, `Saldo tidak cukup untuk biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")}.`);
+          throw new HttpError(400, `Not enough balance for the Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} submission fee.`);
       }
       const action = existing[0]?.status === "perlu_revisi" ? "Diajukan ulang" : "Diajukan ke mitra sponsor";
       const note = isFirst
-        ? `Pengajuan dikirim ke mitra sponsor. Biaya pengajuan ${SUBMISSION_FEE.toLocaleString("id-ID")} dipotong dari saldo.`
+        ? `Submission sent to the sponsor partner. A ${SUBMISSION_FEE.toLocaleString("id-ID")} submission fee was deducted from your balance.`
         : "Pengajuan dikirim ke mitra sponsor untuk ditinjau.";
       const docs = await resolveDocuments(p.id, p.documents);
       const tx: any[] = [upsertPengajuan(p, "diajukan", null, docs), histQ(p.id, action, "Organisasi", note)];
       if (isFirst) tx.push(sql`update organizations set balance = greatest(0, balance - ${SUBMISSION_FEE}) where id = ${p.orgId}`);
-      tx.push(auditQ(b.actorId, "pengajuan.diajukan", p.id, { packages: cleanPackages(p.packages).length }));
+      tx.push(auditQ(session.userId, "pengajuan.diajukan", p.id, { packages: cleanPackages(p.packages).length }));
       const fUser = await userIdForFunder(p.funderId);
-      if (fUser) tx.push(notifQ(fUser, "pengajuan.diajukan", `Pengajuan baru "${p.eventName}" menunggu tinjauan Anda.`, funderLink(p.id)));
+      if (fUser) tx.push(notifQ(fUser, "pengajuan.diajukan", `New submission "${p.eventName}" is waiting for your review.`, funderLink(p.id)));
       await sql.transaction(tx);
     } else if (op === "approve") {
       const p = await getPengajuan(b.id);
+      // Keputusan pendanaan = hak mitra sponsor tujuan saja.
+      requireFunder(session, p.funder_id);
       if (p.status === "disetujui" || p.status === "ditolak")
-        throw new HttpError(400, "Pengajuan sudah diputuskan.");
+        throw new HttpError(400, "This submission has already been decided.");
       const packages = Array.isArray(p.packages) ? p.packages : [];
       const idx = Number(b.selectedPackage);
       if (!Number.isInteger(idx) || idx < 0 || idx >= packages.length)
@@ -264,32 +284,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           b.id,
           "Disetujui mitra sponsor",
           "Pendana",
-          `Mitra Sponsor menyetujui paket "${chosen?.name ?? ""}". Kesepakatan final. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin (tidak dikembalikan).`,
+          `The Sponsor Partner approved the "${chosen?.name ?? ""}" package. The deal is final. The Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} submission fee becomes an admin fee (not refunded).`,
         ),
-        auditQ(b.actorId, "pengajuan.disetujui", b.id, { amount, package: chosen?.name ?? "", adminFee: SUBMISSION_FEE, refund: 0 }),
+        auditQ(session.userId, "pengajuan.disetujui", b.id, { amount, package: chosen?.name ?? "", adminFee: SUBMISSION_FEE, refund: 0 }),
       ];
       if (amount > 0)
         tx.push(sql`update funders set budget_remaining = greatest(0, budget_remaining - ${amount}) where id = ${p.funder_id}`);
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Pengajuan "${p.event_name}" disetujui mitra sponsor. Biaya pengajuan Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} menjadi biaya admin.`, orgLink(b.id)));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.disetujui", `Submission "${p.event_name}" was approved by the sponsor partner. The Rp ${SUBMISSION_FEE.toLocaleString("id-ID")} submission fee becomes an admin fee.`, orgLink(b.id)));
       await sql.transaction(tx);
     } else if (op === "reject") {
       const p = await getPengajuan(b.id);
+      requireFunder(session, p.funder_id);
       if (p.status === "disetujui" || p.status === "ditolak")
-        throw new HttpError(400, "Pengajuan sudah diputuskan.");
+        throw new HttpError(400, "This submission has already been decided.");
       const note = (b.note || "").trim() || "Mitra Sponsor menolak pengajuan.";
       const tx: any[] = [
         sql`update pengajuan set status = 'ditolak', updated_at = now() where id = ${b.id}`,
-        histQ(b.id, "Ditolak mitra sponsor", "Pendana", `${note} Biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")} ditahan; Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo organisasi.`),
-        auditQ(b.actorId, "pengajuan.ditolak", b.id, { adminFee: REJECT_ADMIN_FEE, refund: REJECT_REFUND }),
+        histQ(b.id, "Ditolak mitra sponsor", "Pendana", `${note} An admin fee of Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")} is retained; Rp ${REJECT_REFUND.toLocaleString("id-ID")} is refunded to the organization balance.`),
+        auditQ(session.userId, "pengajuan.ditolak", b.id, { adminFee: REJECT_ADMIN_FEE, refund: REJECT_REFUND }),
         // Tolak → kembalikan sisa biaya (dikurangi biaya admin) ke saldo organisasi.
         sql`update organizations set balance = balance + ${REJECT_REFUND} where id = ${p.org_id}`,
       ];
       const oUser = await userIdForOrg(p.org_id);
-      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Pengajuan "${p.event_name}" ditolak mitra sponsor. Rp ${REJECT_REFUND.toLocaleString("id-ID")} dikembalikan ke saldo (biaya admin Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")}).`, orgLink(b.id)));
+      if (oUser) tx.push(notifQ(oUser, "pengajuan.ditolak", `Submission "${p.event_name}" was rejected by the sponsor partner. Rp ${REJECT_REFUND.toLocaleString("id-ID")} was refunded to your balance (admin fee Rp ${REJECT_ADMIN_FEE.toLocaleString("id-ID")}).`, orgLink(b.id)));
       await sql.transaction(tx);
     } else if (op === "feedback") {
       const p = await getPengajuan(b.id);
+      requireFunder(session, p.funder_id);
       const packages = Array.isArray(p.packages) ? p.packages : [];
       // Paket yang diminta direvisi wajib ditunjuk, agar organisasi tahu
       // persis bagian mana yang harus diperbaiki.
@@ -301,8 +323,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const tx: any[] = [
         sql`update pengajuan set status = 'perlu_revisi', revision_note = ${note},
               selected_package = ${idx}, updated_at = now() where id = ${b.id}`,
-        histQ(b.id, `Diminta revisi — paket "${pkgName}"`, "Pendana", note),
-        auditQ(b.actorId, "pengajuan.revisi", b.id, { package: pkgName, selectedPackage: idx }),
+        histQ(b.id, `Revision requested — package "${pkgName}"`, "Pendana", note),
+        auditQ(session.userId, "pengajuan.revisi", b.id, { package: pkgName, selectedPackage: idx }),
       ];
       const oUser = await userIdForOrg(p.org_id);
       if (oUser)
@@ -310,7 +332,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           notifQ(
             oUser,
             "pengajuan.revisi",
-            `Pengajuan "${p.event_name}" perlu direvisi pada paket "${pkgName}".`,
+            `Submission "${p.event_name}" needs a revision on package "${pkgName}".`,
             orgLink(b.id),
           ),
         );
@@ -319,9 +341,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: "op tidak dikenal" });
     }
 
-    res.status(200).json(await assembleState());
+    res.status(200).json(await assembleState(session.userId));
   } catch (e: any) {
-    const status = e instanceof HttpError ? e.status : 500;
+    const status = e instanceof HttpError || e instanceof AuthError ? e.status : 500;
     res.status(status).json({ error: String(e?.message || e) });
   }
 }

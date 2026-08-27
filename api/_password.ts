@@ -6,10 +6,10 @@ export const PASSWORD_MIN = 8;
 
 export function validatePassword(pw: string): string | null {
   if (pw.length < PASSWORD_MIN) return `Kata sandi minimal ${PASSWORD_MIN} karakter.`;
-  if (!/[A-Z]/.test(pw)) return "Kata sandi harus memuat minimal satu huruf kapital.";
-  if (!/[a-z]/.test(pw)) return "Kata sandi harus memuat minimal satu huruf kecil.";
-  if (!/[0-9]/.test(pw)) return "Kata sandi harus memuat minimal satu angka.";
+  if (!/[A-Z]/.test(pw)) return "Password must contain at least one uppercase letter.";
+  if (!/[a-z]/.test(pw)) return "Password must contain at least one lowercase letter.";
+  if (!/[0-9]/.test(pw)) return "Password must contain at least one number.";
   if (!/[^A-Za-z0-9]/.test(pw))
-    return "Kata sandi harus memuat minimal satu karakter spesial (mis. ! @ # $ %).";
+    return "Password must contain at least one special character (e.g. ! @ # $ %).";
   return null;
 }

@@ -11,13 +11,13 @@ import { pengajuanBadge, pengajuanAmountLabel, packageCountLabel } from "@/lib/p
 import type { PengajuanStatus } from "@/lib/types";
 
 const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
-  { value: "semua", label: "Semua" },
-  { value: "diajukan", label: "Diajukan" },
-  { value: "perlu_revisi", label: "Perlu revisi" },
-  { value: "disetujui", label: "Disetujui" },
-  { value: "ditolak", label: "Ditolak" },
-  { value: "kadaluarsa", label: "Kadaluarsa" },
-  { value: "draf", label: "Draf" },
+  { value: "semua", label: "All" },
+  { value: "diajukan", label: "Submitted" },
+  { value: "perlu_revisi", label: "Needs revision" },
+  { value: "disetujui", label: "Approved" },
+  { value: "ditolak", label: "Rejected" },
+  { value: "kadaluarsa", label: "Expired" },
+  { value: "draf", label: "Draft" },
 ];
 
 export default function AdminPengajuan() {
@@ -60,12 +60,12 @@ export default function AdminPengajuan() {
   return (
     <>
       <Topbar
-        search={{ value: search, onChange: setSearch, placeholder: "Cari event, org, mitra sponsor…" }}
+        search={{ value: search, onChange: setSearch, placeholder: "Search event, org, sponsor partner…" }}
       />
       <div className="sh-shell__content">
         <PageHead
-          title="Pengajuan terarah"
-          subtitle="Pemantauan pengajuan langsung organisasi → mitra sponsor. Read-only; persetujuan dilakukan mitra sponsor."
+          title="Targeted submissions"
+          subtitle="Monitoring of direct organization → sponsor partner submissions. Read-only; approval is the sponsor partner's call."
         />
 
         <div className="sh-toolbar">
@@ -81,7 +81,7 @@ export default function AdminPengajuan() {
         </div>
 
         {rows.length === 0 ? (
-          <Empty title="Tidak ada pengajuan" />
+          <Empty title="No submissions" />
         ) : (
           <section className="sh-card">
             <div className="sh-table-wrap">
@@ -90,12 +90,12 @@ export default function AdminPengajuan() {
                   <tr>
                     <th>ID</th>
                     <th>Event</th>
-                    <th>Organisasi</th>
-                    <th>Mitra Sponsor</th>
-                    <th>Paket</th>
+                    <th>Organization</th>
+                    <th>Sponsor Partner</th>
+                    <th>Package</th>
                     <th>Nominal</th>
                     <th>Status</th>
-                    <th>Tanggal</th>
+                    <th>Date</th>
                     <th />
                   </tr>
                 </thead>
@@ -112,14 +112,14 @@ export default function AdminPengajuan() {
                           </code>
                         </td>
                         <td data-label="Event">{p.eventName}</td>
-                        <td data-label="Organisasi">{org?.name ?? "—"}</td>
-                        <td data-label="Mitra Sponsor">{funder?.name ?? "—"}</td>
-                        <td data-label="Paket">{packageCountLabel(p)}</td>
+                        <td data-label="Organization">{org?.name ?? "—"}</td>
+                        <td data-label="Sponsor Partner">{funder?.name ?? "—"}</td>
+                        <td data-label="Package">{packageCountLabel(p)}</td>
                         <td className="num" data-label="Nominal">{pengajuanAmountLabel(p)}</td>
                         <td data-label="Status">
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                         </td>
-                        <td className="sh-muted" data-label="Tanggal">{formatDate(p.updatedAt)}</td>
+                        <td className="sh-muted" data-label="Date">{formatDate(p.updatedAt)}</td>
                         <td>
                           <button
                             className="sh-btn sh-btn--ghost sh-btn--sm"

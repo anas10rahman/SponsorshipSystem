@@ -28,7 +28,7 @@ export default function OrgDashboard() {
 
   return (
     <>
-      <Topbar title="Dashboard Organisasi" />
+      <Topbar title="Organization Dashboard" />
       <div className="sh-shell__content">
         <Hero />
 
@@ -36,17 +36,17 @@ export default function OrgDashboard() {
 
         <div className="sh-stat-grid">
           <StatCard
-            label="Total disetujui (in-cash)"
+            label="Total approved (in-cash)"
             value={formatRupiah(totalApproved)}
             icon={<Wallet size={20} />}
           />
           <StatCard
-            label="Pengajuan dikirim"
+            label="Submission sent"
             value={mine.filter((p) => p.status !== "draf").length}
             icon={<Send size={20} />}
           />
           <StatCard
-            label="Pengajuan disetujui"
+            label="Submission approved"
             value={approved.length}
             icon={<CheckCircle2 size={20} />}
           />
@@ -54,13 +54,13 @@ export default function OrgDashboard() {
 
         <section className="sh-card">
           <header className="sh-card__header">
-            <h2>Pengajuan terbaru</h2>
+            <h2>Latest submissions</h2>
             <div className="sh-row" style={{ gap: 8 }}>
               <Link to="/org/pengajuan" className="sh-btn sh-btn--ghost sh-btn--sm">
-                Lihat semua
+                View all
               </Link>
               <Link to="/org/cari" className="sh-btn sh-btn--primary sh-btn--sm">
-                Buat pengajuan
+                Create submission
                 <ArrowRight size={14} />
               </Link>
             </div>
@@ -69,7 +69,7 @@ export default function OrgDashboard() {
             <div className="sh-card__body">
               <p className="sh-muted">
                 Belum ada pengajuan.{" "}
-                <Link to="/org/cari">Cari mitra sponsor</Link> untuk memulai.
+                <Link to="/org/cari">Find sponsor partners</Link> to get started.
               </p>
             </div>
           ) : (
@@ -78,9 +78,9 @@ export default function OrgDashboard() {
                 <thead>
                   <tr>
                     <th>Event</th>
-                    <th>Mitra Sponsor</th>
-                    <th>Paket</th>
-                    <th>Nilai</th>
+                    <th>Sponsor Partner</th>
+                    <th>Package</th>
+                    <th>Value</th>
                     <th>Status</th>
                     <th>Diperbarui</th>
                     <th />
@@ -93,9 +93,9 @@ export default function OrgDashboard() {
                     return (
                       <tr key={p.id}>
                         <td style={{ fontWeight: 600 }} data-label="Event">{p.eventName || "(tanpa judul)"}</td>
-                        <td data-label="Mitra Sponsor">{funder?.name ?? "—"}</td>
-                        <td data-label="Paket">{packageCountLabel(p)}</td>
-                        <td className="num" data-label="Nilai">{pengajuanAmountLabel(p)}</td>
+                        <td data-label="Sponsor Partner">{funder?.name ?? "—"}</td>
+                        <td data-label="Package">{packageCountLabel(p)}</td>
+                        <td className="num" data-label="Value">{pengajuanAmountLabel(p)}</td>
                         <td data-label="Status">
                           <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                         </td>

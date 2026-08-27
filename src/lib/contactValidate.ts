@@ -18,12 +18,12 @@ export function normalizePhone(v: string): string {
 /** Kembalikan pesan error, atau null bila nomor wajar untuk WhatsApp Indonesia. */
 export function validatePhone(v: string): string | null {
   const raw = String(v || "").trim();
-  if (!raw) return "Nomor telepon/WhatsApp wajib diisi.";
-  if (/[a-zA-Z]/.test(raw)) return "Nomor telepon hanya boleh berisi angka.";
+  if (!raw) return "Phone/WhatsApp number is required.";
+  if (/[a-zA-Z]/.test(raw)) return "The phone number may contain digits only.";
   const d = normalizePhone(raw);
   // 62 + 9..13 digit → total 11..15
-  if (d.length < 11 || d.length > 15) return "Nomor telepon tidak wajar (contoh: 0812-3456-7890).";
-  if (!/^628/.test(d)) return "Gunakan nomor seluler Indonesia (diawali 08 atau +628).";
+  if (d.length < 11 || d.length > 15) return "That phone number looks wrong (example: 0812-3456-7890).";
+  if (!/^628/.test(d)) return "Use an Indonesian mobile number (starting 08 or +628).";
   return null;
 }
 
@@ -50,9 +50,9 @@ export function validateWebsite(v: string): string | null {
   if (!s) return null; // opsional
   const url = normalizeWebsite(s);
   // Wajib punya titik + TLD, tanpa spasi.
-  if (/\s/.test(url)) return "Alamat website tidak boleh mengandung spasi.";
+  if (/\s/.test(url)) return "The website address cannot contain spaces.";
   if (!/^https?:\/\/[^\s/]+\.[a-z]{2,}(\/\S*)?$/i.test(url))
-    return "Alamat website tidak valid (contoh: https://brand.co.id).";
+    return "That website address is not valid (example: https://brand.co.id).";
   return null;
 }
 
@@ -80,9 +80,9 @@ export function validateInstagram(v: string): string | null {
   // Tautan platform lain jelas keliru → tolak, jangan diam-diam diubah.
   const host = s.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
   if (/^[a-z0-9.-]+\.[a-z]{2,}\//i.test(host) && !/^(instagram\.com|instagr\.am)\//i.test(host))
-    return "Tautan itu bukan Instagram. Isi username atau tautan Instagram.";
+    return "That link is not Instagram. Enter an Instagram username or link.";
   const h = instagramHandle(s);
   if (!/^[A-Za-z0-9._]{1,30}$/.test(h))
-    return "Username Instagram tidak valid (huruf, angka, titik, garis bawah).";
+    return "That Instagram username is not valid (letters, numbers, dots, underscores).";
   return null;
 }

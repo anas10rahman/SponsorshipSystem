@@ -38,7 +38,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
     if (!form.name.trim() || !form.email.trim() || !form.username.trim() || !form.password) {
-      setError("Lengkapi semua kolom wajib.");
+      setError("Fill in all required fields.");
       return;
     }
     const pwErr = validatePassword(form.password);
@@ -47,7 +47,7 @@ export default function Register() {
       return;
     }
     if (form.password !== form.confirm) {
-      setError("Konfirmasi kata sandi tidak cocok.");
+      setError("Password confirmation does not match.");
       return;
     }
     setBusy(true);
@@ -73,12 +73,12 @@ export default function Register() {
     const result = await register(payload);
     setBusy(false);
     if (!result.ok) {
-      setError(result.error ?? "Registrasi gagal.");
+      setError(result.error ?? "Registration failed.");
       return;
     }
     if (result.needsVerification) {
       if (result.emailSent === false)
-        toast.failed("Email kode gagal terkirim — coba 'Kirim ulang kode' di halaman berikutnya.");
+        toast.failed("The code email failed to send — try 'Resend code' on the next page.");
       navigate(`/verify?email=${encodeURIComponent(result.email ?? form.email.trim())}`);
       return;
     }
@@ -93,27 +93,27 @@ export default function Register() {
           <div className="sh-login__brand">
             <Link
               to="/"
-              title="Kembali ke beranda"
-              aria-label="Kembali ke beranda"
+              title="Back to home"
+              aria-label="Back to home"
               style={{ display: "inline-flex", textDecoration: "none" }}
             >
               <BrandMark />
             </Link>
           </div>
-          <h1 className="sh-login__title">Buat akun</h1>
-          <p className="sh-login__sub">Daftar sebagai apa Anda ingin bergabung?</p>
+          <h1 className="sh-login__title">Create account</h1>
+          <p className="sh-login__sub">Which role do you want to join as?</p>
 
           <div style={{ display: "grid", gap: 12, marginTop: 4 }}>
             <RoleOption
               icon={<Building2 size={22} />}
-              title="Organisasi"
-              desc="Ajukan pendanaan sponsorship ke mitra sponsor."
+              title="Organization"
+              desc="Submit sponsorship proposals to sponsor partners."
               onClick={() => setRole("org")}
             />
             <RoleOption
               icon={<HandCoins size={22} />}
-              title="Mitra Sponsor"
-              desc="Tinjau & danai pengajuan dari organisasi."
+              title="Sponsor Partner"
+              desc="Review and fund submissions from organizations."
               onClick={() => setRole("funder")}
             />
           </div>
@@ -121,7 +121,7 @@ export default function Register() {
           <div className="sh-login__demo" style={{ textAlign: "center" }}>
             Sudah punya akun?{" "}
             <Link to="/login" style={{ fontWeight: 700 }}>
-              Masuk di sini
+              Sign in here
             </Link>
           </div>
         </div>
@@ -130,15 +130,15 @@ export default function Register() {
   }
 
   // --- Langkah 2: form ---
-  const roleLabel = role === "org" ? "Organisasi" : "Mitra Sponsor";
+  const roleLabel = role === "org" ? "Organization" : "Sponsor Partner";
   return (
     <main className="sh-login">
       <form className="sh-login__card" onSubmit={onSubmit}>
         <div className="sh-login__brand">
           <Link
             to="/"
-            title="Kembali ke beranda"
-            aria-label="Kembali ke beranda"
+            title="Back to home"
+            aria-label="Back to home"
             style={{ display: "inline-flex", textDecoration: "none" }}
           >
             <BrandMark />
@@ -160,7 +160,7 @@ export default function Register() {
 
         <div className="sh-field">
           <label className="sh-field__label">
-            {role === "org" ? "Nama organisasi" : "Nama mitra sponsor"}
+            {role === "org" ? "Organization name" : "Sponsor partner name"}
           </label>
           <input
             autoFocus
@@ -173,7 +173,7 @@ export default function Register() {
         {role === "org" ? (
           <div className="sh-form-grid">
             <div className="sh-field">
-              <label className="sh-field__label">Kategori</label>
+              <label className="sh-field__label">Category</label>
               <input
                 value={form.category}
                 onChange={(e) => set({ category: e.target.value })}
@@ -181,7 +181,7 @@ export default function Register() {
               />
             </div>
             <div className="sh-field">
-              <label className="sh-field__label">Kota</label>
+              <label className="sh-field__label">City</label>
               <input
                 value={form.city}
                 onChange={(e) => set({ city: e.target.value })}
@@ -191,7 +191,7 @@ export default function Register() {
           </div>
         ) : (
           <div className="sh-field">
-            <label className="sh-field__label">Jenis mitra sponsor</label>
+            <label className="sh-field__label">Sponsor partner type</label>
             <select
               value={form.type}
               onChange={(e) => set({ type: e.target.value as (typeof FUNDER_TYPES)[number] })}
@@ -222,13 +222,13 @@ export default function Register() {
             autoComplete="username"
             value={form.username}
             onChange={(e) => set({ username: e.target.value })}
-            placeholder="Untuk login (huruf/angka, tanpa spasi)"
+            placeholder="For sign-in (letters/numbers, no spaces)"
           />
         </div>
 
         <div className="sh-form-grid">
           <div className="sh-field">
-            <label className="sh-field__label">Kata sandi</label>
+            <label className="sh-field__label">Password</label>
             <PasswordInput
               value={form.password}
               onChange={(v) => set({ password: v })}
@@ -263,11 +263,11 @@ export default function Register() {
             )}
           </div>
           <div className="sh-field">
-            <label className="sh-field__label">Konfirmasi kata sandi</label>
+            <label className="sh-field__label">Confirm password</label>
             <PasswordInput
               value={form.confirm}
               onChange={(v) => set({ confirm: v })}
-              placeholder="Ulangi kata sandi"
+              placeholder="Repeat password"
             />
           </div>
         </div>
@@ -280,13 +280,13 @@ export default function Register() {
           style={{ width: "100%" }}
           disabled={busy}
         >
-          {busy ? "Memproses…" : "Buat akun & masuk"}
+          {busy ? "Processing…" : "Create account & sign in"}
         </button>
 
         <div className="sh-login__demo" style={{ textAlign: "center" }}>
           Sudah punya akun?{" "}
           <Link to="/login" style={{ fontWeight: 700 }}>
-            Masuk di sini
+            Sign in here
           </Link>
         </div>
       </form>

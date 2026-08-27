@@ -102,7 +102,7 @@ function PengajuanDetailInner({
     <Modal
       open
       onClose={onClose}
-      title={pengajuan.eventName || "Detail pengajuan"}
+      title={pengajuan.eventName || "Submission details"}
       footer={footer}
       width={720}
     >
@@ -115,7 +115,7 @@ function PengajuanDetailInner({
 
       {pengajuan.status === "perlu_revisi" && pengajuan.revisionNote && (
         <div className="sh-notice">
-          <strong>Feedback dari mitra sponsor:</strong> {pengajuan.revisionNote}
+          <strong>Feedback from the sponsor partner:</strong> {pengajuan.revisionNote}
         </div>
       )}
 
@@ -129,26 +129,26 @@ function PengajuanDetailInner({
           borderBottom: "1px solid var(--line)",
         }}
       >
-        <Field label="Organisasi">{org?.name ?? "—"}</Field>
-        <Field label="Mitra Sponsor tujuan">{funder?.name ?? "—"}</Field>
+        <Field label="Organization">{org?.name ?? "—"}</Field>
+        <Field label="Target Sponsor Partner">{funder?.name ?? "—"}</Field>
         <Field label="Lokasi">{pengajuan.eventLocation || "—"}</Field>
-        <Field label="Tanggal">{formatEventDate(pengajuan.eventDate)}</Field>
-        <Field label="Total anggaran">{formatRupiah(pengajuan.eventBudget)}</Field>
+        <Field label="Date">{formatEventDate(pengajuan.eventDate)}</Field>
+        <Field label="Total budget">{formatRupiah(pengajuan.eventBudget)}</Field>
         <div style={{ gridColumn: "1 / -1" }}>
-          <Field label="Deskripsi">{pengajuan.description || "—"}</Field>
+          <Field label="Description">{pengajuan.description || "—"}</Field>
         </div>
       </div>
 
       {/* Paket sponsorship */}
       <div>
-        <h4 style={{ marginBottom: 4 }}>Paket sponsorship</h4>
+        <h4 style={{ marginBottom: 4 }}>Sponsorship package</h4>
         {selectable && (
           <p className="sh-muted" style={{ marginTop: 0, marginBottom: 12 }}>
-            Pilih satu paket yang ingin Anda danai, lalu setujui.
+            Pick one package to fund, then approve.
           </p>
         )}
         {packages.length === 0 ? (
-          <p className="sh-muted">Belum ada paket.</p>
+          <p className="sh-muted">No packages yet.</p>
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
             {packages.map((pk, i) => (
@@ -179,12 +179,12 @@ function PengajuanDetailInner({
           <div className="sh-row" style={{ gap: 10 }}>
             <Wallet size={18} style={{ color: "var(--brand-500)" }} />
             <div>
-              <div className="sh-meta-label">Paket terpilih</div>
-              <strong>{chosen?.name ?? "Belum dipilih"}</strong>
+              <div className="sh-meta-label">Selected package</div>
+              <strong>{chosen?.name ?? "Not selected yet"}</strong>
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
-            <div className="sh-meta-label">Total pendanaan</div>
+            <div className="sh-meta-label">Total funding</div>
             <strong className="num" style={{ color: "var(--brand-600)" }}>
               {formatRupiah(chosen ? packageAmount(chosen) : 0)}
             </strong>
@@ -196,7 +196,7 @@ function PengajuanDetailInner({
       <div>
         <h4 style={{ marginBottom: 12 }}>Dokumen pendukung ({documents.length})</h4>
         {documents.length === 0 ? (
-          <p className="sh-muted">Belum ada dokumen.</p>
+          <p className="sh-muted">No documents yet.</p>
         ) : (
           <div style={{ display: "grid", gap: 8 }}>
             {documents.map((doc, i) => (
@@ -228,7 +228,7 @@ function PengajuanDetailInner({
       </div>
 
       <div>
-        <h4 style={{ marginBottom: 12 }}>Riwayat status</h4>
+        <h4 style={{ marginBottom: 12 }}>Status history</h4>
         <div className="sh-timeline">
           {pengajuan.history.map((h, i) => (
             <div key={i} className="sh-timeline__item">
@@ -246,15 +246,15 @@ function PengajuanDetailInner({
       <Modal
         open
         onClose={() => setPreview(null)}
-        title={preview.name || "Pratinjau dokumen"}
+        title={preview.name || "Document preview"}
         width={760}
       >
         {preview.data === null ? (
-          <p className="sh-muted">Memuat dokumen…</p>
+          <p className="sh-muted">Loading document…</p>
         ) : preview.data ? (
           <PdfPreview dataUrl={preview.data} fileName={preview.name} />
         ) : (
-          <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+          <p className="sh-muted">The document could not be loaded.</p>
         )}
       </Modal>
     )}
@@ -319,13 +319,13 @@ function PackageCard({
           )}
           <strong>{pkg.name || `Paket ${index + 1}`}</strong>
           {approvedChoice && (
-            <StatusBadge kind="custom" label="Dipilih mitra sponsor" variant="success" />
+            <StatusBadge kind="custom" label="Chosen by the sponsor partner" variant="success" />
           )}
         </div>
       </div>
       {pkg.requests.length > 0 && (
         <div style={{ marginBottom: 8 }}>
-          <div className="sh-meta-label">Detail permintaan</div>
+          <div className="sh-meta-label">Request details</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.requests.map((r, i) => (
               <li key={i}>{requestLabel(r)}</li>
@@ -335,7 +335,7 @@ function PackageCard({
       )}
       {pkg.benefits.length > 0 && (
         <div>
-          <div className="sh-meta-label">Benefit untuk mitra sponsor</div>
+          <div className="sh-meta-label">Benefits for the sponsor partner</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.benefits.map((b, i) => (
               <li key={i}>{b}</li>

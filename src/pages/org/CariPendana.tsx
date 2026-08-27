@@ -21,17 +21,17 @@ export default function OrgCariPendana() {
   return (
     <>
       <Topbar
-        title="Cari mitra sponsor"
-        search={{ value: query, onChange: setQuery, placeholder: "Cari mitra sponsor / fokus…" }}
+        title="Find sponsor partners"
+        search={{ value: query, onChange: setQuery, placeholder: "Search sponsor partner / focus…" }}
       />
       <div className="sh-shell__content">
         <PageHead
-          title="Cari mitra sponsor"
-          subtitle="Pilih mitra sponsor yang sesuai, lalu ajukan proposal sponsorship langsung ke mereka."
+          title="Find sponsor partners"
+          subtitle="Pick a suitable sponsor partner, then send your sponsorship proposal straight to them."
         />
 
         {rows.length === 0 ? (
-          <Empty title="Tidak ada mitra sponsor yang cocok" />
+          <Empty title="No matching sponsor partners" />
         ) : (
           <div className="sh-proposal-grid">
             {rows.map((f) => {
@@ -65,7 +65,7 @@ export default function OrgCariPendana() {
                       style={{ flex: 1 }}
                       onClick={() => navigate(`/org/pendana/${f.id}`)}
                     >
-                      Lihat profil
+                      View profile
                     </button>
                     <button
                       className="sh-btn sh-btn--primary sh-btn--sm"

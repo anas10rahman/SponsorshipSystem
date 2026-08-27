@@ -1,17 +1,17 @@
 /* ============================================================
-   Naskah landing page — sumber: "DealMatch Compro.docx" +
-   reference.html. Semua teks terpusat di sini supaya bisa
-   diubah tanpa menyentuh komponen.
+   Landing page copy — sourced from "DealMatch Compro.docx" and
+   reference.html. Every string lives here so wording can change
+   without touching components.
 
-   Dua sisi platform dipetakan ke dua warna brand:
-     Organisasi   → biru  (--dm-blue  #1E3A8A)
-     Mitra Sponsor → hijau (--dm-green #10B981)
-   Sama seperti logo DM: D biru dan M hijau disambung satu node.
+   The platform's two sides map onto the two brand colours:
+     Organization   → blue  (--dm-blue  #1E3A8A)
+     Sponsor Partner → green (--dm-green #10B981)
+   Same as the DM logo: a blue D and a green M joined by one node.
    ============================================================ */
 
 export const TAGLINE = "Two Sides. One Match.";
 
-/* Navigasi publik — tiap butir halaman tersendiri (bukan anchor ke section). */
+/* Public navigation — each entry is its own page, not an in-page anchor. */
 export const NAV_LINKS = [
   { href: "/about", label: "About Us" },
   { href: "/program", label: "Program" },
@@ -20,115 +20,115 @@ export const NAV_LINKS = [
   { href: "/faq", label: "FAQ" },
 ] as const;
 
-/* ---------- Tentang Kami ---------- */
+/* ---------- About Us ---------- */
 
 export const ABOUT_LEAD =
-  "DealMatch menghubungkan Organisasi dengan Mitra Sponsor dalam satu platform yang lebih mudah, cepat, dan terarah.";
+  "DealMatch connects Organizations with Sponsor Partners on one platform that is simpler, faster, and more focused.";
 
 export const ABOUT_BODY =
-  "Kami membantu Organisasi mengajukan proposal sponsorship dengan lebih mudah. Di sisi lain, DealMatch membantu Mitra Sponsor menemukan peluang kolaborasi yang sesuai dengan tujuan campaign dan target audiens.";
+  "We make it easier for Organizations to submit sponsorship proposals. On the other side, DealMatch helps Sponsor Partners find collaborations that fit their campaign goals and target audience.";
 
 export const VALUE_PROPS = [
   {
     icon: "target",
     title: "Smart Matching",
-    desc: "Tidak perlu lagi mengirim proposal secara acak. Incar mitra sponsor impianmu langsung.",
+    desc: "No more sending proposals at random. Go straight to the sponsor partner you actually want.",
   },
   {
     icon: "grid",
     title: "One Platform",
-    desc: "Seluruh proses sponsorship terintegrasi dalam satu platform, dari awal sampai deal.",
+    desc: "The whole sponsorship process lives in one place, from first draft to signed deal.",
   },
   {
     icon: "eye",
     title: "Transparent Process",
-    desc: "Pantau status proposal dan saldo secara real-time, tanpa tebak-tebakan.",
+    desc: "Track proposal status and balance in real time. No guesswork.",
   },
   {
     icon: "sparkles",
     title: "Quality Connections",
-    desc: "Kami hubungkan kamu dengan mitra sponsor yang benar-benar relevan dengan event-mu.",
+    desc: "We match you with sponsor partners genuinely relevant to your event.",
   },
   {
     icon: "clock",
     title: "Save Time",
-    desc: "Proses terstruktur dengan batas waktu respons yang jelas. Tidak perlu menunggu tanpa kepastian.",
+    desc: "A structured process with clear response deadlines. No waiting in the dark.",
   },
 ] as const;
 
-/* ---------- Untuk Siapa ---------- */
+/* ---------- Who it is for ---------- */
 
 export const AUDIENCES = [
   {
     side: "org",
-    title: "Organisasi",
-    who: "EO, Komunitas, BEM, HIMA, Karang Taruna, dan organisasi yang butuh support sponsor.",
+    title: "Organizations",
+    who: "Event organizers, communities, student bodies, youth groups, and any organization that needs sponsor support.",
     points: [
-      "Temukan mitra sponsor yang paling relevan",
-      "Ajukan proposal langsung, simpan sebagai draft, lanjutkan kapan saja",
-      "Lacak status tiap pengajuan dari satu dasbor",
-      "Dapatkan kepastian status: Disetujui, Perlu Revisi, atau Ditolak",
-      "Bangun kolaborasi jangka panjang setelah proposal disetujui",
+      "Find the sponsor partners most relevant to you",
+      "Submit proposals directly, save as draft, pick up any time",
+      "Track every submission from a single dashboard",
+      "Get a clear outcome: Approved, Needs Revision, or Rejected",
+      "Build long-term collaboration once a proposal is approved",
     ],
   },
   {
     side: "sponsor",
-    title: "Mitra Sponsor",
-    who: "Brand, perusahaan, dan mitra yang ingin menjangkau audiens lewat event dan peluang kolaborasi.",
+    title: "Sponsor Partners",
+    who: "Brands, companies, and partners looking to reach audiences through events and collaboration.",
     points: [
-      "Terima proposal yang sudah terkurasi",
-      "Tinjau detail acara secara lengkap",
-      "Konfirmasi status proposal dalam satu klik",
-      "Bangun eksposur ke komunitas yang tepat sasaran",
+      "Receive proposals that are already curated",
+      "Review full event details in one place",
+      "Confirm proposal status in a single click",
+      "Build exposure with the right communities",
     ],
   },
 ] as const;
 
-/* ---------- Cara Kerja (per peran) ---------- */
+/* ---------- How it works (per role) ---------- */
 
 export const FLOWS = {
   org: [
     {
-      title: "Daftar & Lengkapi Profil",
-      desc: "Buat akun sebagai Organisasi, lengkapi profil dan dokumen legalitas.",
+      title: "Sign Up & Complete Your Profile",
+      desc: "Create an account as an Organization, then complete your profile and legal documents.",
     },
     {
-      title: "Verifikasi oleh Admin",
-      desc: "Data dan dokumen ditinjau Admin untuk memastikan setiap akun memiliki informasi yang valid sebelum dapat menggunakan platform.",
+      title: "Admin Verification",
+      desc: "Admin reviews your details and documents to make sure every account holds valid information before it can use the platform.",
     },
     {
-      title: "Temukan Mitra Sponsor",
-      desc: "Telusuri direktori Mitra Sponsor sesuai kebutuhan event, bidang yang didukung, dan peluang kolaborasi yang ditawarkan.",
+      title: "Find Sponsor Partners",
+      desc: "Browse the Sponsor Partner directory by what your event needs, the fields they support, and the collaboration they offer.",
     },
     {
-      title: "Ajukan Proposal",
-      desc: "Lengkapi informasi event, pilih atau susun paket sponsorship, unggah proposal PDF, lalu kirim pengajuan kepada Mitra Sponsor pilihanmu.",
+      title: "Submit a Proposal",
+      desc: "Fill in the event details, pick or build a sponsorship package, upload the proposal PDF, then send it to the Sponsor Partner you choose.",
     },
     {
-      title: "Dapatkan Dukungan Sponsor",
-      desc: "Mitra Sponsor meninjau pengajuan dan memberikan keputusan akhir proposal event.",
+      title: "Get Sponsor Support",
+      desc: "The Sponsor Partner reviews your submission and gives the final decision on the proposal.",
     },
   ],
   sponsor: [
     {
-      title: "Daftar & Lengkapi Profil",
-      desc: "Buat akun sebagai Mitra Sponsor, lengkapi profil dan dokumen legalitas.",
+      title: "Sign Up & Complete Your Profile",
+      desc: "Create an account as a Sponsor Partner, then complete your profile and legal documents.",
     },
     {
-      title: "Verifikasi oleh Admin",
-      desc: "Data dan dokumen ditinjau Admin untuk memastikan setiap akun memiliki informasi yang valid sebelum dapat menggunakan platform.",
+      title: "Admin Verification",
+      desc: "Admin reviews your details and documents to make sure every account holds valid information before it can use the platform.",
     },
     {
-      title: "Terima Proposal",
-      desc: "Lihat proposal event yang masuk dan temukan peluang kolaborasi yang sesuai dengan target audiens.",
+      title: "Receive Proposals",
+      desc: "See incoming event proposals and spot the collaborations that fit your target audience.",
     },
     {
-      title: "Tinjau Proposal",
-      desc: "Pelajari detail event, target audiens, benefit sponsorship, paket yang ditawarkan, serta informasi pendukung lainnya.",
+      title: "Review Proposals",
+      desc: "Study the event details, target audience, sponsorship benefits, packages on offer, and supporting information.",
     },
     {
-      title: "Tentukan Keputusan Kerjasama",
-      desc: "Berikan keputusan terhadap proposal: Disetujui, Perlu Revisi, atau Ditolak.",
+      title: "Decide on the Partnership",
+      desc: "Give your decision on the proposal: Approved, Needs Revision, or Rejected.",
     },
   ],
 } as const;
@@ -138,43 +138,43 @@ export const FLOWS = {
 export const READY_CARDS = [
   {
     side: "org",
-    title: "Sedang mencari sponsor?",
-    desc: "Daftarkan organisasi kamu dan temukan mitra sponsor terbaik untuk event kamu.",
-    cta: "Daftar sekarang",
+    title: "Looking for sponsors?",
+    desc: "Register your organization and find the best sponsor partners for your event.",
+    cta: "Sign up now",
   },
   {
     side: "sponsor",
-    title: "Tertarik menjadi sponsor?",
-    desc: "Daftarkan perusahaan atau brand kamu sebagai mitra sponsor terpercaya.",
-    cta: "Daftar sekarang",
+    title: "Interested in sponsoring?",
+    desc: "Register your company or brand as a trusted sponsor partner.",
+    cta: "Sign up now",
   },
 ] as const;
 
-/* ---------- Rincian saldo (jawaban FAQ pertama) ---------- */
+/* ---------- Balance breakdown (first FAQ answer) ---------- */
 
 export const SALDO_ROWS = [
   {
-    title: "Pengajuan dikirim",
-    desc: "Dipotong saat proposal diajukan ke brand pilihan",
-    amount: "− Rp50.000",
+    title: "Proposal sent",
+    desc: "Deducted when the proposal goes to your chosen brand",
+    amount: "− Rp50,000",
     tone: "minus",
   },
   {
-    title: "Brand menyetujui",
-    desc: "Kontak brand terbuka, biaya pengajuan resmi terpakai",
-    amount: "Terpakai",
+    title: "Brand approves",
+    desc: "Brand contact opens, the submission fee is spent",
+    amount: "Spent",
     tone: "neutral",
   },
   {
-    title: "Brand menolak",
-    desc: "Sebagian saldo dikembalikan otomatis ke akun kamu",
-    amount: "+ Rp40.000",
+    title: "Brand rejects",
+    desc: "Part of the balance returns to your account automatically",
+    amount: "+ Rp40,000",
     tone: "plus",
   },
   {
-    title: "Tidak direspons > 7 hari",
-    desc: "Dianggap kelalaian brand, bukan tanggung jawab kamu",
-    amount: "+ Rp50.000",
+    title: "No response after 7 days",
+    desc: "Counted as the brand's lapse, not yours",
+    amount: "+ Rp50,000",
     tone: "plus",
   },
 ] as const;
@@ -183,40 +183,40 @@ export const SALDO_ROWS = [
 
 export const FAQ = [
   {
-    q: "Apakah mendaftar dikenakan biaya?",
-    a: "Mendaftar dan membuat akun gratis. Saat pengajuan dikenakan biaya dengan sistem saldo seperti berikut:",
+    q: "Is there a fee to sign up?",
+    a: "Signing up and creating an account is free. Submitting a proposal draws on your balance as follows:",
     withSaldo: true,
   },
   {
-    q: "Siapa yang bisa memulai pengajuan?",
-    a: "Hanya organisasi. Mitra sponsor tidak menawarkan dana lebih dulu — mereka meninjau pengajuan yang masuk ke inbox, lalu memutuskan.",
+    q: "Who can start a submission?",
+    a: "Organizations only. Sponsor partners do not offer funding first — they review what lands in their inbox, then decide.",
   },
   {
-    q: "Apakah keputusan sponsor bisa dianulir admin?",
-    a: "Tidak. Persetujuan mitra sponsor bersifat final. Admin berperan memantau dan mencatat, bukan menyetujui atau membatalkan.",
+    q: "Can an admin overturn a sponsor's decision?",
+    a: "No. A sponsor partner's approval is final. Admin monitors and records; it does not approve or cancel.",
   },
   {
-    q: "Bagaimana cara verifikasi organisasi?",
-    a: "Lengkapi profil organisasi beserta dokumen legalitas, lalu ajukan verifikasi dari halaman pengaturan. Admin akan meninjaunya.",
+    q: "How does organization verification work?",
+    a: "Complete your organization profile along with the legal documents, then request verification from the settings page. An admin will review it.",
   },
   {
-    q: "Apa yang terjadi kalau pengajuan diminta revisi?",
-    a: "Pengajuan kembali ke organisasi untuk diperbaiki, lalu bisa dikirim ulang ke mitra sponsor yang sama tanpa biaya baru.",
+    q: "What happens if a submission is sent back for revision?",
+    a: "It returns to the organization to be fixed, then can be resent to the same sponsor partner at no extra cost.",
   },
   {
-    q: "Kenapa nomor telepon disembunyikan sebagian?",
-    a: "Nomor penuh baru terbuka setelah ada pengajuan terkirim di antara kedua pihak, supaya koordinasi tetap tercatat di dalam sistem.",
+    q: "Why is the phone number partly hidden?",
+    a: "The full number only opens once a submission has been sent between the two parties, so coordination stays recorded inside the system.",
   },
 ] as const;
 
 /* ---------- Footer ---------- */
 
 export const FOOTER_TAGLINE =
-  "Platform yang mempertemukan Organisasi dan Mitra Sponsor — lebih mudah, cepat, dan terarah.";
+  "The platform where Organizations and Sponsor Partners meet — simpler, faster, more focused.";
 
 export const FOOTER_COLUMNS = [
   {
-    title: "Produk",
+    title: "Product",
     links: [
       { label: "About Us", href: "/about" },
       { label: "Program", href: "/program" },
@@ -224,80 +224,80 @@ export const FOOTER_COLUMNS = [
     ],
   },
   {
-    title: "Untuk",
+    title: "For",
     links: [
-      { label: "Organisasi", href: "/about" },
-      { label: "Mitra Sponsor", href: "/about" },
+      { label: "Organizations", href: "/about" },
+      { label: "Sponsor Partners", href: "/about" },
     ],
   },
   {
-    title: "Bantuan",
+    title: "Help",
     links: [
       { label: "FAQ", href: "/faq" },
       { label: "Contact", href: "/contact" },
-      { label: "Kebijakan Privasi", href: "/kebijakan-privasi" },
-      { label: "Syarat & Ketentuan", href: "/syarat-ketentuan" },
+      { label: "Privacy Policy", href: "/kebijakan-privasi" },
+      { label: "Terms & Conditions", href: "/syarat-ketentuan" },
     ],
   },
 ] as const;
 
 /* ---------- Contact ----------
-   Satu-satunya sumber data kontak publik. Halaman /contact tidak bisa
-   membaca email admin dari store: halaman publik dirender tanpa sesi,
-   dan /api/state memang tidak mengembalikan data untuk pengunjung anonim. */
+   The single source of public contact details. The /contact page cannot read
+   the admin email from the store: public pages render without a session, and
+   /api/state deliberately returns nothing for anonymous visitors. */
 
-/* TODO(anas): ganti dengan kontak DealMatch yang sebenarnya.
-   `email` juga menjadi tujuan form penawaran kerja sama, jadi selama masih
-   placeholder penawaran yang masuk tidak akan sampai ke siapa pun.
+/* TODO(anas): replace with real DealMatch contact details.
+   `email` is also where the partnership enquiry form sends to, so while it
+   stays a placeholder no enquiry reaches anyone.
 
-   `phone`/`whatsapp` sengaja DIKOSONGKAN, bukan diisi contoh: nomor karangan
-   yang terlihat wajar bisa saja milik orang lain, dan halaman ini publik.
-   Baris telepon otomatis disembunyikan selama kosong — isi keduanya untuk
-   memunculkannya kembali. */
+   `phone`/`whatsapp` are deliberately EMPTY rather than filled with an
+   example: a plausible-looking invented number may belong to a real person,
+   and this page is public. The phone row hides itself while empty — fill
+   both to bring it back. */
 export const CONTACT_INFO = {
   email: "halo@dealmatch.id",
   phone: "",
-  /** Dipakai untuk tautan wa.me — hanya angka, tanpa tanda baca. */
+  /** Used for the wa.me link — digits only, no punctuation. */
   whatsapp: "",
   address: "Jakarta, Indonesia",
   instagram: "@dealmatch.id",
   instagramUrl: "https://instagram.com/dealmatch.id",
 } as const;
 
-/** Pilihan subjek pada form penawaran kerja sama. `other` memunculkan
- *  isian bebas supaya penawaran di luar daftar tetap tertampung. */
+/** Subject options on the partnership enquiry form. `other` reveals a free
+ *  text field so enquiries outside the list still have somewhere to go. */
 export const CONTACT_SUBJECTS = [
   { value: "media-partner", label: "Media Partner" },
   { value: "co-branding", label: "Co-Branding / Co-Campaign" },
   { value: "community", label: "Community Collaboration" },
-  { value: "other", label: "Lainnya…" },
+  { value: "other", label: "Other…" },
 ] as const;
 
 /* ---------- Program ----------
-   Daftar program DealMatch. Bentuknya array supaya program berikutnya
-   cukup ditambahkan di sini tanpa menyentuh komponennya. */
+   DealMatch programs. An array so the next program is just another entry
+   here, with no component changes. */
 
 export const PROGRAMS = [
   {
     id: "webinar-sponsorship-2026-08",
-    title: "Paham Sponsorship dari Sudut Pandang Brand",
-    category: "Program Online",
+    title: "Understanding Sponsorship from the Brand's Point of View",
+    category: "Online Program",
     poster: "/poster-webinar-sponsorship.jpeg",
-    date: "29 Agustus 2026",
+    date: "29 August 2026",
     time: "14.00 – 16.00 WIB",
-    price: "Rp 30.000 / orang · Rp 50.000 / 2 orang (hemat 10K)",
+    price: "Rp 30,000 / person · Rp 50,000 / 2 people (save 10K)",
     highlights: [
-      "Bongkar rahasia kenapa proposal kamu selalu di-ghosting brand",
-      'Ubah mindset dari "minta sponsor" jadi "tawarin value"',
-      "Tren sponsorship 2026 yang lagi jadi incaran brand",
-      "Kenali red flag sebelum kerjasama berujung kacau",
-      "Satu langkah lebih dekat ke proposal sponsorship yang di-ACC",
+      "Why brands keep ghosting your proposals",
+      'Shift from "asking for sponsorship" to "offering value"',
+      "The 2026 sponsorship trends brands are chasing",
+      "Spot the red flags before a partnership goes wrong",
+      "One step closer to a sponsorship proposal that gets approved",
     ],
     speakers: [
-      { name: "Ali Abdi", role: "Marketing Komunikasi Media Partner Amazing Malang" },
+      { name: "Ali Abdi", role: "Marketing Communications, Media Partner Amazing Malang" },
       { name: "Adelia PH", role: "Sponsorship & Community Strategist" },
     ],
-    ctaLabel: "Daftar Program",
+    ctaLabel: "Register for the Program",
     ctaUrl: "https://bit.ly/daftarwebinarsponsorship",
   },
 ] as const;

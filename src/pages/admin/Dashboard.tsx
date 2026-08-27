@@ -56,28 +56,28 @@ export default function AdminDashboard() {
 
         <div className="sh-stat-grid">
           <StatCard
-            label="Saldo Diterima"
+            label="Received Balance"
             value={formatRupiah(stats.saldoDiterima)}
             icon={<Wallet size={20} />}
           />
           <StatCard
-            label="Saldo Sementara"
+            label="Held Balance"
             value={formatRupiah(stats.saldoSementara)}
             icon={<Hourglass size={20} />}
             trend={
               stats.jumlahTertahan > 0
-                ? { direction: "up", label: `${stats.jumlahTertahan} pengajuan menunggu keputusan` }
+                ? { direction: "up", label: `${stats.jumlahTertahan} submissions awaiting a decision` }
                 : undefined
             }
           />
-          <StatCard label="Pengajuan dikirim" value={stats.sent} icon={<Send size={20} />} />
+          <StatCard label="Submission sent" value={stats.sent} icon={<Send size={20} />} />
           <StatCard
-            label="Pengajuan disetujui"
+            label="Submission approved"
             value={stats.approved}
             icon={<CheckCircle2 size={20} />}
           />
           <StatCard
-            label="Organisasi aktif"
+            label="Active organizations"
             value={stats.orgAktif}
             icon={<Building2 size={20} />}
           />
@@ -85,18 +85,18 @@ export default function AdminDashboard() {
 
         <section className="sh-card">
           <header className="sh-card__header">
-            <h2>Pengajuan terbaru</h2>
+            <h2>Latest submissions</h2>
           </header>
           <div className="sh-table-wrap">
             <table className="sh-table">
               <thead>
                 <tr>
                   <th>Event</th>
-                  <th>Organisasi</th>
-                  <th>Mitra Sponsor</th>
-                  <th>Nilai</th>
+                  <th>Organization</th>
+                  <th>Sponsor Partner</th>
+                  <th>Value</th>
                   <th>Status</th>
-                  <th>Tanggal</th>
+                  <th>Date</th>
                   <th />
                 </tr>
               </thead>
@@ -108,13 +108,13 @@ export default function AdminDashboard() {
                   return (
                     <tr key={p.id}>
                       <td style={{ fontWeight: 600 }} data-label="Event">{p.eventName}</td>
-                      <td data-label="Organisasi">{org?.name ?? "—"}</td>
-                      <td data-label="Mitra Sponsor">{funder?.name ?? "—"}</td>
-                      <td className="num" data-label="Nilai">{pengajuanAmountLabel(p)}</td>
+                      <td data-label="Organization">{org?.name ?? "—"}</td>
+                      <td data-label="Sponsor Partner">{funder?.name ?? "—"}</td>
+                      <td className="num" data-label="Value">{pengajuanAmountLabel(p)}</td>
                       <td data-label="Status">
                         <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                       </td>
-                      <td className="sh-muted" data-label="Tanggal">{formatDate(p.updatedAt)}</td>
+                      <td className="sh-muted" data-label="Date">{formatDate(p.updatedAt)}</td>
                       <td>
                         <button
                           className="sh-btn sh-btn--ghost sh-btn--sm"
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
                 {recent.length === 0 && (
                   <tr>
                     <td colSpan={7} className="sh-muted" style={{ textAlign: "center", padding: 24 }}>
-                      Belum ada pengajuan.
+                      No submissions yet.
                     </td>
                   </tr>
                 )}

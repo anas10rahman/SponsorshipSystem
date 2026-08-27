@@ -36,7 +36,7 @@ export function ContactLine({ phone, canSee, hint }: Props) {
             {maskPhone(phone)}
           </span>
           <span className="sh-muted" style={{ fontSize: 12 }}>
-            {hint ?? "Nomor terbuka setelah ada pengajuan."}
+            {hint ?? "The number opens once a submission exists."}
           </span>
         </>
       )}

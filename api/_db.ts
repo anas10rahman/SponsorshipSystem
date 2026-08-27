@@ -9,7 +9,7 @@ let _sql: ReturnType<typeof neon> | null = null;
 function realSql() {
   if (!_sql) {
     const url = process.env.DATABASE_URL;
-    if (!url) throw new Error("DATABASE_URL belum diset di server.");
+    if (!url) throw new Error("DATABASE_URL is not set on the server.");
     _sql = neon(url);
   }
   return _sql;
@@ -105,8 +105,110 @@ export function mapFunder(r: any) {
   };
 }
 
-/* ---------- Rakit AppState (tanpa password, tanpa PDF base64) ---------- */
-export async function assembleState() {
+/* ---------- Rakit AppState (tanpa password, tanpa PDF base64) ----------
+   `viewerId` = user pemanggil. Data disaring sesuai peran:
+   admin lihat semua; org/funder hanya baris miliknya sendiri + profil publik
+   lawan transaksi. Tanpa viewerId (tak login) → tak ada data sama sekali. */
+export async function assembleState(viewerId?: string) {
+  const viewer = viewerId
+    ? ((await sql`select id, role, org_id, funder_id from users
+                  where id = ${viewerId} limit 1`) as any[])[0]
+    : null;
+  if (!viewer) return emptyState();
+  if (viewer.role !== "admin") return scopedState(viewer);
+  return adminState();
+}
+
+function emptyState() {
+  return {
+    users: [],
+    organizations: [],
+    funders: [],
+    proposals: [],
+    transactions: [],
+    pengajuan: [],
+    auditLogs: [],
+    notifications: [],
+    session: { userId: null },
+  };
+}
+
+/* Non-admin: hanya entitas sendiri + pengajuan yang melibatkan dirinya.
+   Profil lawan transaksi tetap tampil (perlu untuk UI katalog & inbox),
+   tapi tanpa kolom sensitif — itu sudah dijaga mapOrg/mapFunder yang
+   tidak pernah menyertakan blob dokumen. */
+async function scopedState(v: any) {
+  const orgId = v.org_id ?? null;
+  const funderId = v.funder_id ?? null;
+
+  // Kolom disamakan dengan adminState: tanpa blob base64 (compro_data,
+  // pic_id_doc_data, isi legal/dokumen) — itu diambil lazy & ber-otorisasi.
+  const [users, orgs, funders, pengajuan, notifs] = await Promise.all([
+    // Hanya akun sendiri — daftar user global tidak pernah dikirim ke non-admin.
+    sql`select * from users where id = ${v.id}`,
+    orgId
+      ? sql`select id, name, category, city, logo_initials, logo_url, verified,
+                   verification_status, verification_note, legal_docs, payout_account,
+                   coalesce((select jsonb_agg(jsonb_build_object('name', e->>'name'))
+                      from jsonb_array_elements(legal_docs_data) e), '[]'::jsonb) as legal_docs_data,
+                   balance, phone, email, description, website, instagram, twitter,
+                   facebook, tiktok, compro_url, pic_name, pic_phone, pic_position,
+                   pic_email, pic_id_doc_url, (pic_photo is not null) as pic_has_photo,
+                   created_at, updated_at
+            from organizations where id = ${orgId}`
+      : // Mitra sponsor perlu profil organisasi yang mengirim pengajuan kepadanya.
+        sql`select id, name, category, city, logo_initials, logo_url, verified,
+                   verification_status, verification_note, legal_docs, payout_account,
+                   coalesce((select jsonb_agg(jsonb_build_object('name', e->>'name'))
+                      from jsonb_array_elements(legal_docs_data) e), '[]'::jsonb) as legal_docs_data,
+                   balance, phone, email, description, website, instagram, twitter,
+                   facebook, tiktok, compro_url, pic_name, pic_phone, pic_position,
+                   pic_email, pic_id_doc_url, (pic_photo is not null) as pic_has_photo,
+                   created_at, updated_at
+            from organizations
+            where id in (select org_id from pengajuan where funder_id = ${funderId})
+            order by name`,
+    funderId
+      ? sql`select id, name, type, focus, budget_total, budget_remaining, phone, email,
+                   description, website, instagram, twitter, facebook, logo_url, address,
+                   compro_url, pic_name, pic_phone, pic_position, pic_email,
+                   created_at, updated_at,
+                   coalesce((select jsonb_agg(jsonb_build_object('name', e->>'name'))
+                      from jsonb_array_elements(legal_docs_data) e), '[]'::jsonb) as legal_docs_data
+            from funders where id = ${funderId}`
+      : // Organisasi perlu katalog mitra sponsor (halaman "Cari mitra sponsor").
+        sql`select id, name, type, focus, budget_total, budget_remaining, phone, email,
+                   description, website, instagram, twitter, facebook, logo_url, address,
+                   compro_url, pic_name, pic_phone, pic_position, pic_email,
+                   created_at, updated_at,
+                   coalesce((select jsonb_agg(jsonb_build_object('name', e->>'name'))
+                      from jsonb_array_elements(legal_docs_data) e), '[]'::jsonb) as legal_docs_data
+            from funders order by name`,
+    orgId
+      ? sql`select id, org_id, funder_id, event_name, event_location, event_date, description,
+                   event_budget, packages, selected_package, proposal_doc_url, extra_note,
+                   status, revision_note, created_at, updated_at,
+                   coalesce((select jsonb_agg(jsonb_build_object('name', elem->>'name'))
+                      from jsonb_array_elements(documents) elem), '[]'::jsonb) as documents
+            from pengajuan where org_id = ${orgId} order by updated_at desc`
+      : sql`select id, org_id, funder_id, event_name, event_location, event_date, description,
+                   event_budget, packages, selected_package, proposal_doc_url, extra_note,
+                   status, revision_note, created_at, updated_at,
+                   coalesce((select jsonb_agg(jsonb_build_object('name', elem->>'name'))
+                      from jsonb_array_elements(documents) elem), '[]'::jsonb) as documents
+            from pengajuan where funder_id = ${funderId} order by updated_at desc`,
+    sql`select * from notifications where user_id = ${v.id} order by created_at desc`,
+  ]);
+
+  const ids = (pengajuan as any[]).map((p) => p.id);
+  const history = ids.length
+    ? await sql`select * from pengajuan_history where pengajuan_id = any(${ids}) order by created_at`
+    : [];
+
+  return buildState({ users, orgs, funders, pengajuan, history, audit: [], notifs });
+}
+
+async function adminState() {
   const [users, orgs, funders, pengajuan, history, audit, notifs] = await Promise.all([
     sql`select * from users order by created_at`,
     // Kolom eksplisit: SENGAJA tanpa compro_data & pic_id_doc_data (base64 s/d 2MB).
@@ -150,6 +252,11 @@ export async function assembleState() {
     sql`select * from notifications order by created_at desc`,
   ]);
 
+  return buildState({ users, orgs, funders, pengajuan, history, audit, notifs });
+}
+
+/* Peta baris DB → AppState. Dipakai adminState & scopedState. */
+function buildState({ users, orgs, funders, pengajuan, history, audit, notifs }: any) {
   const histByPgj: Record<string, any[]> = {};
   for (const h of history as any[]) {
     (histByPgj[h.pengajuan_id] ||= []).push({

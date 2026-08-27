@@ -15,9 +15,9 @@ export function AppFooter() {
     <footer className="dm-footer">
       <span>© {year} DealMatch. All rights reserved.</span>
       <nav className="dm-footer__links">
-        <Link to="/funder/kebijakan-privasi">Kebijakan Privasi</Link>
+        <Link to="/funder/kebijakan-privasi">Privacy Policy</Link>
         <span className="dm-footer__dot">•</span>
-        <Link to="/funder/syarat-ketentuan">Syarat &amp; Ketentuan</Link>
+        <Link to="/funder/syarat-ketentuan">Terms &amp; Conditions</Link>
         {support && (
           <>
             <span className="dm-footer__dot">•</span>

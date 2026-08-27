@@ -8,7 +8,7 @@ export function ForWho() {
     <section id="untuk-siapa" className="lp-sec">
       <div className="lp-wrap">
         <div className="lp-sec__head" data-reveal>
-          <h2>Untuk Siapa?</h2>
+          <h2>Who It Is For</h2>
         </div>
 
         <div className="lp-audience">

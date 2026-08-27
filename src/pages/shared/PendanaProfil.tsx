@@ -70,11 +70,11 @@ export default function PendanaProfil() {
         <Topbar />
         <div className="sh-shell__content">
           <Empty
-            title="Mitra Sponsor tidak ditemukan"
+            title="Sponsor Partner not found"
             action={
               <button className="sh-btn sh-btn--secondary" onClick={() => navigate(-1)}>
                 <ArrowLeft size={16} />
-                Kembali
+                Back
               </button>
             }
           />
@@ -83,7 +83,7 @@ export default function PendanaProfil() {
     );
   }
 
-  const title = isSelf ? "Profil saya" : "Profil mitra sponsor";
+  const title = isSelf ? "My profile" : "Sponsor partner profile";
 
   return (
     <>
@@ -91,7 +91,7 @@ export default function PendanaProfil() {
       <div className="sh-shell__content">
         <PageHead
           title={title}
-          subtitle="Informasi profil mitra sponsor."
+          subtitle="Sponsor partner profile information."
           actions={
             <div className="sh-row" style={{ gap: 8 }}>
               {isSelf && (
@@ -141,7 +141,7 @@ export default function PendanaProfil() {
             </div>
 
             <p className="dm-prof__desc">
-              {funder.description || "Belum ada deskripsi."}
+              {funder.description || "No description yet."}
             </p>
 
             <div className="dm-prof__contacts">
@@ -159,7 +159,7 @@ export default function PendanaProfil() {
               ) : (
                 <span className="dm-contact dm-contact--locked">
                   <Lock size={16} />
-                  Email terbuka setelah pengajuan
+                  Email opens after a submission
                 </span>
               )}
 
@@ -232,7 +232,7 @@ export default function PendanaProfil() {
             <span className="dm-pic__avatar">{initials(funder.pic.name || "?")}</span>
             <div style={{ minWidth: 0 }}>
               <h4 className="dm-pic__name">{funder.pic.name || "—"}</h4>
-              <div className="dm-pic__role">{funder.pic.position || "Jabatan belum diisi"}</div>
+              <div className="dm-pic__role">{funder.pic.position || "Role not filled in"}</div>
               <div className="dm-pic__lines">
                 {canSeeContact ? (
                   <a
@@ -264,7 +264,7 @@ export default function PendanaProfil() {
                 ) : (
                   <span className="dm-contact dm-contact--locked">
                     <Lock size={16} />
-                    Email terbuka setelah pengajuan
+                    Email opens after a submission
                   </span>
                 )}
               </div>

@@ -28,7 +28,7 @@ export function About() {
           style={{ margin: "80px 0 40px" }}
           data-reveal
         >
-          <h2>Kenapa DealMatch?</h2>
+          <h2>Why DealMatch?</h2>
         </div>
 
         <div className="lp-values">

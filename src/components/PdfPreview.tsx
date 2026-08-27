@@ -28,7 +28,7 @@ export function PdfPreview({
       <div className="sh-row sh-row--between" style={{ marginBottom: 8, gap: 8, flexWrap: "wrap" }}>
         <div className="sh-row" style={{ gap: 8 }}>
           <FileText size={16} style={{ color: "var(--status-failed)" }} />
-          <span style={{ fontWeight: 600 }}>{fileName || "Dokumen proposal.pdf"}</span>
+          <span style={{ fontWeight: 600 }}>{fileName || "proposal-document.pdf"}</span>
         </div>
         <a
           href={blobUrl}
@@ -41,7 +41,7 @@ export function PdfPreview({
         </a>
       </div>
       <iframe
-        title="Preview dokumen proposal"
+        title="Proposal document preview"
         src={blobUrl}
         style={{
           width: "100%",

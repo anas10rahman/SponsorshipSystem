@@ -24,9 +24,9 @@ export function parseDigits(str: string): number {
 
 export function formatRupiahShort(value: number): string {
   const v = Number(value || 0);
-  if (v >= 1_000_000_000) return `Rp ${(v / 1_000_000_000).toFixed(1)} M`;
-  if (v >= 1_000_000) return `Rp ${(v / 1_000_000).toFixed(1)} Jt`;
-  if (v >= 1_000) return `Rp ${(v / 1_000).toFixed(0)} rb`;
+  if (v >= 1_000_000_000) return `Rp ${(v / 1_000_000_000).toFixed(1)}B`;
+  if (v >= 1_000_000) return `Rp ${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000) return `Rp ${(v / 1_000).toFixed(0)}K`;
   return formatRupiah(v);
 }
 

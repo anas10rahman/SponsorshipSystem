@@ -5,7 +5,7 @@ import { useToast } from "@/components/Toast";
 import { PasswordInput } from "@/components/PasswordInput";
 import { passwordRules, validatePassword } from "@/lib/password";
 
-/* Kartu "Ganti kata sandi" untuk halaman Pengaturan (org/pendana/admin).
+/* Kartu "Change password" untuk halaman Pengaturan (org/pendana/admin).
    Berbeda dari alur lupa password: user sudah masuk, jadi kata sandi lama
    wajib diisi sebagai verifikasi kepemilikan akun. */
 export function GantiPassword() {
@@ -22,7 +22,7 @@ export function GantiPassword() {
     e.preventDefault();
     setError("");
     if (!current) {
-      setError("Masukkan kata sandi saat ini.");
+      setError("Enter your current password.");
       return;
     }
     const pwErr = validatePassword(password);
@@ -31,20 +31,20 @@ export function GantiPassword() {
       return;
     }
     if (password !== confirm) {
-      setError("Konfirmasi kata sandi tidak cocok.");
+      setError("Password confirmation does not match.");
       return;
     }
     setBusy(true);
     const r = await changePassword(current, password);
     setBusy(false);
     if (!r.ok) {
-      setError(r.error ?? "Gagal mengganti kata sandi.");
+      setError(r.error ?? "Could not change the password.");
       return;
     }
     setCurrent("");
     setPassword("");
     setConfirm("");
-    toast.success("Kata sandi berhasil diganti.");
+    toast.success("Password changed.");
   };
 
   return (
@@ -55,9 +55,9 @@ export function GantiPassword() {
             <KeyRound size={20} />
           </span>
           <div>
-            <h3 style={{ marginBottom: 4 }}>Ganti kata sandi</h3>
+            <h3 style={{ marginBottom: 4 }}>Change password</h3>
             <p className="sh-muted">
-              Demi keamanan, masukkan kata sandi saat ini sebelum menyetel yang baru.
+              For security, enter your current password before setting a new one.
             </p>
           </div>
         </div>
@@ -65,26 +65,26 @@ export function GantiPassword() {
         <div style={{ display: "grid", gap: 12, maxWidth: 420 }}>
           <div className="sh-field">
             <label className="sh-field__label" htmlFor="current-password">
-              Kata sandi saat ini
+              Current password
             </label>
             <PasswordInput
               id="current-password"
               autoComplete="current-password"
               value={current}
               onChange={setCurrent}
-              placeholder="Kata sandi saat ini"
+              placeholder="Current password"
             />
           </div>
 
           <div className="sh-field">
             <label className="sh-field__label" htmlFor="change-new-password">
-              Kata sandi baru
+              New password
             </label>
             <PasswordInput
               id="change-new-password"
               value={password}
               onChange={setPassword}
-              placeholder="Kata sandi baru"
+              placeholder="New password"
             />
             {password.length > 0 && (
               <ul
@@ -117,20 +117,20 @@ export function GantiPassword() {
 
           <div className="sh-field">
             <label className="sh-field__label" htmlFor="change-confirm-password">
-              Konfirmasi kata sandi baru
+              Confirm new password
             </label>
             <PasswordInput
               id="change-confirm-password"
               value={confirm}
               onChange={setConfirm}
-              placeholder="Ulangi kata sandi baru"
+              placeholder="Repeat new password"
             />
           </div>
 
           {error && <div className="sh-notice sh-notice--failed">{error}</div>}
 
           <button className="sh-btn sh-btn--primary" type="submit" disabled={busy}>
-            {busy ? "Menyimpan…" : "Ganti kata sandi"}
+            {busy ? "Menyimpan…" : "Change password"}
           </button>
         </div>
       </form>

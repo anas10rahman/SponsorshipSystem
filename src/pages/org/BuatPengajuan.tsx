@@ -34,7 +34,7 @@ import {
   MessageSquareWarning,
 } from "lucide-react";
 
-const STEPS = ["Informasi umum", "Paket sponsorship", "Dokumen", "Review"] as const;
+const STEPS = ["Informasi umum", "Sponsorship package", "Documents", "Review"] as const;
 
 const emptyRequest = (): SponsorshipRequest => ({ type: "in_cash", amount: 0, spec: "" });
 
@@ -88,9 +88,9 @@ export default function BuatPengajuan() {
       status: "draf",
       history: [
         {
-          action: "Pengajuan dibuat",
-          actor: "Organisasi",
-          note: "Draf pengajuan dimulai.",
+          action: "Submission created",
+          actor: "Organization",
+          note: "Submission draft started.",
           at: nowIso(),
         },
       ],
@@ -129,14 +129,14 @@ export default function BuatPengajuan() {
   if (!funder) {
     return (
       <>
-        <Topbar title="Buat pengajuan" />
+        <Topbar title="Create submission" />
         <div className="sh-shell__content">
           <Empty
-            title="Mitra Sponsor belum dipilih"
-            description="Pilih mitra sponsor dulu dari halaman Cari mitra sponsor."
+            title="No sponsor partner selected"
+            description="Pick a sponsor partner first from the Find sponsor partners page."
             action={
               <Link to="/org/cari" className="sh-btn sh-btn--primary">
-                Ke Cari mitra sponsor
+                Go to Find sponsor partners
               </Link>
             }
           />
@@ -208,7 +208,7 @@ export default function BuatPengajuan() {
         continue;
       }
       if ((form.documents ?? []).some((d) => d.name === file.name)) {
-        toast.failed(`"${file.name}" sudah ditambahkan.`);
+        toast.failed(`"${file.name}" is already added.`);
         continue;
       }
       added.push({ name: file.name, data: await readFileAsDataUrl(file) });
@@ -322,16 +322,16 @@ export default function BuatPengajuan() {
     }
     try {
       await savePengajuan(draft);
-      toast.success("Pengajuan disimpan sebagai draf.");
+      toast.success("Submission saved as a draft.");
       navigate("/org/pengajuan");
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal menyimpan."));
+      toast.failed(String(e?.message || "Could not save."));
     }
   };
 
   const finalSubmit = async () => {
     if (org && org.verificationStatus !== "terverifikasi") {
-      toast.failed("Organisasi belum terverifikasi admin. Ajukan verifikasi dulu di Dashboard.");
+      toast.failed("Your organization is not admin-verified yet. Request verification from the Dashboard first.");
       navigate("/org/dashboard");
       return;
     }
@@ -347,17 +347,17 @@ export default function BuatPengajuan() {
     setErrors(new Set());
     if (feeDue > 0 && !balanceOk) {
       toast.failed(
-        `Saldo tidak cukup untuk biaya pengajuan ${formatRupiah(SUBMISSION_FEE)}. Silakan top-up dulu.`,
+        `Not enough balance for the ${formatRupiah(SUBMISSION_FEE)} submission fee. Top up first.`,
       );
       navigate("/org/topup");
       return;
     }
     try {
       await submitPengajuan(normalize(form));
-      toast.success(`Pengajuan "${form.eventName}" dikirim ke ${funder.name}.`);
+      toast.success(`Submission "${form.eventName}" sent to ${funder.name}.`);
       navigate("/org/pengajuan");
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal mengirim pengajuan."));
+      toast.failed(String(e?.message || "Could not send the submission."));
     }
   };
 
@@ -374,15 +374,15 @@ export default function BuatPengajuan() {
 
   return (
     <>
-      <Topbar title={editing ? "Lanjutkan pengajuan" : "Buat pengajuan"} />
+      <Topbar title={editing ? "Continue submission" : "Create submission"} />
       <div className="sh-shell__content">
         <PageHead
-          title={editing ? "Lanjutkan pengajuan" : "Buat pengajuan"}
-          subtitle={`Pengajuan ditujukan ke ${funder.name} (${funder.type}).`}
+          title={editing ? "Continue submission" : "Create submission"}
+          subtitle={`Submission addressed to ${funder.name} (${funder.type}).`}
           actions={
             <Link to="/org/cari" className="sh-btn sh-btn--secondary">
               <ArrowLeft size={16} />
-              Kembali
+              Back
             </Link>
           }
         />
@@ -438,9 +438,9 @@ export default function BuatPengajuan() {
 
         {isRevision && (
           <div className="sh-notice sh-notice--info" style={{ marginBottom: 16 }}>
-            <strong>Mode revisi.</strong> Mitra sponsor sudah meninjau pengajuan ini, jadi yang
-            dapat diubah hanya <strong>Paket sponsorship</strong> (detail permintaan & benefit).
-            Informasi umum dan dokumen dikunci agar isi yang sudah ditinjau tetap sama.
+            <strong>Revision mode.</strong> The sponsor partner has already reviewed this submission, so
+            only the <strong>Sponsorship package</strong> can change (request details & benefits).
+            General information and documents are locked so the reviewed content stays the same.
           </div>
         )}
 
@@ -451,7 +451,7 @@ export default function BuatPengajuan() {
               <h3 className="sh-form-section__title">1. Informasi umum event</h3>
               <div className="sh-form-grid">
                 <div className={`sh-field sh-field--wide${err("eventName") ? " sh-field--invalid" : ""}`}>
-                  <label className="sh-field__label">Nama event</label>
+                  <label className="sh-field__label">Event name</label>
                   <input
                     value={form.eventName}
                     disabled={locked}
@@ -459,9 +459,9 @@ export default function BuatPengajuan() {
                       set({ eventName: e.target.value });
                       clearErr("eventName");
                     }}
-                    placeholder="Misal: Konser Amal Akhir Tahun"
+                    placeholder="e.g. Year-End Charity Concert"
                   />
-                  <FieldError show={err("eventName")}>Nama event wajib diisi.</FieldError>
+                  <FieldError show={err("eventName")}>Event name is required.</FieldError>
                 </div>
                 <div className={`sh-field${err("eventLocation") ? " sh-field--invalid" : ""}`}>
                   <label className="sh-field__label">Lokasi event</label>
@@ -474,10 +474,10 @@ export default function BuatPengajuan() {
                     }}
                     placeholder="Misal: Balai Sarbini, Jakarta"
                   />
-                  <FieldError show={err("eventLocation")}>Lokasi event wajib diisi.</FieldError>
+                  <FieldError show={err("eventLocation")}>Event location is required.</FieldError>
                 </div>
                 <div className={`sh-field${err("eventDate") ? " sh-field--invalid" : ""}`}>
-                  <label className="sh-field__label">Tanggal event</label>
+                  <label className="sh-field__label">Event date</label>
                   <input
                     type="date"
                     value={form.eventDate}
@@ -489,11 +489,11 @@ export default function BuatPengajuan() {
                     }}
                   />
                   <FieldError show={err("eventDate")}>
-                    Tanggal event tidak boleh sebelum hari ini.
+                    The event date cannot be before today.
                   </FieldError>
                 </div>
                 <div className={`sh-field sh-field--wide${err("description") ? " sh-field--invalid" : ""}`}>
-                  <label className="sh-field__label">Deskripsi lengkap event</label>
+                  <label className="sh-field__label">Full event description</label>
                   <textarea
                     value={form.description}
                     disabled={locked}
@@ -501,12 +501,12 @@ export default function BuatPengajuan() {
                       set({ description: e.target.value });
                       clearErr("description");
                     }}
-                    placeholder="Ceritakan tujuan, cakupan, dan target audiens event."
+                    placeholder="Describe the goal, scope, and target audience of the event."
                   />
-                  <FieldError show={err("description")}>Deskripsi event wajib diisi.</FieldError>
+                  <FieldError show={err("description")}>Event description is required.</FieldError>
                 </div>
                 <div className={`sh-field${err("eventBudget") ? " sh-field--invalid" : ""}`}>
-                  <label className="sh-field__label">Total anggaran event (Rp)</label>
+                  <label className="sh-field__label">Total event budget (Rp)</label>
                   <CurrencyInput
                     value={form.eventBudget}
                     disabled={locked}
@@ -517,7 +517,7 @@ export default function BuatPengajuan() {
                     placeholder="Misal: 300.000.000"
                   />
                   <FieldError show={err("eventBudget")}>
-                    Total anggaran wajib diisi dan lebih dari 0.
+                    Total budget is required and must be greater than 0.
                   </FieldError>
                 </div>
               </div>
@@ -527,7 +527,7 @@ export default function BuatPengajuan() {
           {/* STEP 1 — Paket sponsorship */}
           {step === 1 && (
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
-              <h3 className="sh-form-section__title">2. Paket sponsorship</h3>
+              <h3 className="sh-form-section__title">2. Sponsorship package</h3>
               <p className="sh-muted" style={{ marginTop: -6, marginBottom: 18 }}>
                 Susun paket yang bisa dipilih mitra sponsor. Tiap paket: nama, detail permintaan
                 (in-cash / in-kind), dan benefit untuk mitra sponsor.
@@ -555,14 +555,14 @@ export default function BuatPengajuan() {
                         {pkgLocked(pi) && (
                           <span className="dm-locked__badge">
                             <Lock size={12} />
-                            Tidak direvisi
+                            Not revised
                           </span>
                         )}
                       </div>
                       <button
                         className="sh-btn sh-btn--ghost sh-btn--icon"
                         onClick={() => removePackage(pi)}
-                        title="Hapus paket"
+                        title="Remove package"
                         disabled={packages.length <= 1 || isRevision}
                       >
                         <Trash2 size={16} />
@@ -573,7 +573,7 @@ export default function BuatPengajuan() {
                       <div className="dm-revnote">
                         <MessageSquareWarning size={16} />
                         <div>
-                          <strong>Catatan revisi dari mitra sponsor:</strong> {form.revisionNote}
+                          <strong>Revision notes from the sponsor partner:</strong> {form.revisionNote}
                         </div>
                       </div>
                     )}
@@ -582,7 +582,7 @@ export default function BuatPengajuan() {
                       className={`sh-field${err(`pkg.${pi}.name`) ? " sh-field--invalid" : ""}`}
                       style={{ marginBottom: 8, maxWidth: 320 }}
                     >
-                      <label className="sh-field__label">Nama paket</label>
+                      <label className="sh-field__label">Package name</label>
                       <input
                         value={pk.name}
                         disabled={pkgLocked(pi)}
@@ -592,7 +592,7 @@ export default function BuatPengajuan() {
                         }}
                         placeholder="Misal: Gold"
                       />
-                      <FieldError show={err(`pkg.${pi}.name`)}>Nama paket wajib diisi.</FieldError>
+                      <FieldError show={err(`pkg.${pi}.name`)}>Package name is required.</FieldError>
                     </div>
 
                     <RequestEditor
@@ -609,13 +609,13 @@ export default function BuatPengajuan() {
                       onRemove={(li) => removeRequest(pi, li)}
                     />
                     <FieldError show={err(`pkg.${pi}.requests`)}>
-                      Isi minimal satu detail permintaan (nominal in-cash atau spesifikasi in-kind).
+                      Fill in at least one request detail (in-cash amount or in-kind specification).
                     </FieldError>
 
                     <PointEditor
-                      label="Benefit untuk mitra sponsor"
-                      hint="Imbalan/keuntungan yang didapat mitra sponsor pada paket ini."
-                      placeholder="Misal: Logo di poster kegiatan"
+                      label="Benefits for the sponsor partner"
+                      hint="What the sponsor partner gets in return under this package."
+                      placeholder="e.g. Logo on the event poster"
                       values={pk.benefits}
                       invalid={err(`pkg.${pi}.benefits`)}
                       disabled={pkgLocked(pi)}
@@ -627,14 +627,14 @@ export default function BuatPengajuan() {
                       onRemove={(li) => removeBenefit(pi, li)}
                     />
                     <FieldError show={err(`pkg.${pi}.benefits`)}>
-                      Isi minimal satu benefit untuk mitra sponsor.
+                      Add at least one benefit for the sponsor partner.
                     </FieldError>
                   </div>
                 ))}
               </div>
 
               <FieldError show={err("packages")}>
-                Minimal satu paket harus lengkap: nama, detail permintaan, dan benefit.
+                At least one package must be complete: name, request details, and benefits.
               </FieldError>
 
               <button
@@ -657,7 +657,7 @@ export default function BuatPengajuan() {
                 <span style={{ color: "var(--status-failed)", marginLeft: 4 }}>*</span>
               </h3>
               <div className="sh-field__label" style={{ marginBottom: 8 }}>
-                Berkas pendukung (PDF) — wajib, bisa lebih dari satu
+                Supporting files (PDF) — required, more than one allowed
               </div>
               {locked && (
                 <div className="sh-row" style={{ gap: 6, marginBottom: 10, color: "var(--ink-500)", fontSize: 13 }}>
@@ -666,7 +666,7 @@ export default function BuatPengajuan() {
                 </div>
               )}
               <FieldError show={err("documents")}>
-                Unggah minimal satu berkas proposal (PDF).
+                Upload at least one proposal file (PDF).
               </FieldError>
               <input
                 ref={fileInputRef}
@@ -706,7 +706,7 @@ export default function BuatPengajuan() {
                           className="sh-btn sh-btn--ghost sh-btn--icon"
                           disabled={locked}
                           onClick={() => removeDoc(i)}
-                          title="Hapus berkas"
+                          title="Remove file"
                         >
                           <X size={16} />
                         </button>
@@ -730,21 +730,21 @@ export default function BuatPengajuan() {
                 <UploadCloud size={28} style={{ color: "var(--brand-500)" }} />
                 <span>
                   {(form.documents ?? []).length > 0
-                    ? "Tambah berkas lain."
-                    : "Klik untuk unggah berkas pendukung."}
+                    ? "Add another file."
+                    : "Click to upload supporting files."}
                 </span>
                 <span className="sh-muted" style={{ fontSize: 12 }}>
-                  Bisa pilih beberapa sekaligus · hanya PDF · maks 4 MB per berkas.
+                  Multiple files allowed · PDF only · max 4 MB per file.
                 </span>
               </button>
               <div className="sh-field">
-                <label className="sh-field__label">Catatan tambahan (opsional)</label>
+                <label className="sh-field__label">Additional notes (optional)</label>
                 <textarea
                   rows={3}
                   value={form.extraNote ?? ""}
                   disabled={locked}
                   onChange={(e) => set({ extraNote: e.target.value })}
-                  placeholder="Informasi lain yang ingin disampaikan ke mitra sponsor."
+                  placeholder="Anything else you want the sponsor partner to know."
                 />
               </div>
             </div>
@@ -753,14 +753,14 @@ export default function BuatPengajuan() {
           {/* STEP 3 — Review */}
           {step === 3 && (
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
-              <h3 className="sh-form-section__title">4. Review pengajuan</h3>
+              <h3 className="sh-form-section__title">4. Review submission</h3>
               <div className="sh-stack">
-                <ReviewRow label="Mitra Sponsor tujuan" value={`${funder.name} · ${funder.type}`} />
-                <ReviewRow label="Nama event" value={form.eventName || "—"} />
+                <ReviewRow label="Target Sponsor Partner" value={`${funder.name} · ${funder.type}`} />
+                <ReviewRow label="Event name" value={form.eventName || "—"} />
                 <ReviewRow label="Lokasi" value={form.eventLocation || "—"} />
-                <ReviewRow label="Tanggal" value={formatEventDate(form.eventDate)} />
-                <ReviewRow label="Deskripsi" value={form.description || "—"} />
-                <ReviewRow label="Total anggaran event" value={formatRupiah(form.eventBudget)} />
+                <ReviewRow label="Date" value={formatEventDate(form.eventDate)} />
+                <ReviewRow label="Description" value={form.description || "—"} />
+                <ReviewRow label="Total event budget" value={formatRupiah(form.eventBudget)} />
                 <div>
                   <div className="sh-meta-label" style={{ marginBottom: 8 }}>
                     Paket sponsorship ({validPackages.length})
@@ -812,7 +812,7 @@ export default function BuatPengajuan() {
               {feeDue > 0 &&
                 (balanceOk ? (
                   <div className="sh-notice" style={{ marginTop: 16 }}>
-                    Saldo Anda akan terpotong <strong>{formatRupiah(SUBMISSION_FEE)}</strong>{" "}
+                    Your balance will be charged <strong>{formatRupiah(SUBMISSION_FEE)}</strong>{" "}
                     sebagai biaya pengajuan. Jika <strong>disetujui</strong>, biaya tidak
                     dikembalikan (biaya admin); jika <strong>ditolak</strong>,{" "}
                     {formatRupiah(40000)} dikembalikan (biaya admin {formatRupiah(10000)}). Saldo
@@ -824,7 +824,7 @@ export default function BuatPengajuan() {
                     <strong>{formatRupiah(SUBMISSION_FEE)}</strong> (saldo Anda:{" "}
                     {formatRupiah(balance)}).{" "}
                     <Link to="/org/topup" style={{ fontWeight: 700 }}>
-                      Top-up saldo dulu
+                      Top up your balance first
                     </Link>
                     .
                   </div>
@@ -832,18 +832,18 @@ export default function BuatPengajuan() {
 
               {notVerified && (
                 <div className="sh-notice sh-notice--failed" style={{ marginTop: 12 }}>
-                  Organisasi Anda belum terverifikasi admin, jadi pengajuan belum bisa dikirim. Draf
-                  tetap bisa disimpan.{" "}
+                  Your organization is not admin-verified yet, so the submission cannot be sent. You can
+                  still save it as a draft.{" "}
                   <Link to="/org/dashboard" style={{ fontWeight: 700 }}>
-                    Ajukan verifikasi di Dashboard
+                    Request verification from the Dashboard
                   </Link>
                   .
                 </div>
               )}
 
               <div className="sh-notice sh-notice--info" style={{ marginTop: 12 }}>
-                Setelah dikirim, pengajuan masuk ke mitra sponsor untuk ditinjau. Mitra Sponsor memilih
-                salah satu paket lalu menyetujui, atau menolak/meminta revisi.
+                Once sent, the submission goes to the sponsor partner for review. They pick one package
+                and approve it, or reject it / request a revision.
               </div>
             </div>
           )}
@@ -852,7 +852,7 @@ export default function BuatPengajuan() {
           <div className="sh-card__footer">
             <button className="sh-btn sh-btn--secondary" onClick={persistDraft}>
               <Save size={16} />
-              Simpan draf
+              Save draft
             </button>
             <div style={{ flex: 1 }} />
             {step > 0 && (
@@ -878,7 +878,7 @@ export default function BuatPengajuan() {
                 }
               >
                 <Send size={16} />
-                Kirim pengajuan
+                Send submission
               </button>
             )}
           </div>
@@ -889,13 +889,13 @@ export default function BuatPengajuan() {
         <Modal
           open
           onClose={() => setPreviewDoc(null)}
-          title={previewDoc.name || "Pratinjau dokumen"}
+          title={previewDoc.name || "Document preview"}
           width={760}
         >
           {previewDoc.data ? (
             <PdfPreview dataUrl={previewDoc.data} fileName={previewDoc.name} />
           ) : (
-            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+            <p className="sh-muted">The document could not be loaded.</p>
           )}
         </Modal>
       )}
@@ -972,7 +972,7 @@ function PointEditor({
             <button
               className="sh-btn sh-btn--ghost sh-btn--icon"
               onClick={() => onRemove(i)}
-              title="Hapus poin"
+              title="Remove item"
               disabled={disabled || values.length <= 1}
             >
               <X size={14} />
@@ -993,7 +993,7 @@ function PointEditor({
   );
 }
 
-/** Editor "Detail permintaan": tiap poin punya dropdown tipe (In-Cash / In-Kind).
+/** Editor "Request details": tiap poin punya dropdown tipe (In-Cash / In-Kind).
  *  In-Cash → nominal rupiah berformat; In-Kind → spesifikasi barang. */
 function RequestEditor({
   requests,
@@ -1020,7 +1020,7 @@ function RequestEditor({
   return (
     <div style={{ marginTop: 12 }}>
       <div className="sh-row sh-row--between" style={{ marginBottom: 2 }}>
-        <div className="sh-field__label">Detail permintaan</div>
+        <div className="sh-field__label">Request details</div>
         {total > 0 && (
           <div className="sh-muted" style={{ fontSize: 12 }}>
             Total dana:{" "}
@@ -1031,8 +1031,8 @@ function RequestEditor({
         )}
       </div>
       <div className="sh-muted" style={{ fontSize: 12, marginBottom: 8 }}>
-        Apa yang diminta organisasi dari mitra sponsor. Pilih jenis tiap poin: In-Cash (dana) atau
-        In-Kind (barang/jasa). In-Cash hanya satu per paket; In-Kind boleh lebih dari satu.
+        What the organization is asking the sponsor partner for. Pick a type per item: In-Cash (funds) or
+        In-Kind (goods/services). One In-Cash per package; In-Kind may repeat.
       </div>
       <div style={{ display: "grid", gap: 8 }}>
         {requests.map((r, i) => (
@@ -1070,7 +1070,7 @@ function RequestEditor({
             <button
               className="sh-btn sh-btn--ghost sh-btn--icon"
               onClick={() => onRemove(i)}
-              title="Hapus poin"
+              title="Remove item"
               disabled={disabled || requests.length <= 1}
             >
               <X size={14} />
@@ -1108,7 +1108,7 @@ function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
       </div>
       {pkg.requests.length > 0 && (
         <div style={{ marginBottom: 8 }}>
-          <div className="sh-meta-label">Detail permintaan</div>
+          <div className="sh-meta-label">Request details</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.requests.map((r, i) => (
               <li key={i}>{requestLabel(r)}</li>
@@ -1118,7 +1118,7 @@ function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
       )}
       {pkg.benefits.length > 0 && (
         <div>
-          <div className="sh-meta-label">Benefit untuk mitra sponsor</div>
+          <div className="sh-meta-label">Benefits for the sponsor partner</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.benefits.map((b, i) => (
               <li key={i}>{b}</li>

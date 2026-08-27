@@ -50,7 +50,7 @@ export function pengajuanAmountLabel(p: Pengajuan): string {
   return min === max ? formatRupiah(min) : `${formatRupiah(min)} – ${formatRupiah(max)}`;
 }
 
-/** Label ringkas jumlah paket untuk kolom "Paket". */
+/** Label ringkas jumlah paket untuk kolom "Package". */
 export function packageCountLabel(p: Pengajuan): string {
   const n = (p.packages ?? []).length;
   return n === 0 ? "—" : `${n} paket`;
@@ -81,18 +81,18 @@ export function maskPhone(phone: string): string {
 type BadgeVariant = "success" | "pending" | "failed" | "info" | "neutral";
 
 const MAP: Record<PengajuanStatus, { label: string; variant: BadgeVariant }> = {
-  draf: { label: "Draf", variant: "neutral" },
-  diajukan: { label: "Diajukan", variant: "info" },
-  perlu_revisi: { label: "Perlu revisi", variant: "pending" },
-  disetujui: { label: "Disetujui", variant: "success" },
-  ditolak: { label: "Ditolak", variant: "failed" },
-  kadaluarsa: { label: "Kadaluarsa", variant: "neutral" },
+  draf: { label: "Draft", variant: "neutral" },
+  diajukan: { label: "Submitted", variant: "info" },
+  perlu_revisi: { label: "Needs revision", variant: "pending" },
+  disetujui: { label: "Approved", variant: "success" },
+  ditolak: { label: "Rejected", variant: "failed" },
+  kadaluarsa: { label: "Expired", variant: "neutral" },
 };
 
-/** Nilai `actor` tersimpan di DB memakai istilah lama ("Mitra Sponsor").
- *  Petakan saat ditampilkan agar riwayat lama tetap terbaca dengan istilah baru. */
+/** Stored `actor` values keep the old Indonesian wording. Map them at render
+ *  time so older history still reads with the current terminology. */
 export function actorLabel(actor: string): string {
-  return actor === "Pendana" ? "Mitra Sponsor" : actor;
+  return actor === "Pendana" ? "Sponsor Partner" : actor;
 }
 
 export function pengajuanBadge(status: PengajuanStatus) {

@@ -36,13 +36,13 @@ export function PhotoPicker({
     if (!file) return;
     setOk("");
     if (!file.type.startsWith("image/")) {
-      setError("Berkas harus berupa gambar (PNG/JPG).");
+      setError("The file must be an image (PNG/JPG).");
       reset();
       return;
     }
     // Batas berkas masukan longgar karena hasilnya dikompres dulu.
     if (file.size > 10 * 1024 * 1024) {
-      setError("Ukuran gambar maksimal 10 MB.");
+      setError("Images may be at most 10 MB.");
       reset();
       return;
     }
@@ -55,11 +55,11 @@ export function PhotoPicker({
       const saved = file.size - r.bytes;
       setOk(
         saved > 1024
-          ? `Siap disimpan · ${formatBytes(r.bytes)} (dari ${formatBytes(file.size)}).`
-          : `Siap disimpan · ${formatBytes(r.bytes)}.`,
+          ? `Ready to save · ${formatBytes(r.bytes)} (from ${formatBytes(file.size)}).`
+          : `Ready to save · ${formatBytes(r.bytes)}.`,
       );
     } catch (err: any) {
-      setError(String(err?.message || "Gambar gagal diproses."));
+      setError(String(err?.message || "The image could not be processed."));
     } finally {
       setBusy(false);
       reset();
@@ -97,8 +97,8 @@ export function PhotoPicker({
             type="button"
             className="dm-photo__edit"
             onClick={() => ref.current?.click()}
-            title={value ? "Ganti foto" : "Unggah foto"}
-            aria-label={value ? "Ganti foto" : "Unggah foto"}
+            title={value ? "Ganti foto" : "Upload photo"}
+            aria-label={value ? "Ganti foto" : "Upload photo"}
           >
             <Pencil size={14} />
           </button>
@@ -113,8 +113,8 @@ export function PhotoPicker({
                 setError("");
                 if (ref.current) ref.current.value = "";
               }}
-              title="Hapus foto"
-              aria-label="Hapus foto"
+              title="Remove photo"
+              aria-label="Remove photo"
             >
               <X size={13} />
             </button>

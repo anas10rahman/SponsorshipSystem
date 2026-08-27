@@ -65,7 +65,7 @@ export function NotificationsMenu() {
     <div ref={ref} style={{ position: "relative" }}>
       <button
         className="sh-btn sh-btn--ghost sh-btn--icon"
-        aria-label={`Notifikasi${unread ? ` (${unread} belum dibaca)` : ""}`}
+        aria-label={`Notifications${unread ? ` (${unread} unread)` : ""}`}
         title="Notifikasi"
         onClick={() => setOpen((v) => !v)}
         style={{ position: "relative" }}
@@ -129,7 +129,7 @@ export function NotificationsMenu() {
               <button
                 className="sh-btn sh-btn--ghost sh-btn--sm"
                 onClick={markAll}
-                title="Tandai semua telah dibaca"
+                title="Mark all as read"
               >
                 <CheckCheck size={14} />
                 Tandai dibaca
@@ -147,7 +147,7 @@ export function NotificationsMenu() {
                 }}
               >
                 <Info size={20} style={{ margin: "0 auto 8px" }} />
-                <div>Belum ada notifikasi.</div>
+                <div>No notifications yet.</div>
               </div>
             ) : (
               <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>

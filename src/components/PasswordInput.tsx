@@ -41,8 +41,8 @@ export function PasswordInput({
       <button
         type="button"
         onClick={() => setShow((s) => !s)}
-        aria-label={show ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-        title={show ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+        aria-label={show ? "Hide password" : "Show password"}
+        title={show ? "Hide password" : "Show password"}
         style={{
           position: "absolute",
           right: 6,

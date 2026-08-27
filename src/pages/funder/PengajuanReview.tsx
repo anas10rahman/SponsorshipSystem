@@ -75,10 +75,10 @@ export default function FunderPengajuanReview() {
     setBusy(true);
     try {
       await approvePengajuan(pengajuan.id, selectedPkg);
-      toast.success(`Pengajuan "${pengajuan.eventName}" disetujui.`);
+      toast.success(`Submission "${pengajuan.eventName}" approved.`);
       navigate("/funder/pengajuan");
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal menyetujui."));
+      toast.failed(String(e?.message || "Could not approve."));
       setBusy(false);
     }
   };
@@ -93,36 +93,36 @@ export default function FunderPengajuanReview() {
     try {
       if (action === "revisi") {
         if (selectedPkg == null) {
-          toast.failed("Pilih paket yang ingin direvisi dulu.");
+          toast.failed("Pick the package to revise first.");
           setBusy(false);
           return;
         }
         await requestRevisionPengajuan(pengajuan.id, note.trim(), selectedPkg);
-        toast.info(`Feedback dikirim untuk "${pengajuan.eventName}".`);
+        toast.info(`Feedback sent for "${pengajuan.eventName}".`);
       } else {
         await rejectPengajuan(pengajuan.id, note.trim());
-        toast.failed(`Pengajuan "${pengajuan.eventName}" ditolak.`);
+        toast.failed(`Submission "${pengajuan.eventName}" rejected.`);
       }
       navigate("/funder/pengajuan");
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal memproses."));
+      toast.failed(String(e?.message || "Could not process."));
       setBusy(false);
     }
   };
 
   return (
     <>
-      <Topbar title="Tinjau pengajuan" />
+      <Topbar title="Review submission" />
       <div className="sh-shell__content">
         <PageHead
-          title={pengajuan.eventName || "Detail pengajuan"}
+          title={pengajuan.eventName || "Submission details"}
           subtitle={`${org?.name ?? "—"} · ${pengajuan.id}`}
           actions={
             <>
               <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
               <Link to="/funder/pengajuan" className="sh-btn sh-btn--secondary">
                 <ArrowLeft size={16} />
-                Kembali
+                Back
               </Link>
             </>
           }
@@ -130,7 +130,7 @@ export default function FunderPengajuanReview() {
 
         {pengajuan.status === "perlu_revisi" && pengajuan.revisionNote && (
           <div className="sh-notice" style={{ marginBottom: 16 }}>
-            <strong>Feedback Anda sebelumnya:</strong> {pengajuan.revisionNote}
+            <strong>Your previous feedback:</strong> {pengajuan.revisionNote}
           </div>
         )}
 
@@ -152,14 +152,14 @@ export default function FunderPengajuanReview() {
                   gap: 16,
                 }}
               >
-                <Field label="Organisasi">{org?.name ?? "—"}</Field>
-                <Field label="Mitra Sponsor tujuan">{funder?.name ?? "—"}</Field>
+                <Field label="Organization">{org?.name ?? "—"}</Field>
+                <Field label="Target Sponsor Partner">{funder?.name ?? "—"}</Field>
                 <Field label="Lokasi">{pengajuan.eventLocation || "—"}</Field>
-                <Field label="Tanggal">{formatEventDate(pengajuan.eventDate)}</Field>
-                <Field label="Total anggaran">{formatRupiah(pengajuan.eventBudget)}</Field>
+                <Field label="Date">{formatEventDate(pengajuan.eventDate)}</Field>
+                <Field label="Total budget">{formatRupiah(pengajuan.eventBudget)}</Field>
               </div>
               <div style={{ marginTop: 16 }}>
-                <Field label="Deskripsi">{pengajuan.description || "—"}</Field>
+                <Field label="Description">{pengajuan.description || "—"}</Field>
               </div>
             </div>
 
@@ -168,7 +168,7 @@ export default function FunderPengajuanReview() {
                 Dokumen pendukung ({documents.length})
               </div>
               {documents.length === 0 ? (
-                <p className="sh-muted">Belum ada dokumen.</p>
+                <p className="sh-muted">No documents yet.</p>
               ) : (
                 <div style={{ display: "grid", gap: 8 }}>
                   {documents.map((doc, i) => (
@@ -208,17 +208,17 @@ export default function FunderPengajuanReview() {
         <section className="sh-card" style={{ marginBottom: 16 }}>
           <header className="sh-card__header">
             <div>
-              <h2>Paket Sponsorship yang Diajukan</h2>
+              <h2>Sponsorship Packages Offered</h2>
               {canReview && (
                 <p className="sh-muted" style={{ margin: "4px 0 0" }}>
-                  Pilih paket sponsorship yang ingin Anda danai dari opsi yang diajukan organisasi.
+                  Choose the sponsorship package you want to fund from the options the organization offered.
                 </p>
               )}
             </div>
           </header>
           <div className="sh-card__body">
             {packages.length === 0 ? (
-              <p className="sh-muted">Belum ada paket.</p>
+              <p className="sh-muted">No packages yet.</p>
             ) : (
               <div
                 style={{
@@ -255,8 +255,8 @@ export default function FunderPengajuanReview() {
               disabled={selectedPkg == null || busy}
               title={
                 selectedPkg == null
-                  ? "Pilih dulu paket yang ingin direvisi"
-                  : "Minta revisi pada paket terpilih"
+                  ? "First pick the package to revise"
+                  : "Request revision on the selected package"
               }
               style={selectedPkg == null ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
             >
@@ -293,15 +293,15 @@ export default function FunderPengajuanReview() {
         <Modal
           open
           onClose={() => setPreview(null)}
-          title={preview.name || "Pratinjau dokumen"}
+          title={preview.name || "Document preview"}
           width={760}
         >
           {preview.data === null ? (
-            <p className="sh-muted">Memuat dokumen…</p>
+            <p className="sh-muted">Loading document…</p>
           ) : preview.data ? (
             <PdfPreview dataUrl={preview.data} fileName={preview.name} />
           ) : (
-            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+            <p className="sh-muted">The document could not be loaded.</p>
           )}
         </Modal>
       )}
@@ -310,18 +310,18 @@ export default function FunderPengajuanReview() {
       <Modal
         open={!!action}
         onClose={() => setAction(null)}
-        title={action === "revisi" ? "Minta revisi" : "Tolak pengajuan"}
+        title={action === "revisi" ? "Request revision" : "Reject submission"}
         footer={
           <>
             <button className="sh-btn sh-btn--secondary" onClick={() => setAction(null)} disabled={busy}>
-              Batal
+              Cancel
             </button>
             <button
               className={`sh-btn ${action === "revisi" ? "sh-btn--warning" : "sh-btn--danger"}`}
               onClick={confirmAction}
               disabled={busy}
             >
-              {action === "revisi" ? "Kirim feedback" : "Tolak pengajuan"}
+              {action === "revisi" ? "Send feedback" : "Reject submission"}
             </button>
           </>
         }
@@ -343,7 +343,7 @@ export default function FunderPengajuanReview() {
 
             <div className="sh-row" style={{ gap: 24, flexWrap: "wrap", marginBottom: 10 }}>
               <div>
-                <div className="sh-meta-label">Organisasi</div>
+                <div className="sh-meta-label">Organization</div>
                 <div className="sh-meta-value">{org?.name ?? "—"}</div>
               </div>
               <div>
@@ -351,7 +351,7 @@ export default function FunderPengajuanReview() {
                 <div className="sh-meta-value">{pengajuan.eventName}</div>
               </div>
               <div>
-                <div className="sh-meta-label">Nilai paket</div>
+                <div className="sh-meta-label">Package value</div>
                 <div className="sh-meta-value num">{formatRupiah(packageAmount(revisedPkg))}</div>
               </div>
             </div>
@@ -368,7 +368,7 @@ export default function FunderPengajuanReview() {
             </ul>
 
             <div className="sh-meta-label" style={{ marginBottom: 4 }}>
-              Benefit untuk mitra sponsor
+              Benefits for the sponsor partner
             </div>
             <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13 }}>
               {revisedPkg.benefits.length ? (
@@ -382,7 +382,7 @@ export default function FunderPengajuanReview() {
 
         <div className={`sh-field${noteErr ? " sh-field--invalid" : ""}`}>
           <label className="sh-field__label">
-            {action === "revisi" ? "Feedback untuk organisasi" : "Alasan penolakan"}
+            {action === "revisi" ? "Feedback for the organization" : "Alasan penolakan"}
           </label>
           <textarea
             rows={4}
@@ -393,7 +393,7 @@ export default function FunderPengajuanReview() {
             }}
             placeholder={
               action === "revisi"
-                ? "Tulis masukan/feedback yang perlu diperbaiki organisasi."
+                ? "Write the feedback the organization needs to act on."
                 : "Jelaskan alasan penolakan."
             }
           />
@@ -404,7 +404,7 @@ export default function FunderPengajuanReview() {
             >
               <AlertCircle size={14} style={{ flex: "none" }} />
               {action === "revisi"
-                ? "Tulis feedback yang perlu diperbaiki organisasi."
+                ? "Write what the organization needs to fix."
                 : "Tulis alasan penolakan."}
             </div>
           )}
@@ -467,7 +467,7 @@ function PackageCard({
       </div>
       {pkg.requests.length > 0 && (
         <div style={{ marginBottom: 10 }}>
-          <div className="sh-meta-label">Detail permintaan</div>
+          <div className="sh-meta-label">Request details</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.requests.map((r, i) => (
               <li key={i}>{requestLabel(r)}</li>
@@ -477,7 +477,7 @@ function PackageCard({
       )}
       {pkg.benefits.length > 0 && (
         <div>
-          <div className="sh-meta-label">Benefit untuk mitra sponsor</div>
+          <div className="sh-meta-label">Benefits for the sponsor partner</div>
           <ul style={{ margin: "4px 0 0 18px" }}>
             {pkg.benefits.map((b, i) => (
               <li key={i}>{b}</li>

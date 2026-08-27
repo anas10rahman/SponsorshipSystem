@@ -32,18 +32,18 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError("");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
-      setError("Masukkan alamat email yang valid.");
+      setError("Enter a valid email address.");
       return;
     }
     setBusy(true);
     const r = await forgotPassword(email);
     setBusy(false);
     if (!r.ok) {
-      setError(r.error ?? "Gagal mengirim kode reset.");
+      setError(r.error ?? "Could not send the reset code.");
       return;
     }
     // Pesan netral: kita tidak pernah memberi tahu apakah email terdaftar.
-    toast.success(r.message ?? "Jika email terdaftar, kode reset telah dikirim.");
+    toast.success(r.message ?? "If the email is registered, a reset code has been sent.");
     setPhase("reset");
   };
 
@@ -51,7 +51,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError("");
     if (!/^\d{6}$/.test(code.trim())) {
-      setError("Masukkan 6 digit kode dari email.");
+      setError("Enter the 6-digit code from your email.");
       return;
     }
     const pwErr = validatePassword(password);
@@ -60,17 +60,17 @@ export default function ForgotPassword() {
       return;
     }
     if (password !== confirm) {
-      setError("Konfirmasi kata sandi tidak cocok.");
+      setError("Password confirmation does not match.");
       return;
     }
     setBusy(true);
     const r = await resetPassword(email, code, password);
     setBusy(false);
     if (!r.ok) {
-      setError(r.error ?? "Gagal reset kata sandi.");
+      setError(r.error ?? "Could not reset the password.");
       return;
     }
-    toast.success("Kata sandi berhasil diubah. Silakan masuk.");
+    toast.success("Password changed. Please sign in.");
     navigate("/login");
   };
 
@@ -81,7 +81,7 @@ export default function ForgotPassword() {
           <div className="sh-login__brand">
             <BrandMark />
           </div>
-          <h1 className="sh-login__title">Lupa kata sandi</h1>
+          <h1 className="sh-login__title">Forgot password</h1>
           <p className="sh-login__sub">
             Masukkan email akun Anda. Kami akan mengirim kode 6 digit untuk mengatur ulang kata
             sandi.
@@ -110,13 +110,13 @@ export default function ForgotPassword() {
             style={{ width: "100%" }}
             disabled={busy}
           >
-            {busy ? "Mengirim…" : "Kirim kode"}
+            {busy ? "Sending…" : "Send code"}
           </button>
 
           <div className="sh-login__demo" style={{ textAlign: "center" }}>
             Ingat kata sandi?{" "}
             <Link to="/login" style={{ fontWeight: 700 }}>
-              Kembali ke login
+              Back to sign in
             </Link>
           </div>
         </form>
@@ -125,9 +125,9 @@ export default function ForgotPassword() {
           <div className="sh-login__brand">
             <BrandMark />
           </div>
-          <h1 className="sh-login__title">Atur ulang kata sandi</h1>
+          <h1 className="sh-login__title">Reset your password</h1>
           <p className="sh-login__sub">
-            Masukkan kode yang dikirim ke <strong>{email}</strong> beserta kata sandi baru Anda.
+            Enter the code sent to <strong>{email}</strong> along with your new password.
           </p>
 
           <div className="sh-field">
@@ -145,13 +145,13 @@ export default function ForgotPassword() {
 
           <div className="sh-field">
             <label className="sh-field__label" htmlFor="new-password">
-              Kata sandi baru
+              New password
             </label>
             <PasswordInput
               id="new-password"
               value={password}
               onChange={setPassword}
-              placeholder="Kata sandi baru"
+              placeholder="New password"
             />
           </div>
 
@@ -185,13 +185,13 @@ export default function ForgotPassword() {
 
           <div className="sh-field">
             <label className="sh-field__label" htmlFor="confirm-password">
-              Konfirmasi kata sandi baru
+              Confirm new password
             </label>
             <PasswordInput
               id="confirm-password"
               value={confirm}
               onChange={setConfirm}
-              placeholder="Ulangi kata sandi baru"
+              placeholder="Repeat new password"
             />
           </div>
 
@@ -203,7 +203,7 @@ export default function ForgotPassword() {
             style={{ width: "100%" }}
             disabled={busy}
           >
-            {busy ? "Menyimpan…" : "Reset kata sandi"}
+            {busy ? "Menyimpan…" : "Reset password"}
           </button>
 
           <button
@@ -216,12 +216,12 @@ export default function ForgotPassword() {
             }}
             disabled={busy}
           >
-            Ganti email / kirim ulang kode
+            Change email / resend code
           </button>
 
           <div className="sh-login__demo" style={{ textAlign: "center" }}>
             <Link to="/login" style={{ fontWeight: 700 }}>
-              Kembali ke login
+              Back to sign in
             </Link>
           </div>
         </form>

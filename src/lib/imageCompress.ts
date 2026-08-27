@@ -25,7 +25,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Gambar tidak dapat dibaca."));
+    img.onerror = () => reject(new Error("The image could not be read."));
     img.src = src;
   });
 }
@@ -34,7 +34,7 @@ function readAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
     r.onload = () => resolve(String(r.result));
-    r.onerror = () => reject(new Error("Berkas tidak dapat dibaca."));
+    r.onerror = () => reject(new Error("The file could not be read."));
     r.readAsDataURL(file);
   });
 }

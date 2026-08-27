@@ -36,7 +36,7 @@ export function DocPicker({
       if (file.size > 2 * 1024 * 1024) return resolve(`"${file.name}" melebihi 2 MB.`);
       const reader = new FileReader();
       reader.onload = () => resolve({ name: file.name, data: String(reader.result) });
-      reader.onerror = () => resolve(`"${file.name}" gagal dibaca.`);
+      reader.onerror = () => resolve(`"${file.name}" could not be read.`);
       reader.readAsDataURL(file);
     });
 
@@ -50,7 +50,7 @@ export function DocPicker({
     const problems: string[] = [];
     for (const f of files) {
       if (docs.some((d) => d.name === f.name)) {
-        problems.push(`"${f.name}" sudah ditambahkan.`);
+        problems.push(`"${f.name}" is already added.`);
         continue;
       }
       const r = await readPdf(f);
@@ -61,8 +61,8 @@ export function DocPicker({
       onChange(multiple ? [...docs, ...added] : added.slice(0, 1));
       setOk(
         added.length === 1
-          ? `"${added[0].name}" siap disimpan.`
-          : `${added.length} berkas siap disimpan.`,
+          ? `"${added[0].name}" ready to save.`
+          : `${added.length} files ready to save.`,
       );
     }
     if (problems.length) setError(problems.join(" "));
@@ -98,7 +98,7 @@ export function DocPicker({
                 type="button"
                 className="dm-file__name"
                 onClick={() => onPreview(d, i)}
-                title="Pratinjau dokumen"
+                title="Document preview"
                 style={{ background: "none", border: 0, cursor: "pointer" }}
               >
                 {d.name}
@@ -115,7 +115,7 @@ export function DocPicker({
                 type="button"
                 className="sh-btn sh-btn--ghost sh-btn--icon"
                 onClick={() => remove(i)}
-                title="Hapus berkas"
+                title="Remove file"
               >
                 <X size={16} />
               </button>
@@ -134,13 +134,13 @@ export function DocPicker({
         <span>
           {docs.length > 0
             ? multiple
-              ? "Tambah berkas lain."
-              : "Ganti berkas."
-            : "Klik untuk unggah berkas PDF."}
+              ? "Add another file."
+              : "Replace file."
+            : "Click to upload a PDF file."}
         </span>
         <span className="sh-muted" style={{ fontSize: 12 }}>
           Hanya PDF · maks 2 MB per berkas
-          {multiple ? " · bisa pilih beberapa sekaligus" : ""}
+          {multiple ? " · multiple files allowed" : ""}
         </span>
       </button>
 
@@ -154,7 +154,7 @@ export function DocPicker({
         </span>
       ) : invalid ? (
         <span className="sh-field__hint" style={{ color: "var(--status-failed)" }}>
-          {label} wajib diunggah.
+          {label} is required.
         </span>
       ) : (
         hint && <span className="sh-field__hint">{hint}</span>

@@ -4,8 +4,8 @@ import { Menu, X } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { NAV_LINKS } from "@/lib/landingContent";
 
-/** Nav landing yang menempel di atas. "Masuk" sengaja berupa tautan teks
- *  supaya "Daftar Sekarang" jadi satu-satunya tombol solid di nav. */
+/** Nav landing yang menempel di atas. "Sign in" sengaja berupa tautan teks
+ *  supaya "Sign Up Now" jadi satu-satunya tombol solid di nav. */
 export function LandingNav() {
   const [open, setOpen] = useState(false);
 
@@ -30,10 +30,10 @@ export function LandingNav() {
 
         <div className="lp-nav__cta">
           <Link to="/login" className="lp-nav__masuk">
-            Masuk
+            Sign in
           </Link>
           <Link to="/register" className="lp-btn lp-btn--org lp-btn--sm">
-            Daftar Sekarang
+            Sign Up Now
           </Link>
         </div>
 
@@ -41,7 +41,7 @@ export function LandingNav() {
           className="lp-nav__burger"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          aria-label={open ? "Tutup menu" : "Buka menu"}
+          aria-label={open ? "Close menu" : "Open menu"}
         >
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -62,10 +62,10 @@ export function LandingNav() {
         ))}
         <div className="lp-drawer__actions">
           <Link to="/register" className="lp-btn lp-btn--org">
-            Daftar Sekarang
+            Sign Up Now
           </Link>
           <Link to="/login" className="lp-btn lp-btn--outline">
-            Masuk
+            Sign in
           </Link>
         </div>
       </div>

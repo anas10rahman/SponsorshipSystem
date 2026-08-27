@@ -12,19 +12,19 @@ import type { PengajuanStatus } from "@/lib/types";
 import { Eye, Search, Download, ChevronLeft, ChevronRight } from "lucide-react";
 
 const FILTERS: Array<{ value: "semua" | PengajuanStatus; label: string }> = [
-  { value: "semua", label: "Semua" },
+  { value: "semua", label: "All" },
   { value: "diajukan", label: "Perlu Ditinjau" },
   { value: "perlu_revisi", label: "Diberi Feedback" },
-  { value: "disetujui", label: "Disetujui" },
-  { value: "ditolak", label: "Ditolak" },
-  { value: "kadaluarsa", label: "Kadaluarsa" },
+  { value: "disetujui", label: "Approved" },
+  { value: "ditolak", label: "Rejected" },
+  { value: "kadaluarsa", label: "Expired" },
 ];
 
 const PER_PAGE_OPTIONS = [7, 15, 30];
 
 /** Rentang tanggal pengajuan — dihitung mundur dari hari ini. */
 const DATE_RANGES: Array<{ value: string; label: string; days: number | null }> = [
-  { value: "all", label: "Semua tanggal", days: null },
+  { value: "all", label: "All dates", days: null },
   { value: "7", label: "7 hari terakhir", days: 7 },
   { value: "30", label: "30 hari terakhir", days: 30 },
   { value: "90", label: "90 hari terakhir", days: 90 },
@@ -114,7 +114,7 @@ export default function FunderPengajuanInbox() {
   };
 
   const downloadCsv = () => {
-    const header = ["ID", "Organisasi", "Event", "Kategori", "Lokasi", "Tanggal", "Status", "Nominal"];
+    const header = ["ID", "Organization", "Event", "Category", "Lokasi", "Date", "Status", "Nominal"];
     const lines = rows.map((p) => {
       const org = orgById.get(p.orgId);
       return [
@@ -147,8 +147,8 @@ export default function FunderPengajuanInbox() {
       <Topbar />
       <div className="sh-shell__content">
         <PageHead
-          title="Pengajuan Sponsorship"
-          subtitle="Kelola semua pengajuan sponsorship yang masuk dari organisasi."
+          title="Sponsorship Submissions"
+          subtitle="Manage every sponsorship submission coming in from organizations."
         />
 
         <div className="sh-toolbar">
@@ -173,15 +173,15 @@ export default function FunderPengajuanInbox() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Cari nama event atau organisasi…"
-                aria-label="Cari pengajuan"
+                placeholder="Search event or organization name…"
+                aria-label="Search submissions"
               />
             </div>
 
             <select
               value={range}
               onChange={(e) => setRange(e.target.value)}
-              aria-label="Rentang tanggal pengajuan"
+              aria-label="Submission date range"
               style={{ width: "auto", minWidth: 170 }}
             >
               {DATE_RANGES.map((r) => (
@@ -194,10 +194,10 @@ export default function FunderPengajuanInbox() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              aria-label="Kategori organisasi"
+              aria-label="Organization category"
               style={{ width: "auto", minWidth: 160 }}
             >
-              <option value="all">Semua Kategori</option>
+              <option value="all">All Categories</option>
               {categories.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -209,7 +209,7 @@ export default function FunderPengajuanInbox() {
               className="sh-btn sh-btn--secondary"
               onClick={downloadCsv}
               disabled={rows.length === 0}
-              title="Unduh daftar terfilter sebagai CSV"
+              title="Download the filtered list as CSV"
             >
               <Download size={16} />
               Unduh Laporan
@@ -218,11 +218,11 @@ export default function FunderPengajuanInbox() {
 
           {rows.length === 0 ? (
             <Empty
-              title="Tidak ada pengajuan"
+              title="No submissions"
               description={
                 inbox.length === 0
-                  ? "Pengajuan dari organisasi akan muncul di sini."
-                  : "Tidak ada yang cocok dengan filter. Coba ubah kata kunci atau filter."
+                  ? "Submissions from organizations will appear here."
+                  : "Nothing matches the filter. Try different keywords or filters."
               }
             />
           ) : (
@@ -231,10 +231,10 @@ export default function FunderPengajuanInbox() {
                 <table className="sh-table">
                   <thead>
                     <tr>
-                      <th>Organisasi</th>
+                      <th>Organization</th>
                       <th>Event</th>
-                      <th>Kategori</th>
-                      <th>Tanggal Pengajuan</th>
+                      <th>Category</th>
+                      <th>Submission Date</th>
                       <th>Status</th>
                       <th style={{ width: 130 }}>Aksi</th>
                     </tr>
@@ -245,7 +245,7 @@ export default function FunderPengajuanInbox() {
                       const badge = pengajuanBadge(p.status);
                       return (
                         <tr key={p.id}>
-                          <td data-label="Organisasi">
+                          <td data-label="Organization">
                             {org ? (
                               <Link to={`/funder/organisasi/${org.id}`}>{org.name}</Link>
                             ) : (
@@ -258,8 +258,8 @@ export default function FunderPengajuanInbox() {
                               {p.eventLocation}
                             </div>
                           </td>
-                          <td data-label="Kategori">{org?.category || "—"}</td>
-                          <td className="sh-muted" data-label="Tanggal Pengajuan">{formatDate(p.createdAt)}</td>
+                          <td data-label="Category">{org?.category || "—"}</td>
+                          <td className="sh-muted" data-label="Submission Date">{formatDate(p.createdAt)}</td>
                           <td data-label="Status">
                             <StatusBadge kind="custom" label={badge.label} variant={badge.variant} />
                           </td>
@@ -269,7 +269,7 @@ export default function FunderPengajuanInbox() {
                               className="sh-btn sh-btn--ghost sh-btn--sm"
                             >
                               <Eye size={14} />
-                              Lihat Detail
+                              View Details
                             </Link>
                           </td>
                         </tr>

@@ -140,10 +140,14 @@ export function useActions() {
           const res = await api.login(username.trim(), password);
           if ("needsVerification" in res)
             return { ok: false, needsVerification: true, email: res.email };
+          // State awal (pra-login) sengaja kosong dari server. Setelah sesi
+          // terbentuk, tarik ulang data yang kini dilingkupi akun ini —
+          // tanpa ini `currentUser` tak ketemu dan RoleGuard menolak.
+          dispatch({ type: "hydrate", data: await api.getState() });
           dispatch({ type: "auth/login", userId: res.user.id });
           return { ok: true };
         } catch (e: any) {
-          return { ok: false, error: String(e?.message || "Login gagal.") };
+          return { ok: false, error: String(e?.message || "Sign-in failed.") };
         }
       },
 
@@ -170,7 +174,7 @@ export function useActions() {
           dispatch({ type: "auth/login", userId: res.userId! });
           return { ok: true };
         } catch (e: any) {
-          return { ok: false, error: String(e?.message || "Registrasi gagal.") };
+          return { ok: false, error: String(e?.message || "Registration failed.") };
         }
       },
 
@@ -184,7 +188,7 @@ export function useActions() {
           dispatch({ type: "auth/login", userId }); // verifikasi sukses → langsung login
           return { ok: true };
         } catch (e: any) {
-          return { ok: false, error: String(e?.message || "Verifikasi gagal.") };
+          return { ok: false, error: String(e?.message || "Verification failed.") };
         }
       },
 
@@ -195,7 +199,7 @@ export function useActions() {
           const r = await api.resendCode(email);
           return { ok: true, emailSent: r.emailSent };
         } catch (e: any) {
-          return { ok: false, error: String(e?.message || "Gagal kirim ulang kode.") };
+          return { ok: false, error: String(e?.message || "Could not resend the code.") };
         }
       },
 
@@ -206,7 +210,7 @@ export function useActions() {
           const r = await api.forgotPassword(email.trim());
           return { ok: true, message: r.message };
         } catch (e: any) {
-          return { ok: false, error: String(e?.message || "Gagal mengirim kode reset.") };
+          return { ok: false, error: String(e?.message || "Could not send the reset code.") };
         }
       },
 
@@ -214,13 +218,11 @@ export function useActions() {
         currentPassword: string,
         password: string,
       ): Promise<{ ok: boolean; error?: string }> {
-        const uid = actorId();
-        if (!uid) return { ok: false, error: "Sesi tidak valid. Silakan masuk ulang." };
         try {
-          await api.changePassword(uid, currentPassword, password);
+          await api.changePassword(currentPassword, password);
           return { ok: true };
         } catch (e: any) {
-          return { ok: false, error: String(e?.message || "Gagal mengganti kata sandi.") };
+          return { ok: false, error: String(e?.message || "Could not change the password.") };
         }
       },
 
@@ -233,12 +235,15 @@ export function useActions() {
           await api.resetPassword(email.trim(), code.trim(), password);
           return { ok: true };
         } catch (e: any) {
-          return { ok: false, error: String(e?.message || "Gagal reset kata sandi.") };
+          return { ok: false, error: String(e?.message || "Could not reset the password.") };
         }
       },
 
       logout() {
+        // Hapus cookie sesi di server, lalu bersihkan cache lokal.
+        void api.logout();
         dispatch({ type: "auth/logout" });
+        dispatch({ type: "hydrate", data: blankState() });
       },
 
       // ---- Pengajuan terarah ----

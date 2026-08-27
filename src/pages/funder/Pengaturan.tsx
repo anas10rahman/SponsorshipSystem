@@ -103,37 +103,37 @@ export default function FunderPengaturan() {
       });
       navigate("/funder/profil");
     } catch (e: any) {
-      toast.failed(String(e?.message || "Gagal menyimpan profil."));
+      toast.failed(String(e?.message || "Could not save the profile."));
     }
   };
 
   return (
     <>
-      <Topbar title="Pengaturan akun mitra sponsor" />
+      <Topbar title="Sponsor partner account settings" />
       <div className="sh-shell__content">
         <PageHead
-          title="Edit profil mitra sponsor"
-          subtitle="Lengkapi profil mitra sponsor dan penanggung jawab (PIC)."
+          title="Edit sponsor partner profile"
+          subtitle="Complete the sponsor partner profile and the person in charge (PIC)."
         />
 
         <div style={{ display: "grid", gap: 20, maxWidth: 880 }}>
           {/* ============ Profil mitra sponsor ============ */}
           <section className="sh-card">
             <header className="sh-card__header">
-              <h3>Profil mitra sponsor</h3>
+              <h3>Sponsor partner profile</h3>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <PhotoPicker
-                label="Logo mitra sponsor"
+                label="Sponsor partner logo"
                 value={form.logoUrl}
                 fallback={initials(form.name)}
                 onChange={(v) => set({ logoUrl: v })}
                 size={96}
-                hint="PNG/JPG, maks 2 MB. Jika kosong, dipakai inisial nama."
+                hint="PNG/JPG, max 2 MB. If empty, the name initials are used."
               />
 
               <div className="sh-form-grid">
-                <Field label="Nama mitra sponsor" required invalid={errors.has("name")}>
+                <Field label="Sponsor partner name" required invalid={errors.has("name")}>
                   <input
                     value={form.name}
                     onChange={(e) => set({ name: e.target.value })}
@@ -156,11 +156,11 @@ export default function FunderPengaturan() {
                   </select>
                 </div>
                 <Field
-                  label="Email mitra sponsor"
+                  label="Sponsor partner email"
                   required
                   icon={<Mail size={14} />}
                   invalid={errors.has("email")}
-                  error={form.email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.trim()) ? "Format email tidak valid." : null}
+                  error={form.email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.trim()) ? "That email format is not valid." : null}
                 >
                   <input
                     type="email"
@@ -169,7 +169,7 @@ export default function FunderPengaturan() {
                     placeholder="csr@mitra.co.id"
                   />
                 </Field>
-                <Field label="Fokus pendanaan" required hint="Pisahkan dengan koma" invalid={errors.has("focus")}>
+                <Field label="Fokus pendanaan" required hint="Separate with commas" invalid={errors.has("focus")}>
                   <input
                     value={focusText}
                     onChange={(e) => setFocusText(e.target.value)}
@@ -177,9 +177,9 @@ export default function FunderPengaturan() {
                   />
                 </Field>
                 <Field
-                  label="Alamat kantor"
+                  label="Office address"
                   icon={<MapPin size={14} />}
-                  hint="Alamat yang tampil di profil publik."
+                  hint="The address shown on your public profile."
                 >
                   <input
                     value={form.address}
@@ -188,10 +188,10 @@ export default function FunderPengaturan() {
                   />
                 </Field>
                 <Field
-                  label="No. Telepon / WhatsApp"
+                  label="Phone / WhatsApp"
                   required
                   icon={<Phone size={14} />}
-                  hint="Nomor aktif WhatsApp — jadi tautan chat di profil."
+                  hint="An active WhatsApp number — becomes the chat link on your profile."
                   invalid={errors.has("phone")}
                   error={validatePhone(form.phone)}
                 >
@@ -210,7 +210,7 @@ export default function FunderPengaturan() {
                     rows={4}
                     value={form.description}
                     onChange={(e) => set({ description: e.target.value })}
-                    placeholder="Ceritakan profil, misi CSR, dan jenis kegiatan yang didukung."
+                    placeholder="Describe your profile, CSR mission, and the kinds of activities you support."
                   />
                 </div>
               </div>
@@ -237,7 +237,7 @@ export default function FunderPengaturan() {
                   label="Instagram"
                   required
                   icon={<Instagram size={14} />}
-                  hint="Isi username atau tautan — disimpan sebagai tautan."
+                  hint="Enter a username or a link — stored as a link."
                   invalid={errors.has("instagram")}
                   error={validateInstagram(form.instagram ?? "")}
                 >
@@ -254,7 +254,7 @@ export default function FunderPengaturan() {
           {/* ============ Dokumen mitra sponsor ============ */}
           <section className="sh-card">
             <header className="sh-card__header">
-              <h3>Dokumen mitra sponsor</h3>
+              <h3>Sponsor partner documents</h3>
               <span className="sh-muted" style={{ fontSize: 12 }}>
                 PDF · menjadi dasar penilaian kredibilitas
               </span>
@@ -271,7 +271,7 @@ export default function FunderPengaturan() {
                 invalid={errors.has("comproUrl")}
               />
               <DocPicker
-                label="Dokumen legal"
+                label="Legal documents"
                 required
                 multiple
                 docs={form.legalDocs}
@@ -288,20 +288,20 @@ export default function FunderPengaturan() {
             <header className="sh-card__header">
               <h3>Penanggung jawab (PIC)</h3>
               <span className="sh-muted" style={{ fontSize: 12 }}>
-                Kontak utama untuk koordinasi
+                Main contact for coordination
               </span>
             </header>
             <div className="sh-form-section" style={{ borderBottom: 0 }}>
               <div className="sh-form-grid">
-                <Field label="Nama PIC" required invalid={errors.has("pic.name")}>
+                <Field label="PIC name" required invalid={errors.has("pic.name")}>
                   <input
                     value={form.pic.name}
                     onChange={(e) => setPic({ name: e.target.value })}
-                    placeholder="Nama lengkap penanggung jawab"
+                    placeholder="Full name of the person in charge"
                   />
                 </Field>
                 <Field
-                  label="Nomor WA PIC"
+                  label="PIC WhatsApp number"
                   required
                   invalid={errors.has("pic.phone")}
                   error={validatePhone(form.pic.phone)}
@@ -312,7 +312,7 @@ export default function FunderPengaturan() {
                     placeholder="0812-3456-7890"
                   />
                 </Field>
-                <Field label="Jabatan" required invalid={errors.has("pic.position")}>
+                <Field label="Role" required invalid={errors.has("pic.position")}>
                   <input
                     value={form.pic.position}
                     onChange={(e) => setPic({ position: e.target.value })}
@@ -320,11 +320,11 @@ export default function FunderPengaturan() {
                   />
                 </Field>
                 <Field
-                  label="Email PIC"
+                  label="PIC email"
                   required
                   icon={<Mail size={14} />}
                   invalid={errors.has("pic.email")}
-                  error={form.pic.email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.pic.email.trim()) ? "Format email tidak valid." : null}
+                  error={form.pic.email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.pic.email.trim()) ? "That email format is not valid." : null}
                 >
                   <input
                     type="email"
@@ -340,7 +340,7 @@ export default function FunderPengaturan() {
           <div className="sh-row" style={{ justifyContent: "flex-end" }}>
             <button className="sh-btn sh-btn--primary" onClick={save}>
               <Save size={16} />
-              Simpan profil
+              Save profile
             </button>
           </div>
 
@@ -351,11 +351,11 @@ export default function FunderPengaturan() {
       {preview && (
         <Modal open onClose={() => setPreview(null)} title={preview.title} width={760}>
           {preview.data === null ? (
-            <p className="sh-muted">Memuat dokumen…</p>
+            <p className="sh-muted">Loading document…</p>
           ) : preview.data ? (
             <PdfPreview dataUrl={preview.data} fileName={preview.title} />
           ) : (
-            <p className="sh-muted">Dokumen tidak dapat dimuat.</p>
+            <p className="sh-muted">The document could not be loaded.</p>
           )}
         </Modal>
       )}
@@ -395,7 +395,7 @@ function Field({
       {children}
       {invalid ? (
         <span className="sh-field__hint" style={{ color: "var(--status-failed)" }}>
-          {error ?? "Wajib diisi dengan benar."}
+          {error ?? "Must be filled in correctly."}
         </span>
       ) : (
         hint && <span className="sh-field__hint">{hint}</span>

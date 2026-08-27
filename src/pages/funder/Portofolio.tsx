@@ -87,16 +87,16 @@ export default function FunderPortofolio() {
       <Topbar />
       <div className="sh-shell__content">
         <PageHead
-          title="Portofolio Kolaborasi"
-          subtitle="Riwayat event yang telah Anda dukung melalui DealMatch."
+          title="Collaboration Portfolio"
+          subtitle="A history of the events you have supported through DealMatch."
         />
 
         <section className="sh-card" style={{ marginBottom: 20 }}>
           <div className="dm-toolbar" style={{ borderBottom: 0 }}>
             <div className="sh-field" style={{ margin: 0, minWidth: 160 }}>
-              <label className="sh-field__label">Bulan Pengajuan</label>
+              <label className="sh-field__label">Submission Month</label>
               <select value={month} onChange={(e) => setMonth(e.target.value)}>
-                <option value="all">Semua bulan</option>
+                <option value="all">All months</option>
                 {MONTHS.map((m, i) => (
                   <option key={m} value={String(i)}>
                     {m}
@@ -105,9 +105,9 @@ export default function FunderPortofolio() {
               </select>
             </div>
             <div className="sh-field" style={{ margin: 0, minWidth: 140 }}>
-              <label className="sh-field__label">Tahun Pengajuan</label>
+              <label className="sh-field__label">Submission Year</label>
               <select value={year} onChange={(e) => setYear(e.target.value)}>
-                <option value="all">Semua tahun</option>
+                <option value="all">All years</option>
                 {years.map((y) => (
                   <option key={y} value={String(y)}>
                     {y}
@@ -116,9 +116,9 @@ export default function FunderPortofolio() {
               </select>
             </div>
             <div className="sh-field" style={{ margin: 0, minWidth: 200 }}>
-              <label className="sh-field__label">Kategori Event</label>
+              <label className="sh-field__label">Event Category</label>
               <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option value="all">Semua kategori</option>
+                <option value="all">All categories</option>
                 {categories.map((c) => (
                   <option key={c} value={c}>
                     {c}
@@ -144,16 +144,16 @@ export default function FunderPortofolio() {
 
         {rows.length === 0 ? (
           <Empty
-            title={approved.length === 0 ? "Belum ada kolaborasi" : "Tidak ada yang cocok"}
+            title={approved.length === 0 ? "No collaborations yet" : "Nothing matches"}
             description={
               approved.length === 0
-                ? "Pengajuan yang Anda setujui akan muncul di sini sebagai portofolio."
-                : "Coba ubah filter bulan, tahun, atau kategori."
+                ? "Submissions you approve appear here as your portfolio."
+                : "Try changing the month, year, or category filter."
             }
             action={
               approved.length === 0 ? (
                 <Link to="/funder/pengajuan" className="sh-btn sh-btn--primary">
-                  Ke Pengajuan Sponsorship
+                  Go to Sponsorship Submissions
                   <ArrowRight size={14} />
                 </Link>
               ) : undefined
@@ -183,7 +183,7 @@ export default function FunderPortofolio() {
 
                     <div className="dm-pcard__body">
                       <div className="sh-row" style={{ gap: 8, flexWrap: "wrap" }}>
-                        <StatusBadge kind="custom" label="Disetujui" variant="success" />
+                        <StatusBadge kind="custom" label="Approved" variant="success" />
                         {pkg?.name && <StatusBadge kind="custom" label={pkg.name} variant="pending" />}
                       </div>
 
@@ -193,7 +193,7 @@ export default function FunderPortofolio() {
                       </div>
                       <div className="dm-pcard__meta">
                         <CalendarDays size={14} />
-                        {p.eventDate ? formatDate(p.eventDate) : "Tanggal event belum diisi"}
+                        {p.eventDate ? formatDate(p.eventDate) : "Event date not filled in"}
                       </div>
                       {amount > 0 && (
                         <div className="dm-pcard__meta" style={{ fontWeight: 700 }}>
@@ -204,7 +204,7 @@ export default function FunderPortofolio() {
                       {benefits.length > 0 && (
                         <div>
                           <div className="sh-meta-label" style={{ marginBottom: 4 }}>
-                            Benefit yang diberikan
+                            Benefits provided
                           </div>
                           <ul className="dm-pcard__benefits">
                             {benefits.map((b, i) => (
@@ -227,7 +227,7 @@ export default function FunderPortofolio() {
                         style={{ alignSelf: "flex-start", marginTop: "auto" }}
                         onClick={() => setSelectedId(p.id)}
                       >
-                        Lihat detail
+                        View details
                       </button>
                     </div>
 
