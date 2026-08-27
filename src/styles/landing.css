@@ -265,6 +265,38 @@ html:has(.lp) {
   max-width: 480px;
 }
 
+/* Kata berputar di headline. Lebarnya mengikuti isi, jadi "together"
+   bergeser saat kata berganti — mengunci lebar ke kata terpanjang
+   menyisakan celah kosong di depan "together" untuk kata pendek. */
+.lp-rotate {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+}
+.lp-rotate__dot {
+  width: 0.32em;
+  height: 0.32em;
+  border-radius: 50%;
+  background: var(--dm-green);
+  flex: none;
+  align-self: center;
+}
+.lp-rotate__word {
+  color: var(--dm-blue);
+  animation: lp-word 0.42s var(--ease-standard) both;
+}
+@keyframes lp-word {
+  from {
+    opacity: 0;
+    transform: translateY(0.32em);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-rotate__word {
+    animation: none;
+  }
+}
+
 /* Visual tanda tangan: dua sisi bertemu di satu node.
    Rasionya dikunci sama dengan viewBox SVG (440×420). Tanpa itu, saat
    kotaknya melebar SVG ter-letterbox di tengah sementara label node
