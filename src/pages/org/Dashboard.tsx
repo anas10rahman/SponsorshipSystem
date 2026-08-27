@@ -68,7 +68,7 @@ export default function OrgDashboard() {
           {recent.length === 0 ? (
             <div className="sh-card__body">
               <p className="sh-muted">
-                Belum ada pengajuan.{" "}
+                No submissions yet.{" "}
                 <Link to="/org/cari">Find sponsor partners</Link> to get started.
               </p>
             </div>

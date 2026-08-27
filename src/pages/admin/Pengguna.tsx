@@ -79,7 +79,7 @@ export default function AdminPengguna() {
             onClick={() => setTab("org")}
           >
             <Building2 size={14} />
-            Organisasi
+            Organizations
             <span className="sh-muted" style={{ fontWeight: 600 }}>
               ({state.organizations.length})
             </span>
@@ -89,7 +89,7 @@ export default function AdminPengguna() {
             onClick={() => setTab("funder")}
           >
             <HandCoins size={14} />
-            Mitra Sponsor
+            Sponsor Partners
             <span className="sh-muted" style={{ fontWeight: 600 }}>
               ({state.funders.length})
             </span>
