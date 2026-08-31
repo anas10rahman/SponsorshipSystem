@@ -1615,3 +1615,174 @@ a.lp-contact__row:hover .lp-contact__ico {
     justify-content: center;
   }
 }
+
+/* ============================================================
+   Alur kerja: pemilih peran (tab) + alur satu kolom
+   ============================================================ */
+
+.lp-flowtabs {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-8);
+}
+
+.lp-flowtabs__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 11px 22px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--line);
+  background: var(--lp-surface);
+  color: var(--ink-500);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+.lp-flowtabs__btn:hover {
+  color: var(--ink-900);
+  border-color: var(--ink-300);
+}
+
+/* Tab aktif memakai warna sisinya masing-masing — biru untuk Organisasi,
+   hijau untuk Mitra Sponsor — supaya sewarna dengan alur di bawahnya. */
+.lp-flowtabs__btn--org.is-active {
+  background: var(--dm-blue);
+  border-color: var(--dm-blue);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(30, 58, 138, 0.28);
+}
+.lp-flowtabs__btn--sponsor.is-active {
+  background: var(--dm-green);
+  border-color: var(--dm-green);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.28);
+}
+
+/* Mode satu alur: kolom tunggal di tengah, tanpa pencerminan sisi kanan
+   (pencerminan hanya masuk akal saat dua alur berdampingan). */
+.lp-flows--single {
+  grid-template-columns: 1fr;
+  grid-template-rows: none;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.lp-flows--single .lp-flow {
+  grid-row: auto;
+  grid-template-rows: none;
+}
+.lp-flows--single .lp-flow__list {
+  grid-row: auto;
+  grid-template-rows: none;
+}
+.lp-flows--single .lp-flow--sponsor .lp-flow__step {
+  grid-template-columns: 46px 1fr;
+}
+.lp-flows--single .lp-flow--sponsor .lp-flow__marker {
+  order: 0;
+}
+.lp-flows--single .lp-flow--sponsor .lp-flow__body {
+  order: 0;
+  text-align: left;
+}
+.lp-flows--single .lp-flow--sponsor .lp-flow__step::before {
+  left: 22px;
+  right: auto;
+}
+
+/* ============================================================
+   Kartu "Why DealMatch" — berwarna, berselang-seling dua sisi brand
+   Tint dijaga sangat muda supaya teks tetap kontras di atasnya, dan
+   tidak ada warna di luar palet DealMatch.
+   ============================================================ */
+
+.lp-value[data-tone] {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Pita aksen tipis di tepi atas kartu. */
+.lp-value[data-tone]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: var(--value-accent);
+}
+
+.lp-value[data-tone="org"] {
+  --value-accent: var(--dm-blue);
+  background: linear-gradient(180deg, #f3f7ff 0%, var(--lp-surface) 62%);
+  border-color: #d9e4fa;
+}
+.lp-value[data-tone="sponsor"] {
+  --value-accent: var(--dm-green);
+  background: linear-gradient(180deg, #eefaf4 0%, var(--lp-surface) 62%);
+  border-color: #cfeee0;
+}
+
+.lp-value[data-tone]:hover {
+  border-color: var(--value-accent);
+}
+
+/* Chip ikon mengikuti warna kartunya, bukan selalu biru. */
+.lp-value[data-tone="org"] .lp-value__icon {
+  background: var(--lp-org-soft);
+  color: var(--dm-blue);
+}
+.lp-value[data-tone="sponsor"] .lp-value__icon {
+  background: var(--lp-sponsor-soft);
+  color: var(--green-700);
+}
+/* Aturan hover lama menukar warna chip ke hijau untuk semua kartu —
+   itu melawan warna kartunya sendiri, jadi dinetralkan di sini. */
+.lp-value[data-tone]:hover .lp-value__icon {
+  background: var(--value-accent);
+  color: #fff;
+}
+
+.lp-value[data-tone] .lp-value__num {
+  color: var(--value-accent);
+  opacity: 0.55;
+}
+
+/* ============================================================
+   Ilustrasi section Tentang
+   Gambar sudah punya latar terang sendiri, jadi bingkainya tidak lagi
+   memakai padding tebal seperti saat isinya logo — cukup dipangkas rapi
+   mengikuti sudut membulat kartunya.
+   ============================================================ */
+
+.lp-about__diagram:has(.lp-about__art) {
+  padding: 0;
+  overflow: hidden;
+  background: var(--lp-surface);
+  perspective: none;
+}
+
+.lp-about__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease-standard);
+}
+.lp-about__diagram:hover .lp-about__art {
+  transform: scale(1.03);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-about__art {
+    transition: none;
+  }
+  .lp-about__diagram:hover .lp-about__art {
+    transform: none;
+  }
+}

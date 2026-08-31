@@ -18,18 +18,19 @@ export function ValueIcon({ name }: { name: ValueIconName }) {
   return <Cmp size={20} strokeWidth={2} aria-hidden="true" />;
 }
 
-/** Logo DealMatch sebagai visual section Tentang. Lambangnya sendiri sudah
- *  menyatakan "Two Sides. One Match." — D biru dan M hijau disambung satu
- *  node — jadi lebih kuat daripada diagram abstrak yang mengulang hal sama. */
+/** Ilustrasi section Tentang: dua sisi — Sponsor Partner dan Organization —
+ *  bertemu di DealMatch. Menggantikan logo polos karena gambar ini
+ *  menceritakan hubungannya, bukan cuma menampilkan lambangnya. */
 export function AboutDiagram() {
   return (
     <div className="lp-about__diagram">
       <img
-        src="/logo-mark.png"
-        alt="DealMatch logo"
-        className="lp-about__logo"
-        width={180}
-        height={180}
+        src="/about-dealmatch.jpg"
+        alt="Sponsor Partner dan Organization bertemu di DealMatch"
+        className="lp-about__art"
+        width={1400}
+        height={933}
+        loading="lazy"
       />
     </div>
   );

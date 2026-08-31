@@ -36,6 +36,11 @@ export function About() {
             <article
               key={v.title}
               className="lp-value"
+              /* Warna kartu berselang-seling antara dua warna brand —
+                 biru (Organisasi) dan hijau (Mitra Sponsor) — supaya grid
+                 ini ikut menyuarakan "Two Sides. One Match." tanpa
+                 memasukkan warna di luar palet. */
+              data-tone={i % 2 === 0 ? "org" : "sponsor"}
               data-reveal
               style={{ animationDelay: `${(i % 3) * 70}ms` }}
             >
