@@ -192,11 +192,48 @@ function buildState(): AppState {
   return s;
 }
 
+/** Cookie sesi dev — meniru `sh_session` produksi (tanpa tanda tangan). */
+const DEV_COOKIE = "sh_session_dev";
+
+function readCookie(req: any, name: string): string | null {
+  const h = req.headers?.cookie;
+  if (!h) return null;
+  for (const part of String(h).split(";")) {
+    const i = part.indexOf("=");
+    if (i > 0 && part.slice(0, i).trim() === name)
+      return decodeURIComponent(part.slice(i + 1).trim());
+  }
+  return null;
+}
+
 function sanitize(state: AppState): AppState {
   return {
     ...state,
     users: state.users.map((u) => ({ ...u, password: "" })),
     session: { userId: null },
+  };
+}
+
+/** Saring state seperti assembleState di server: tanpa sesi → kosong. */
+function stateFor(state: AppState, userId: string | null): AppState {
+  const base = sanitize(state);
+  const me = userId ? state.users.find((u) => u.id === userId) : null;
+  if (!me)
+    return { ...base, users: [], organizations: [], funders: [], pengajuan: [], notifications: [] };
+  if (me.role === "admin") return base;
+  return {
+    ...base,
+    users: base.users.filter((u) => u.id === me.id),
+    organizations: me.orgId
+      ? base.organizations.filter((o) => o.id === me.orgId)
+      : base.organizations.filter((o) =>
+          state.pengajuan.some((p) => p.orgId === o.id && p.funderId === me.funderId),
+        ),
+    funders: me.funderId ? base.funders.filter((f) => f.id === me.funderId) : base.funders,
+    pengajuan: base.pengajuan.filter((p) =>
+      me.orgId ? p.orgId === me.orgId : p.funderId === me.funderId,
+    ),
+    notifications: base.notifications.filter((n) => n.userId === me.id),
   };
 }
 
@@ -237,13 +274,19 @@ export function devSeedApi(): Plugin {
         const path = url.split("?")[0].replace(/^\/api\//, "");
         const method = (req.method || "GET").toUpperCase();
 
+        const viewerId = () => readCookie(req, DEV_COOKIE);
+
         try {
-          if (path === "state") return json(res, 200, sanitize(state));
+          if (path === "state") return json(res, 200, stateFor(state, viewerId()));
 
           if (path === "health") return json(res, 200, { ok: true, mode: "dev-seed" });
 
           if (path === "login") {
             const body = await readBody(req);
+            if (body.op === "logout") {
+              res.setHeader("Set-Cookie", `${DEV_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`);
+              return json(res, 200, { ok: true });
+            }
             if (body.op) return json(res, 200, { ok: true, message: "OK (dev)" });
             const u = state.users.find(
               (x) =>
@@ -251,6 +294,10 @@ export function devSeedApi(): Plugin {
             );
             if (!u || u.password !== body.password)
               return json(res, 401, { error: "Username atau kata sandi salah." });
+            res.setHeader(
+              "Set-Cookie",
+              `${DEV_COOKIE}=${encodeURIComponent(u.id)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`,
+            );
             return json(res, 200, { user: { id: u.id } });
           }
 
@@ -259,7 +306,7 @@ export function devSeedApi(): Plugin {
 
           if (path === "verify-email" || path === "resend-code") {
             await readBody(req);
-            return json(res, 200, { ok: true, emailSent: false, state: sanitize(state) });
+            return json(res, 200, { ok: true, emailSent: false, state: stateFor(state, viewerId()) });
           }
 
           if (path === "notifications") {
@@ -274,13 +321,13 @@ export function devSeedApi(): Plugin {
               const n = state.notifications.find((x) => x.id === id);
               if (n) n.read = true;
             }
-            return json(res, 200, sanitize(state));
+            return json(res, 200, stateFor(state, viewerId()));
           }
 
           // Mutasi lain (org/funder/pengajuan): stub — kembalikan state saat ini.
           if (["org", "funder", "pengajuan"].includes(path)) {
             await readBody(req);
-            return json(res, 200, sanitize(state));
+            return json(res, 200, stateFor(state, viewerId()));
           }
 
           // Dokumen/foto lazy: tidak ada isi di mode seed.

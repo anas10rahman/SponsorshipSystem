@@ -82,9 +82,11 @@ create table users (
   email_verified boolean not null default false,
   verify_code    text,                             -- kode OTP di-hash (pgcrypto)
   verify_expires timestamptz,                      -- kadaluarsa kode OTP
+  verify_attempts int not null default 0,          -- percobaan gagal; kode hangus di batas
   -- Reset password (OTP): kode di-hash + kadaluarsa, terpisah dari verifikasi email
   reset_code     text,                             -- kode reset di-hash (pgcrypto)
   reset_expires  timestamptz,                      -- kadaluarsa kode reset
+  reset_attempts int not null default 0,           -- percobaan gagal; kode hangus di batas
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -174,6 +176,10 @@ alter table users
 -- Migrasi idempotent: kolom reset password untuk DB yang sudah berjalan.
 alter table users add column if not exists reset_code    text;
 alter table users add column if not exists reset_expires timestamptz;
+
+-- Migrasi idempotent: penghitung percobaan OTP (anti tebak-kode beruntun).
+alter table users add column if not exists reset_attempts  int not null default 0;
+alter table users add column if not exists verify_attempts int not null default 0;
 
 -- Migrasi idempotent: berkas legal organisasi & berkas mitra sponsor.
 alter table organizations add column if not exists legal_docs_data jsonb not null default '[]'::jsonb;
